@@ -1466,8 +1466,8 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                 <div className="absolute bottom-[100%] left-0 w-full flex items-end justify-center z-40 pointer-events-none pb-0">
                   <div className="w-full h-10 flex items-center justify-center px-3 pointer-events-auto relative top-1">
                     <span
-                      className="font-black text-sky-900 text-center leading-tight truncate tracking-tight cursor-pointer hover:text-sky-600 transition-colors drop-shadow-md"
-                      style={{ fontSize: '15px' }}
+                      className={`font-black text-sky-900 text-center leading-tight truncate tracking-tight cursor-pointer hover:text-sky-600 transition-colors bg-white/60 backdrop-blur-md px-3 py-1 rounded-full shadow-sm border border-white/50`}
+                      style={{ fontSize: `${metadataFontSize * 1.2}px` }}
                       onClick={handlePlaylistsGrid}
                       title={playlistTitle}
                     >
@@ -1608,6 +1608,15 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                     </div>
                   )}
                 </div>
+                {/* Header Metadata - Centered above (Mirrors Playlist Title) */}
+                <div className="absolute bottom-[100%] left-0 w-full flex items-end justify-center z-40 pointer-events-none pb-0">
+                  <div className="w-full h-10 flex items-center justify-center px-3 pointer-events-auto relative top-1">
+                    <div className={`flex items-center justify-center gap-1 ${theme.accent} font-black uppercase tracking-widest bg-white/60 backdrop-blur-md px-3 py-1 rounded-full shadow-sm border border-white/50`} style={{ fontSize: `${metadataFontSize}px` }}>
+                      <span className="opacity-90">{displayVideo.author}</span>{displayVideo.verified && <CheckCircle2 size={metadataFontSize} className="fill-current" />}<span className="opacity-30 mx-1">|</span><span>{displayVideo.viewers} Views</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex-grow flex flex-col items-center justify-center px-4 relative z-10 overflow-hidden">
                   {showColorPicker ? (
                     <div className="flex flex-col items-center animate-in zoom-in duration-200" style={{ transform: `translateY(${dotMenuY}px)` }}>
@@ -1672,11 +1681,8 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                       </div>
                     </div>
                   ) : (
-                    <div className="w-full flex flex-col justify-start transition-all relative" style={{ height: `${textContainerHeight}px`, transform: `translateY(${textContainerY}px)` }}>
-                      <div className={`flex items-center justify-center gap-1 ${theme.accent} font-black uppercase tracking-widest`} style={{ fontSize: `${metadataFontSize}px`, transform: `translateY(${metadataYOffset}px)` }}>
-                        <span className="opacity-80">{displayVideo.author}</span>{displayVideo.verified && <CheckCircle2 size={metadataFontSize} className="fill-current" />}<span className="opacity-30 mx-1">|</span><span>{displayVideo.viewers} LIVE</span>
-                      </div>
-                      <h1 className="font-black text-sky-950 text-center leading-tight line-clamp-2 tracking-tight transition-all" style={{ fontSize: `${titleFontSize}px` }}>{displayVideo.title}</h1>
+                    <div className="w-full flex flex-col justify-center transition-all relative h-full">
+                      <h1 className="font-black text-sky-950 text-center leading-tight line-clamp-3 tracking-tight transition-all pb-1" style={{ fontSize: `${titleFontSize}px` }}>{displayVideo.title}</h1>
                     </div>
                   )}
                 </div>

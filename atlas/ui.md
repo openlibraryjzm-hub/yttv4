@@ -34,6 +34,11 @@ The application employs a high-contrast, structured design with distinct borders
   - Has a visible 12px dark blue background padding that acts as a border.
   - Scales responsively with view modes (Full/Half/Quarter).
 
+- **Floating Metadata Bubbles**:
+  - Information bubbles for playlist titles and video metadata that float above their respective menus.
+  - **Styling**: Uses a "glassmorphism" effect: `bg-white/60`, `backdrop-blur-md`, `rounded-full`, and `shadow-sm`.
+  - **Typography**: Dark blue text for legibility against dynamic backgrounds. Playlist titles are sized 1.2x larger than metadata bubbles.
+
 #### ### 4.1 Side Menu
 
 **1: User-Perspective Description**

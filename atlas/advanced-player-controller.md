@@ -1,15 +1,13 @@
 ###1: Advanced Player Controller
 
-> **WARNING: CRITICAL UI REGRESSION**
-> The Advanced Player Controller menu layout has been severely compromised ("wrecked") following an accidental configStore reset and subsequent resizing attempts.
-> **Current Status:**
-> - Menu Height: Reduced to 102px (from 128px/160px/200px)
-> - Menu Width: Increased to 340px (from 300px) to fit toolbar buttons
-> - Button Layout: Nav Block Left (Grid -120, Chevrons -148/-92), Actions Right (Star 0, Shuffle 40, Pin 80, Like 120, Menu 152)
-> - Button Effects: Static (hover animations disabled)
-> - Orb Size: Increased to 150px (from 100px)
-> - Orb-Menu Gap: Increased to 30px
-> - **Action Required:** Rigorous manual re-tweaking of all layout features (sliders, offsets, sizes) via the Settings/Config panel is required to restore the UI to a usable state. The default values in `configStore.js` are likely incorrect for the current visual design.
+> **CRITICAL WARNING / REGRESSION ALERT**
+> The Advanced Player Controller menu layout was previously compromised ("wrecked") but has been largely restored.
+> **Current Status: RESTORED / USABLE**
+> - Layout has been rebuilt with fixed dimensions (102px height, 340px width) and absolute positioning.
+> - **Top Video Menu:** Buttons aligned on 40px grid. Navigation controls clustered left, actions right.
+> - **Metadata Bubbles:** Video metadata and Playlist title now use consistent "floating bubble" styling (bg-white/60) above the menus.
+> - **Typography:** "Views" replaces "LIVE", playlist title size increased (1.2x).
+> - **Action Required:** Minor visual tuning may still be desired, but the critical regression is resolved. The default values in `configStore.js` now match this restored state.
 
 The Advanced Player Controller is a comprehensive UI component positioned at the top of the application layout. It provides centralized control for playlist navigation, video playback, folder management, and preview functionality through an orb-based design with surrounding menu rectangles.
 
@@ -203,31 +201,36 @@ Users see a horizontal track of pinned video thumbnails at the top of the video 
 
 **1: User-Perspective Description**
 
-Users see a bottom toolbar in the video menu rectangle with six action buttons:
+Users see a bottom toolbar in the video menu rectangle with distinct, grouped action buttons:
 
-- **Navigation Controls**:
-  - **Previous Video** (left chevron): Navigates to previous video in the current playlist.
-  - **Grid Button** (center): Opens the Videos page grid view. Icon: Grid3X3. Replaces the former Mode Switcher.
-  - **Next Video** (right chevron): Navigates to next video in the current playlist.
-- **Priority Pin Button**: A yellow/amber pin button (above the like button) that sets the current video as the priority pin. The button is same size as other toolbar buttons (34px × 34px) with amber border (#fbbf24) and filled amber pin icon. Clicking sets the video as the priority pin (always leftmost in pin track). If a priority pin already exists, it's replaced.
-- **Shuffle Button**: A circular button with shuffle icon. The button's border color reflects the "quick shuffle" setting:
-  - Slate/Dark border = shuffle from all videos (improved visibility)
-  - Colored border = shuffle from that folder color
-  - Right-click opens color picker to set quick shuffle default
-  - Left-click shuffles to random video from selected folder (or all videos)
+- **Navigation Controls (Left-Aligned Cluster)**:
+  - **Grid Button**: Opens the Videos page grid view. Icon: Grid3X3. Positioned at far left (-120px offset).
+  - **Previous Video** (chevron left): Navigates to previous video (-148px offset). (Note: Visual order is Grid -> Prev -> Next).
+  - **Next Video** (chevron right): Navigates to next video (-92px offset).
+
+- **Action Controls (Right-Aligned Cluster)**:
+  - **Star Button** (0px offset): A circular button with star icon for folder assignment.
+    - **Filled star with colored border** = video belongs to that folder color
+    - **Empty star with colored outline** = video not in folder, outline shows "quick assign" default color
+    - Left-click assigns/unassigns video to quick assign folder
+    - Right-click opens color picker to set quick assign default
+  - **Shuffle Button** (40px offset): A circular button with shuffle icon.
+    - **Slate/Dark border** = shuffle from all videos
+    - **Colored border** = shuffle from that folder color
+    - Right-click opens color picker to set quick shuffle default
+    - Left-click shuffles to random video from selected folder (or all videos)
+  - **Priority Pin Button** (80px offset): A yellow/amber pin button that sets the current video as the priority pin. 
+    - Distinctive amber border (#fbbf24) and filled amber pin icon. 
+    - Clicking sets the video as the priority pin (always leftmost in pin track).
+  - **Like Button** (120px offset): A circular button with thumbs-up icon.
+    - **Filled with blue** = video is liked (in "Likes" playlist)
+    - **Empty/outline** = video not liked
+    - Clicking toggles like status
+  - **More Menu Button** (152px offset): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
+    - **Hide/Show Preview Menus**: Toggles visibility of side navigation menus.
+    - **Hide/Show Dev Toolbar**: Toggles visibility of floating development toolbar.
+
 - **(Removed)** Mode Switcher Button: The disabled "1" toggle button has been removed from the UI.
-- **Star Button**: A circular button with star icon for folder assignment:
-  - **Filled star with colored border** = video belongs to that folder color
-  - **Empty star with colored outline** = video not in folder, outline shows "quick assign" default color
-  - Left-click assigns/unassigns video to quick assign folder
-  - Right-click opens color picker to set quick assign default
-- **Like Button**: A circular button with thumbs-up icon:
-  - **Filled with blue** = video is liked (in "Likes" playlist)
-  - **Empty/outline** = video not liked
-  - Clicking toggles like status, adds/removes from special "Likes" playlist
-  - **More Menu Button**: A circular button with 3 horizontal dots icon, located after the Like button, providing access to UI visibility toggles:
-    - **Hide/Show Preview Menus**: Toggles the visibility of the side navigation menus (Up/Down arrows) for playlist and video previewing (default: visible).
-    - **Hide/Show Dev Toolbar**: Toggles the visibility of the floating development toolbar containing view mode and debug controls (default: visible).
 
 **Color Picker Modal**: When star or shuffle button is right-clicked, a modal appears showing:
 - 16 colored circles (one per folder color) + "All" option for shuffle

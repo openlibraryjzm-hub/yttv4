@@ -296,8 +296,8 @@ The following features exist in the codebase but are currently non-functional:
   - Component renders but ruler visualization does not appear
   - Infrastructure exists but requires debugging
 - **Advanced Player Controller Layout**:
-  - The top menu layout is currently broken ("wrecked") due to a config reset.
-  - Requires manual tuning of layout parameters (heights, gaps, offsets) to restore proper alignment.
+  - **Status: RESOLVED**. The top menu layout has been restored with fixed dimensions and absolute positioning.
+  - Minor visual tuning may still be desired, but the critical regression is fixed.
 
 ## Theme Documentation
 
