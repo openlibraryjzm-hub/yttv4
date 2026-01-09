@@ -450,6 +450,8 @@ Users see a dropdown button at the start of the tab bar labeled with the current
 
 - **Preset Switching**: Clicking a preset in the dropdown immediately switches to that preset, filtering the visible tabs.
 
+- **Explorer Page Context**: Presets are also used as the primary filter context in the `ExplorerPage` (see `ui.md` 4.1.5). There, they enforce a single-select mode where one preset is always active.
+
 **2: File Manifest**
 
 **UI/Components:**

@@ -768,3 +768,49 @@ Users see a modal dialog when selecting "Move to Playlist" or "Copy to Playlist"
    - **Move**: Calls `addVideoToPlaylist` then `removeVideoFromPlaylist` (from source)
    - Updates UI (removes video from grid if moved)
    - Closes modal and clears state
+
+---
+
+#### ### 4.1.5 Explorer Page
+
+**1: User-Perspective Description**
+
+The Explorer Page offers an alternative, focused way to browse content using a tag-based filtering system. It bypasses the standard grid hierarchy to allow rapid drilling down into specific content subsets.
+
+- **Dual View Modes**:
+  - **Playlists View**: Displays a clean list of playlists matching the current filters.
+  - **Colored Folders View**: Displays an aggregated list of folders from matching playlists, ideal for finding specific categorized content across multiple playlists.
+
+- **Tag-Based Filtering System**:
+  - **Presets (Context)**: A row of colored tags representing Tab Presets.
+    - **Single Selection**: Decreed enforced. One preset must always be active (defaults to "All"). Clicking another preset switches context immediately.
+    - **Visuals**: Active preset glows with its assigned color.
+  - **Tabs (Drill-Down)**: A row of neutral tags representing Tabs available within the active Preset.
+    - **Dynamic List**: Only shows tabs derived from the currently active Preset.
+    - **Multi-Selection**: Users can toggle multiple tabs to create a union filter (e.g., "Show me Playlists from 'Gaming' AND 'Music' tabs").
+  - **Logic**:
+    - **Preset Only**: Shows EVERYTHING in that preset.
+    - **Preset + Tabs**: Shows ONLY content belonging to the selected tabs.
+  - **Reset Filters**: A button capable of resetting the entire state back to the default "All" preset appears when any filter is active.
+
+**2: File Manifest**
+
+**UI/Components:**
+- `src/components/ExplorerPage.jsx`: Top-level component managing the view, state, and rendering cards.
+
+**State Management:**
+- Local state in `ExplorerPage`:
+  - `activeTab`: 'playlists' | 'folders'
+  - `activeFilters`: Array of filter objects `{ id, type, name }`
+  - `playlistThumbnails`: Aggregated thumbnails map
+  - `playlistFolders`: Cache for playlist folder data
+
+**3: The Logic & State Chain**
+
+**Filtering Priority logic:**
+1. **Playlist Filters** (Most Specific): If present (via code/edge case), wins.
+2. **Tab Filters** (Specific): If user selects specific tabs, show only content from those tabs.
+3. **Preset Filter** (Broad): If no tabs selected, show all content from the active preset tags.
+
+**Aggregation Logic:**
+- **Thumbnails**: The Explorer page aggressively pre-fetches `first_video` for all displayed folders/playlists to ensuring rich visual thumbnails are always present, avoiding "empty" card states.

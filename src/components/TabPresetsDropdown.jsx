@@ -88,11 +88,10 @@ const TabPresetsDropdown = () => {
       <div ref={dropdownRef} className="relative flex-shrink-0">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-            activePresetId === 'all'
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${activePresetId === 'all'
               ? 'bg-sky-600 text-white'
               : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-          }`}
+            }`}
           title="Tab Presets"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,9 +110,8 @@ const TabPresetsDropdown = () => {
               {presets.map((preset) => (
                 <div
                   key={preset.id}
-                  className={`flex items-center justify-between px-3 py-2 hover:bg-slate-700 cursor-pointer ${
-                    activePresetId === preset.id ? 'bg-sky-600/20' : ''
-                  }`}
+                  className={`flex items-center justify-between px-3 py-2 hover:bg-slate-700 cursor-pointer group ${activePresetId === preset.id ? 'bg-sky-600/20' : ''
+                    }`}
                   onClick={() => {
                     setActivePreset(preset.id);
                     setIsOpen(false);
@@ -127,7 +125,7 @@ const TabPresetsDropdown = () => {
                       <span className="text-xs text-slate-400">({preset.tabIds.length} tabs)</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 group">
+                  <div className="flex items-center gap-1">
                     {preset.id !== 'all' && (
                       <>
                         <button
@@ -135,20 +133,20 @@ const TabPresetsDropdown = () => {
                             e.stopPropagation();
                             handleEditPreset(preset);
                           }}
-                          className="p-1 rounded hover:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="p-1 rounded hover:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-white"
                           title="Edit preset"
                         >
-                          <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                           </svg>
                         </button>
                         <button
                           onClick={(e) => handleDeletePreset(preset.id, e)}
-                          className="p-1 rounded hover:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="p-1 rounded hover:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-400"
                           title="Delete preset"
                         >
-                          <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
                       </>
@@ -209,17 +207,15 @@ const TabPresetsDropdown = () => {
                     <div
                       key={tab.id}
                       onClick={() => handleToggleTab(tab.id)}
-                      className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
-                        isSelected
+                      className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${isSelected
                           ? 'bg-sky-600/20 border border-sky-500'
                           : 'bg-slate-700 hover:bg-slate-600 border border-transparent'
-                      }`}
+                        }`}
                     >
-                      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${
-                        isSelected
+                      <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${isSelected
                           ? 'bg-sky-500 border-sky-500'
                           : 'border-slate-500'
-                      }`}>
+                        }`}>
                         {isSelected && (
                           <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
