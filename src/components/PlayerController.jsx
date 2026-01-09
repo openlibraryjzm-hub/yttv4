@@ -1682,30 +1682,46 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                 </div>
                 <div className={`border-t flex items-center px-3 shrink-0 relative rounded-b-2xl ${theme.bottomBar}`} style={{ height: `${bottomBarHeight}px` }}>
                   {showColorPicker ? (<div className="flex items-center justify-center w-full h-full animate-in fade-in slide-in-from-bottom-1 duration-300"><span className="text-[10px] font-black uppercase tracking-[0.3em] text-sky-700/80">{hoveredColorName || `Select ${showColorPicker} color`}</span></div>) : (
-                    <div className="flex items-center justify-around w-full h-full">
-                      <div className="flex items-center gap-0.5">
-                        <button onClick={handlePrevVideo} className="p-0.5 text-sky-400 transition-transform" style={{ transform: `translateX(${videoChevronLeftX}px)` }} title={getInspectTitle('Previous video')}><ChevronLeft size={navChevronSize} strokeWidth={3} /></button>
-                        <button
-                          onClick={handleVideosGrid}
-                          className="relative flex items-center justify-center transition-all hover:scale-110 active:scale-95 group/tool"
-                          style={{ transform: `translateX(${modeSwitcherX}px)` }}
-                          title={getInspectTitle('View videos grid')}
-                        >
-                          <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px` }}>
-                            <Grid3X3 size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
-                          </div>
-                        </button>
-                        <button onClick={handleNextVideo} className="p-0.5 text-sky-400 transition-transform" style={{ transform: `translateX(${videoChevronRightX}px)` }} title={getInspectTitle('Next video')}><ChevronRight size={navChevronSize} strokeWidth={3} /></button>
-                      </div>
+                    <div className="w-full h-full relative">
+                      {/* Navigation Controls - Now Absolute Centered */}
+                      <button
+                        onClick={handlePrevVideo}
+                        className="absolute left-1/2 top-1/2 p-0.5 text-sky-400"
+                        style={{ transform: `translate(calc(-50% + ${videoChevronLeftX}px), -50%)` }}
+                        title={getInspectTitle('Previous video')}
+                      >
+                        <ChevronLeft size={navChevronSize} strokeWidth={3} />
+                      </button>
+
+                      <button
+                        onClick={handleVideosGrid}
+                        className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
+                        style={{ transform: `translate(calc(-50% + ${modeSwitcherX}px), -50%)` }}
+                        title={getInspectTitle('View videos grid')}
+                      >
+                        <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px` }}>
+                          <Grid3X3 size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={handleNextVideo}
+                        className="absolute left-1/2 top-1/2 p-0.5 text-sky-400"
+                        style={{ transform: `translate(calc(-50% + ${videoChevronRightX}px), -50%)` }}
+                        title={getInspectTitle('Next video')}
+                      >
+                        <ChevronRight size={navChevronSize} strokeWidth={3} />
+                      </button>
+
+                      {/* Tool Buttons - Absolute Centered */}
                       <button
                         onClick={() => handleShuffle()}
                         onContextMenu={(e) => { e.preventDefault(); setShowColorPicker('shuffle'); }}
-                        className="relative flex items-center justify-center transition-all hover:scale-110 active:scale-95 group/tool"
-                        style={{ transform: `translateX(${shuffleButtonX}px)` }}
+                        className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
+                        style={{ transform: `translate(calc(-50% + ${shuffleButtonX}px), -50%)` }}
                         title={getInspectTitle('Shuffle videos')}
                       >
                         {(() => {
-                          // Determine shuffle button color based on quick shuffle setting
                           const shuffleColorObj = quickShuffleColor === 'all'
                             ? { hex: '#334155', name: 'All' }
                             : (FOLDER_COLORS.find(c => c.id === quickShuffleColor) || FOLDER_COLORS.find(c => c.id === 'indigo'));
@@ -1720,25 +1736,22 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                       <button
                         onClick={() => handleStarClick()}
                         onContextMenu={(e) => { e.preventDefault(); setShowColorPicker('star'); }}
-                        className="relative flex items-center justify-center transition-all hover:scale-110 active:scale-95 group/tool"
-                        style={{ transform: `translateX(${starButtonX}px)` }}
+                        className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
+                        style={{ transform: `translate(calc(-50% + ${starButtonX}px), -50%)` }}
                         title={getInspectTitle('Star button (assign to folder)')}
                       >
                         {(() => {
-                          // Determine star appearance based on video's folder assignments
                           const firstFolder = currentVideoFolders.length > 0 ? currentVideoFolders[0] : null;
                           const quickAssignColorObj = FOLDER_COLORS.find(c => c.id === quickAssignColor) || FOLDER_COLORS.find(c => c.id === 'sky');
                           const folderColorObj = firstFolder ? FOLDER_COLORS.find(c => c.id === firstFolder) : null;
 
                           if (folderColorObj) {
-                            // Video belongs to a folder - show filled star with folder color
                             return (
                               <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: folderColorObj.hex }}>
                                 <Star size={Math.round(bottomIconSize * 0.5)} color={folderColorObj.hex} fill={folderColorObj.hex} strokeWidth={3} />
                               </div>
                             );
                           } else {
-                            // Video doesn't belong to any folder - show empty star with quick assign color outline
                             return (
                               <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: quickAssignColorObj.hex }}>
                                 <Star size={Math.round(bottomIconSize * 0.5)} color={quickAssignColorObj.hex} fill="transparent" strokeWidth={3} />
@@ -1747,31 +1760,33 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                           }
                         })()}
                       </button>
+
                       <button
                         onClick={handleFirstPinClick}
-                        className="relative flex items-center justify-center transition-all hover:scale-110 active:scale-95 group/tool"
-                        style={{ transform: `translateX(${pinFirstButtonX}px)` }}
+                        className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
+                        style={{ transform: `translate(calc(-50% + ${pinFirstButtonX}px), -50%)` }}
                         title={getInspectTitle('Set as first pin')}
                       >
                         <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#fbbf24' }}>
                           <Pin size={Math.round(bottomIconSize * 0.5)} color="#fbbf24" fill="#fbbf24" strokeWidth={2} />
                         </div>
                       </button>
+
                       <button
                         onClick={handleLikeClick}
-                        className="relative flex items-center justify-center transition-all hover:scale-110 active:scale-95 group/tool"
-                        style={{ transform: `translateX(${likeButtonX}px)` }}
+                        className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
+                        style={{ transform: `translate(calc(-50% + ${likeButtonX}px), -50%)` }}
                         title={getInspectTitle('Like button')}
                       >
                         <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: isVideoLiked ? likeColor : '#3b82f6' }}>
                           <ThumbsUp size={Math.round(bottomIconSize * 0.5)} color={isVideoLiked ? likeColor : '#3b82f6'} fill="transparent" strokeWidth={3} />
                         </div>
                       </button>
-                      <div className="relative">
+
+                      <div className="absolute left-1/2 top-1/2" style={{ transform: `translate(calc(-50% + ${menuButtonX}px), -50%)` }}>
                         <button
                           onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-                          className="relative flex items-center justify-center transition-all hover:scale-110 active:scale-95 group/tool"
-                          style={{ transform: `translateX(${menuButtonX}px)` }}
+                          className="flex items-center justify-center group/tool"
                           title={getInspectTitle('More options')}
                         >
                           <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#94a3b8' }}>
@@ -1779,9 +1794,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                           </div>
                         </button>
                         {isMoreMenuOpen && (
-                          <div className="absolute bottom-full right-0 mb-3 w-56 bg-sky-50 border border-sky-300 rounded-lg shadow-xl overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-100 flex flex-col p-1" style={{ transform: `translateX(${menuButtonX}px)` }}>
-
-                            {/* Simplified Menu Options */}
+                          <div className="absolute bottom-full right-0 mb-3 w-56 bg-sky-50 border border-sky-300 rounded-lg shadow-xl overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-100 flex flex-col p-1">
                             <button
                               className="w-full text-left px-4 py-2 text-sm text-sky-900 hover:bg-sky-200 transition-colors flex items-center gap-2"
                               onClick={() => {

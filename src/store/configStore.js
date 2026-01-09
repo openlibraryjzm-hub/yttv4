@@ -59,9 +59,9 @@ export const useConfigStore = create(
             setOrbMenuGap: (val) => set({ orbMenuGap: val }),
 
             // Global Layout
-            menuWidth: 300,
+            menuWidth: 340,
             setMenuWidth: (val) => set({ menuWidth: val }),
-            menuHeight: 128,
+            menuHeight: 102,
             setMenuHeight: (val) => set({ menuHeight: val }),
 
             // Video Menu Toolbar
@@ -69,27 +69,79 @@ export const useConfigStore = create(
             setModeHandleSize: (val) => set({ modeHandleSize: val }),
             modeHandleInternalSize: 14,
             setModeHandleInternalSize: (val) => set({ modeHandleInternalSize: val }),
-            videoChevronLeftX: -26,
-            setVideoChevronLeftX: (val) => set({ videoChevronLeftX: val }),
-            videoChevronRightX: 26,
-            setVideoChevronRightX: (val) => set({ videoChevronRightX: val }),
-            modeSwitcherX: 0,
+
+            // Center Cluster
+            modeSwitcherX: -120, // Grid moved to Star's old position
             setModeSwitcherX: (val) => set({ modeSwitcherX: val }),
-            shuffleButtonX: -54,
-            setShuffleButtonX: (val) => set({ shuffleButtonX: val }),
-            gridButtonX: 52,
-            setGridButtonX: (val) => set({ gridButtonX: val }),
-            starButtonX: -80,
+            videoChevronLeftX: -148, // Left of Grid
+            setVideoChevronLeftX: (val) => set({ videoChevronLeftX: val }),
+            videoChevronRightX: -92, // Right of Grid
+            setVideoChevronRightX: (val) => set({ videoChevronRightX: val }),
+
+            // Right Side Group (Pushing right to make space)
+            starButtonX: 0, // Center
             setStarButtonX: (val) => set({ starButtonX: val }),
-            likeButtonX: 80,
+            shuffleButtonX: 40, // Right of Star
+            setShuffleButtonX: (val) => set({ shuffleButtonX: val }),
+
+            // Right Flank (Existing)
+            pinFirstButtonX: 80,
+            setPinFirstButtonX: (val) => set({ pinFirstButtonX: val }),
+            likeButtonX: 120,
             setLikeButtonX: (val) => set({ likeButtonX: val }),
+            menuButtonX: 152,
+            setMenuButtonX: (val) => set({ menuButtonX: val }),
 
             // Custom Banner Image
             customBannerImage: null,
             setCustomBannerImage: (val) => set({ customBannerImage: val }),
+
+            // Restored Missing Keys (Defaults)
+            pinFirstButtonSize: 34,
+            setPinFirstButtonSize: (val) => set({ pinFirstButtonSize: val }),
+
+
+            dotMenuWidth: 240,
+            setDotMenuWidth: (val) => set({ dotMenuWidth: val }),
+            dotMenuHeight: 100,
+            setDotMenuHeight: (val) => set({ dotMenuHeight: val }),
+            dotMenuY: -80,
+            setDotMenuY: (val) => set({ dotMenuY: val }),
+            dotSize: 32,
+            setDotSize: (val) => set({ dotSize: val }),
+
+            playlistHandleSize: 40,
+            setPlaylistHandleSize: (val) => set({ playlistHandleSize: val }),
+            playlistPlayIconSize: 20,
+            setPlaylistPlayIconSize: (val) => set({ playlistPlayIconSize: val }),
+            playlistChevronIconSize: 20,
+            setPlaylistChevronIconSize: (val) => set({ playlistChevronIconSize: val }),
+
+            bottomBarHeight: 40,
+            setBottomBarHeight: (val) => set({ bottomBarHeight: val }),
+
+            titleFontSize: 16,
+            setTitleFontSize: (val) => set({ titleFontSize: val }),
+            metadataFontSize: 11,
+            setMetadataFontSize: (val) => set({ metadataFontSize: val }),
+
+            pinSize: 20,
+            setPinSize: (val) => set({ pinSize: val }),
+            pinWidth: 40,
+            setPinWidth: (val) => set({ pinWidth: val }),
+            pinHeight: 30,
+            setPinHeight: (val) => set({ pinHeight: val }),
+
+            bottomIconSize: 34,
+            setBottomIconSize: (val) => set({ bottomIconSize: val }),
+            navChevronSize: 20,
+            setNavChevronSize: (val) => set({ navChevronSize: val }),
+
+            orbButtonSpread: 35,
+            setOrbButtonSpread: (val) => set({ orbButtonSpread: val }),
         }),
         {
-            name: 'config-storage-v4', // name of the item in the storage (must be unique)
+            name: 'config-storage-v5', // name of the item in the storage (must be unique)
         }
     )
 );

@@ -3,7 +3,10 @@
 > **WARNING: CRITICAL UI REGRESSION**
 > The Advanced Player Controller menu layout has been severely compromised ("wrecked") following an accidental configStore reset and subsequent resizing attempts.
 > **Current Status:**
-> - Menu Height: Reduced to 128px (from 160px/200px)
+> - Menu Height: Reduced to 102px (from 128px/160px/200px)
+> - Menu Width: Increased to 340px (from 300px) to fit toolbar buttons
+> - Button Layout: Nav Block Left (Grid -120, Chevrons -148/-92), Actions Right (Star 0, Shuffle 40, Pin 80, Like 120, Menu 152)
+> - Button Effects: Static (hover animations disabled)
 > - Orb Size: Increased to 150px (from 100px)
 > - Orb-Menu Gap: Increased to 30px
 > - **Action Required:** Rigorous manual re-tweaking of all layout features (sliders, offsets, sizes) via the Settings/Config panel is required to restore the UI to a usable state. The default values in `configStore.js` are likely incorrect for the current visual design.
