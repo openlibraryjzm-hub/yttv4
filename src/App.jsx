@@ -7,6 +7,7 @@ import TopNavigation from './components/TopNavigation';
 import PlaylistsPage from './components/PlaylistsPage';
 import VideosPage from './components/VideosPage';
 import HistoryPage from './components/HistoryPage';
+import ExplorerPage from './components/ExplorerPage';
 import YouTubePlayer from './components/YouTubePlayer';
 import LocalVideoPlayer from './components/LocalVideoPlayer';
 import NativeVideoPlayer from './components/NativeVideoPlayer';
@@ -576,6 +577,8 @@ function App() {
             <VideosPage onVideoSelect={handleVideoSelect} onSecondPlayerSelect={handleSecondPlayerSelect} />
           ) : !showPlaylists && currentPage === 'history' ? (
             <HistoryPage onVideoSelect={handleVideoSelect} onSecondPlayerSelect={handleSecondPlayerSelect} />
+          ) : !showPlaylists && currentPage === 'explorer' ? (
+            <ExplorerPage onVideoSelect={handleVideoSelect} />
           ) : !showPlaylists && currentPage === 'settings' ? (
             <SettingsPage currentThemeId={currentThemeId} onThemeChange={setCurrentThemeId} />
           ) : null

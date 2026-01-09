@@ -71,13 +71,38 @@ const PlaylistsPage = ({ onVideoSelect }) => {
 
   const loadFolders = async () => {
     try {
-      console.log('Loading folders with videos...');
-      const foldersData = await getAllFoldersWithVideos();
-      console.log('Loaded folders data:', foldersData);
-      setFolders(Array.isArray(foldersData) ? foldersData : []);
+      console.log('Loading folders via aggregation strategy to ensure thumbnails...');
+
+      // Fetch all playlists to ensure we have the list to iterate over
+      const allPlaylists = await getAllPlaylists();
+
+      if (!Array.isArray(allPlaylists)) {
+        throw new Error('Failed to load playlists for folder aggregation');
+      }
+
+      const aggregatedFolders = [];
+      await Promise.all(allPlaylists.map(async (p) => {
+        try {
+          const pFolders = await getFoldersForPlaylist(p.id);
+          if (Array.isArray(pFolders)) {
+            aggregatedFolders.push(...pFolders);
+          }
+        } catch (e) {
+          console.warn(`Failed to load folders for playlist ${p.id}`, e);
+        }
+      }));
+
+      console.log('Aggregated folders:', aggregatedFolders);
+      setFolders(aggregatedFolders);
     } catch (error) {
-      console.error('Failed to load folders:', error);
-      setFolders([]);
+      console.error('Failed to load folders aggregation:', error);
+      // Fallback to bulk method if aggregation fails completely
+      try {
+        const bulk = await getAllFoldersWithVideos();
+        setFolders(Array.isArray(bulk) ? bulk : []);
+      } catch (e) {
+        setFolders([]);
+      }
     }
   };
 
@@ -425,8 +450,8 @@ const PlaylistsPage = ({ onVideoSelect }) => {
               <button
                 onClick={() => setShowPlaylistSelector(false)}
                 className="text-slate-400 transition-colors"
-              onMouseEnter={(e) => e.currentTarget.style.color = '#052F4A'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(148 163 184)'}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#052F4A'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'rgb(148 163 184)'}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -635,9 +660,9 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                             style={{ backgroundColor: folderColor.hex }}
                           />
                           <h3 className="font-medium text-sm truncate transition-colors"
-                              style={{ color: '#052F4A' }}
-                              onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
-                              onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
+                            style={{ color: '#052F4A' }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
                             {folderColor.name} Folder
                           </h3>
                         </div>
@@ -885,9 +910,9 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                         {/* Playlist Info */}
                         <div className="mt-2 relative flex items-start justify-between gap-2">
                           <h3 className="font-medium text-sm truncate transition-colors flex-1"
-                              style={{ color: '#052F4A' }}
-                              onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
-                              onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
+                            style={{ color: '#052F4A' }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
                             {playlist.name}
                           </h3>
 
@@ -1073,7 +1098,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                               <svg
                                 className="w-16 h-16"
-                              style={{ color: '#052F4A' }}
+                                style={{ color: '#052F4A' }}
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                               >
@@ -1132,9 +1157,9 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                               style={{ backgroundColor: folderColor.hex }}
                             />
                             <h3 className="font-medium text-sm truncate transition-colors pr-8"
-                                style={{ color: '#052F4A' }}
-                                onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
-                                onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
+                              style={{ color: '#052F4A' }}
+                              onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
+                              onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
                               {folderColor.name} Folder
                             </h3>
                           </div>
