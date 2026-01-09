@@ -306,12 +306,17 @@ Users see a 3-column grid of video cards showing videos from the current playlis
   - **Pagination Controls**: For performance, videos are paginated (50 videos per page). Previous/Next controls appear at the bottom of the grid.
 
 - **Sticky Video Carousel**: 
-  - **Purpose**: Displays important videos at the very top of the page, bypassing pagination and sorting.
+  - **Purpose**: Displays important videos at the very top of the page.
+  - **Behavior**:
+    - **Copy vs Move**: Stickied videos are *copied* to the carousel (they remain in the regular grid properly sorted).
+    - **Scoped State**: Sticky status is scoped per playlist AND per folder context. A video stickied in the "Red" folder only appears in the "Red" folder's carousel.
+    - **Root Context**: Videos stickied in the main "All Videos" view only appear in the root carousel.
+    - **Unsorted Exclusion**: The carousel is hidden on the "Unsorted" view.
   - **Format**: 
     - 1-3 stickied videos: Displayed in a standard grid layout.
-    - 4+ stickied videos: Displayed in a horizontal carousel (scrollable).
+    - 4+ stickied videos: Displayed in a horizontal carousel (scrollable via mouse wheel).
   - **Controls**: Sticky status toggled via video 3-dot menu ("Sticky Video" / "Unsticky Video").
-  - **Persistence**: Per-playlist sticky state is saved.
+  - **Persistence**: Scoped ID sets are persisted to localStorage (`sticky-storage`).
 
 - **Video Grid**: 3-column grid of video cards (see 4.1.2.1)
 
@@ -336,6 +341,7 @@ Users see a 3-column grid of video cards showing videos from the current playlis
 - `src/components/BulkTagColorGrid.jsx`: Color grid overlay for bulk tagging
 - `src/components/FolderSelector.jsx`: Folder filter selector
 - `src/components/PlaylistSelectionModal.jsx`: Modal for selecting playlist (Move/Copy actions)
+- `src/components/StickyVideoCarousel.jsx`: Sticky video grid/carousel component
 
 **State Management:**
 - `src/store/playlistStore.js`:
@@ -343,6 +349,10 @@ Users see a 3-column grid of video cards showing videos from the current playlis
   - `previewPlaylistItems`: Array of videos in preview playlist (null when not previewing)
   - `currentPlaylistId`: Current playlist ID
   - `previewPlaylistId`: Preview playlist ID
+- `src/store/stickyStore.js`:
+  - `allStickiedVideos`: Map of scoped keys (`playlistId::folderId`) to video IDs
+  - `toggleSticky(playlistId, videoId, folderId)`: Toggles sticky state
+  - `isStickied(playlistId, videoId, folderId)`: Checks sticky state
 - `src/store/folderStore.js`:
   - `selectedFolder`: Currently selected folder color (null = all)
   - `videoFolderAssignments`: Map of video ID to array of folder colors

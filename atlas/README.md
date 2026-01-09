@@ -77,6 +77,7 @@ yttv2/
 │   │   ├── BulkPlaylistImporter.jsx   # Bulk import modal with 17 fields
 │   │   ├── PlaylistFolderSelector.jsx  # Universal playlist/folder selector
 │   │   ├── PlaylistSelectionModal.jsx  # Modal for selecting playlist (Move/Copy actions)
+│   │   ├── StickyVideoCarousel.jsx     # Carousel/Grid for stickied videos
 │   │   └── DebugRuler.jsx              # Ruler overlay component (non-functional - see debug.md)
 │   ├── store/                    # Zustand state management
 │   │   ├── layoutStore.js        # View mode, menu state, debug/inspect/ruler/dev toolbar toggles
@@ -85,7 +86,8 @@ yttv2/
 │   │   ├── folderStore.js        # Folder state, bulk tagging, show folders
 │   │   ├── tabStore.js           # Tab state management
 │   │   ├── tabPresetStore.js     # Tab preset state management
-│   │   └── pinStore.js           # Pin state management (session-only)
+│   │   ├── pinStore.js           # Pin state management (session-only)
+│   │   └── stickyStore.js        # Sticky video state management (persisted)
 │   ├── utils/                    # Utility functions
 │   │   ├── youtubeUtils.js       # YouTube URL parsing, thumbnails, API
 │   │   ├── initDatabase.js       # Database initialization (no test data)

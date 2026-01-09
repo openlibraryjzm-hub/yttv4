@@ -207,7 +207,11 @@ Users see colored folders as a way to organize videos within playlists:
   - **16 Colored Dots**: Each dot displays the count of videos assigned to that folder.
   - **All Button**: Shows all videos (displays total count).
   - **Unsorted Button**: Shows videos not assigned to any folder (displays count).
-
+ 
+- **Start-of-List Sticky Videos**:
+  - Each specific colored folder view supports its own set of "Sticky Videos" (see `ui.md` 4.1.2).
+  - Videos stickied while viewing a folder will only appear in that folder's sticky carousel, not in other folders or the main view.
+ 
 **2: File Manifest**
 
 **UI/Components:**

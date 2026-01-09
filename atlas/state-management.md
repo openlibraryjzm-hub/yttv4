@@ -28,6 +28,7 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 3. **Organization State Stores** (persisted to localStorage):
    - `tabStore` - Tab organization
    - `tabPresetStore` - Tab preset configurations
+   - `stickyStore` - Sticky video state management
 
 ## Store Details
 
@@ -240,6 +241,33 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 - When `pinnedVideos` changes → PlayerController pins display updates → Pinned videos shown (priority pin always first)
 - When `priorityPinId` changes → Priority pin visual styling updates → Larger size and amber border applied
 - When priority pin set → Priority pin button icons update → Filled if priority, outline if not
+
+---
+
+### 8. stickyStore (`src/store/stickyStore.js`)
+
+**Purpose**: Manages sticky video state with folder-scoped persistence
+
+**State:**
+- `stickiedVideos`: Set - Set of strings in format `${playlistId}::${videoId}::${folderKey}` (internal state, exposed via selectors)
+
+**Actions:**
+- `toggleSticky(playlistId, videoId, folderId)` - Toggles sticky state for a video in a specific folder context
+- `isStickied(playlistId, videoId, folderId)` - Checks if a video is stickied in a specific folder context
+- `getStickiedVideoIds(playlistId, folderId)` - Returns array of video IDs stickied in that context
+- `clearAllSticky()` - Clears all sticky states
+
+**Persistence**: 
+- Persisted to localStorage: `sticky-storage`
+- Uses custom serialization/deserialization for the Set of strings
+
+**Key Behaviors:**
+- **Scoped Keys**: Stickiness is stored using a composite key: `${activePlaylistId}::${folderKey}`. This ensures a video can be stickied in the "Red" folder but not in the "Blue" folder or Root view.
+- **Copy Semantics**: Sticky videos are treated as copies; they appear in the carousel but are NOT removed from the main grid list.
+- **UnsortedExclusion**: Stickiness is disabled/hidden for the 'unsorted' folder view.
+
+**Dependencies:**
+- When `stickiedVideos` changes → `VideosPage` re-renders → Carousel updates and VideoCard menu items update
 
 ---
 

@@ -7,6 +7,27 @@ const StickyVideoCarousel = ({ children }) => {
 
     const count = React.Children.count(children);
 
+    // Handle horizontal scroll on mouse wheel
+    React.useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (container) {
+            const handleWheel = (e) => {
+                if (e.deltaY !== 0) {
+                    e.preventDefault();
+                    // Multiply by 3 for faster scrolling (better sensitivity)
+                    container.scrollLeft += e.deltaY * 3;
+                }
+            };
+
+            // Add non-passive event listener to support preventDefault
+            container.addEventListener('wheel', handleWheel, { passive: false });
+
+            return () => {
+                container.removeEventListener('wheel', handleWheel);
+            };
+        }
+    });
+
     if (count === 0) return null;
 
     // If 3 or fewer items, show in a standard grid (first row)
@@ -62,22 +83,12 @@ const StickyVideoCarousel = ({ children }) => {
                 </button>
 
                 <div
-                    ref={(el) => {
-                        scrollContainerRef.current = el;
-                        if (el) {
-                            // Add non-passive event listener to support preventDefault
-                            el.onwheel = (e) => {
-                                if (e.deltaY !== 0) {
-                                    e.preventDefault();
-                                    el.scrollLeft += e.deltaY;
-                                }
-                            };
-                        }
-                    }}
+                    ref={scrollContainerRef}
                     className="flex gap-6 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory scrollbar-hide mask-fade-sides"
                     style={{
                         scrollbarWidth: 'none', // Firefox
                         msOverflowStyle: 'none', // IE/Edge
+                        scrollBehavior: 'auto' // Force instant scroll for wheel event responsiveness
                     }}
                 >
                     {React.Children.map(children, (child) => (
