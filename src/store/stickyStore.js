@@ -13,13 +13,23 @@ export const useStickyStore = create(
             stickiedVideos: {},
 
             /**
-             * Toggle sticky status for a video in a playlist
+             * Helper to generate composite key
+             */
+            _getKey: (playlistId, folderId) => {
+                const folderKey = folderId === null ? 'root' : folderId;
+                return `${playlistId}::${folderKey}`;
+            },
+
+            /**
+             * Toggle sticky status for a video in a specific playlist context (folder)
              * @param {string|number} playlistId - Playlist ID
              * @param {number} videoId - Video ID
+             * @param {string|null} folderId - Folder ID (null for root/all, 'unsorted', or color)
              */
-            toggleSticky: (playlistId, videoId) => {
+            toggleSticky: (playlistId, videoId, folderId = null) => {
                 const state = get();
-                const currentStickies = state.stickiedVideos[playlistId] || [];
+                const key = state._getKey(playlistId, folderId);
+                const currentStickies = state.stickiedVideos[key] || [];
                 const isStickied = currentStickies.includes(videoId);
 
                 let newStickies;
@@ -34,20 +44,22 @@ export const useStickyStore = create(
                 set({
                     stickiedVideos: {
                         ...state.stickiedVideos,
-                        [playlistId]: newStickies,
+                        [key]: newStickies,
                     },
                 });
             },
 
             /**
-             * Check if a video is stickied in a playlist
+             * Check if a video is stickied in a playlist context
              * @param {string|number} playlistId - Playlist ID
              * @param {number} videoId - Video ID
+             * @param {string|null} folderId - Folder ID
              * @returns {boolean}
              */
-            isStickied: (playlistId, videoId) => {
+            isStickied: (playlistId, videoId, folderId = null) => {
                 const state = get();
-                const stickies = state.stickiedVideos[playlistId];
+                const key = state._getKey(playlistId, folderId);
+                const stickies = state.stickiedVideos[key];
                 return stickies ? stickies.includes(videoId) : false;
             },
         }),

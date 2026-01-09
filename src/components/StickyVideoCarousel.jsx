@@ -38,7 +38,7 @@ const StickyVideoCarousel = ({ children }) => {
 
     return (
         <div
-            className="w-full mb-8 animate-fade-in group relative px-8"
+            className="w-full mb-8 animate-fade-in relative px-8"
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => setShowControls(false)}
         >
@@ -61,9 +61,19 @@ const StickyVideoCarousel = ({ children }) => {
                     <ChevronLeft size={20} />
                 </button>
 
-                {/* Carousel Container */}
                 <div
-                    ref={scrollContainerRef}
+                    ref={(el) => {
+                        scrollContainerRef.current = el;
+                        if (el) {
+                            // Add non-passive event listener to support preventDefault
+                            el.onwheel = (e) => {
+                                if (e.deltaY !== 0) {
+                                    e.preventDefault();
+                                    el.scrollLeft += e.deltaY;
+                                }
+                            };
+                        }
+                    }}
                     className="flex gap-6 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory scrollbar-hide mask-fade-sides"
                     style={{
                         scrollbarWidth: 'none', // Firefox
@@ -71,7 +81,7 @@ const StickyVideoCarousel = ({ children }) => {
                     }}
                 >
                     {React.Children.map(children, (child) => (
-                        <div className="min-w-[calc(33.333%-16px)] snap-start flex-shrink-0">
+                        <div className="w-[calc(33.333%-16px)] snap-start flex-shrink-0">
                             {child}
                         </div>
                     ))}
