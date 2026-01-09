@@ -37,6 +37,7 @@ const VideoCard = ({
   onSecondPlayerSelect,
   progress = 0,
   isWatched = false,
+  isStickied = false,
 }) => {
   const { inspectMode } = useLayoutStore();
   const { quickAssignFolder } = useFolderStore();
@@ -54,11 +55,23 @@ const VideoCard = ({
   const isPinnedVideo = isPinned(video.id);
   const isPriority = isPriorityPin(video.id);
 
+  // Flattened splatter icon path for re-use
+  const splatterPath = "M47.5,12.2c0,0-2.3,16.2-7.8,19.3c-5.5,3.1-17.7-6.2-17.7-6.2s3.8,11.2-1.7,16.5c-5.5,5.3-20.2-2.1-20.2-2.1 s12.5,9.6,9.2,16.5c-3.3,6.9-10.7,5.5-10.7,5.5s12.9,5.7,12.5,14.7c-0.4,9-10.6,15.6-10.6,15.6s15.3-1.6,20.2,4.2 c4.9,5.8-0.9,13.8-0.9,13.8s9.4-9,16.9-5.3c7.5,3.7,5.9,14.6,5.9,14.6s5.9-11.8,13.6-10.6c7.7,1.2,13.6,9.5,13.6,9.5 s-1.8-13.6,5.3-16.7c7.1-3.1,16.5,2.7,16.5,2.7s-8.1-13.6-1.5-18.9c6.6-5.3,18.8,0.7,18.8,0.7s-13.2-8.1-11.1-16.7 C99.2,40.4,100,28.8,100,28.8s-12,8.8-17.7,3.1c-5.7-5.7-1.3-18.8-1.3-18.8s-9,11.6-16.5,9.4c-7.5-2.2-11.1-12.2-11.1-12.2 S50.4,14.5,47.5,12.2z";
+
   // Quick action - star for folder assignment (must be defined before badges)
   const quickActions = [];
 
   // Menu options - easy to extend! (must be defined before badges)
   const menuOptions = [
+    {
+      label: isStickied ? 'Unsticky Video' : 'Sticky Video',
+      icon: (
+        <svg className="w-4 h-4 text-amber-500" viewBox="0 0 100 100" fill="currentColor">
+          <path d={splatterPath} />
+        </svg>
+      ),
+      action: 'toggleSticky',
+    },
     {
       label: 'Delete',
       danger: true,
@@ -236,7 +249,7 @@ const VideoCard = ({
     // Quick Actions Badge (Star) - Top Right - Visible on Hover
     !bulkTagMode && {
       component: (
-        <div 
+        <div
           className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative"
           onMouseEnter={() => {
             // Clear any existing delay or hide timeout
@@ -300,10 +313,10 @@ const VideoCard = ({
                 ? `Assigned to: ${videoFolders.map(f => getFolderColorById(f).name).join(', ')}`
                 : 'Click to assign to folder'
             ) || (
-              videoFolders.length > 0
-                ? `Assigned to: ${videoFolders.map(f => getFolderColorById(f).name).join(', ')}`
-                : 'Click to assign to folder'
-            )}
+                videoFolders.length > 0
+                  ? `Assigned to: ${videoFolders.map(f => getFolderColorById(f).name).join(', ')}`
+                  : 'Click to assign to folder'
+              )}
             style={{ color: primaryFolder ? primaryFolder.hex : quickAssignColor.hex }}
             data-card-action="true"
           >

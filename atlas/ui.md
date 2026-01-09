@@ -305,6 +305,14 @@ Users see a 3-column grid of video cards showing videos from the current playlis
   - **Save/Cancel Buttons**: Appear when in bulk tag mode
   - **Pagination Controls**: For performance, videos are paginated (50 videos per page). Previous/Next controls appear at the bottom of the grid.
 
+- **Sticky Video Carousel**: 
+  - **Purpose**: Displays important videos at the very top of the page, bypassing pagination and sorting.
+  - **Format**: 
+    - 1-3 stickied videos: Displayed in a standard grid layout.
+    - 4+ stickied videos: Displayed in a horizontal carousel (scrollable).
+  - **Controls**: Sticky status toggled via video 3-dot menu ("Sticky Video" / "Unsticky Video").
+  - **Persistence**: Per-playlist sticky state is saved.
+
 - **Video Grid**: 3-column grid of video cards (see 4.1.2.1)
 
 - **Folder Filtering**: When a folder is selected (via FolderSelector), only videos in that folder are shown

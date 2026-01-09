@@ -9,6 +9,8 @@ import VideoCard from './VideoCard';
 import PlaylistSelectionModal from './PlaylistSelectionModal';
 import PlaylistUploader from './PlaylistUploader';
 import { addVideoToPlaylist, getPlaylistItems } from '../api/playlistApi';
+import { useStickyStore } from '../store/stickyStore';
+import StickyVideoCarousel from './StickyVideoCarousel';
 
 const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   const {
@@ -88,6 +90,19 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
       setSelectedVideoIndex(currentVideoIndex);
     }
   }, [currentVideoIndex, activePlaylistItems]);
+
+  const { isStickied, toggleSticky, stickiedVideos: allStickiedVideos } = useStickyStore();
+
+  const handleToggleSticky = (playlistId, videoId) => {
+    console.log(`[VideosPage] Toggling sticky for playlist ${playlistId}, video ${videoId}`);
+    toggleSticky(playlistId, videoId);
+  };
+
+  // Debug effect
+  useEffect(() => {
+    console.log('[VideosPage] Active Playlist:', activePlaylistId);
+    console.log('[VideosPage] Sticky Data:', allStickiedVideos);
+  }, [activePlaylistId, allStickiedVideos]);
 
   // Reset selected folder when playlist changes to prevent showing wrong videos
   useEffect(() => {
@@ -652,6 +667,15 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   // Determine which videos to display (for count display)
   const videosToDisplay = selectedFolder !== null ? displayedVideos : activePlaylistItems;
 
+  // Split sorted videos into stickied and regular
+  // Use allStickiedVideos to ensure reactivity
+  const stickiedVideos = sortedVideos.filter(v => {
+    const stickies = allStickiedVideos[activePlaylistId] || [];
+    return stickies.includes(v.id);
+  });
+
+  const regularVideos = sortedVideos;
+
   const bulkTagSelectionCount = Object.values(bulkTagSelections).reduce(
     (total, folders) => total + folders.size,
     0
@@ -816,48 +840,100 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
       ) : (
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto p-4 bg-transparent"
         >
-          <div className="grid grid-cols-3 gap-4">
-            {sortedVideos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((video, index) => {
-              const originalIndex = activePlaylistItems.findIndex(v => v.id === video.id);
-              const isSelected = selectedVideoIndex === originalIndex;
-              const isCurrentlyPlaying = currentVideoIndex === originalIndex;
-              const videoFolders = videoFolderAssignments[video.id] || [];
+          {loadingFolders ? (
+            <div className="flex items-center justify-center h-64 text-slate-400">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mr-3"></div>
+              Loading videos...
+            </div>
+          ) : sortedVideos.length > 0 ? (
+            <>
+              {/* Sticky Carousel Section */}
+              {stickiedVideos.length > 0 && (
+                <StickyVideoCarousel>
+                  {stickiedVideos.map((video, index) => {
+                    const originalIndex = activePlaylistItems.findIndex(v => v.id === video.id);
+                    return (
+                      <VideoCard
+                        key={video.id}
+                        video={video}
+                        index={index}
+                        originalIndex={originalIndex}
+                        isSelected={selectedVideoIndex === originalIndex}
+                        isCurrentlyPlaying={currentVideoIndex === originalIndex}
+                        videoFolders={videoFolderAssignments[video.id] || []}
+                        selectedFolder={selectedFolder}
+                        onVideoClick={() => handleVideoClick(video, index)}
+                        onStarClick={(e) => handleStarClick(e, video)}
+                        onStarColorLeftClick={handleStarColorLeftClick}
+                        onStarColorRightClick={handleStarColorRightClick}
+                        onMenuOptionClick={(option) => {
+                          // If it's a sticky toggle, we handle it here or pass down?
+                          // VideoCard might handle it if we pass the handler or let VideoCard use store
+                          // But VideoCard uses onMenuOptionClick for everything else.
+                          // Actually, VideoCard constructs the menu. We intercept it here or handle it.
+                          if (option.action === 'toggleSticky') {
+                            handleToggleSticky(activePlaylistId, video.id);
+                          } else {
+                            handleMenuOptionClick(option, video);
+                          }
+                        }}
+                        onQuickAssign={handleStarClick}
+                        bulkTagMode={bulkTagMode}
+                        bulkTagSelections={bulkTagSelections[video.id] || new Set()}
+                        onBulkTagColorClick={(color) => handleBulkTagColorClick(video, color)}
+                        onPinClick={() => { }} // Handled internally in VideoCard via store
+                        isStickied={true} // It is stickied in this list
+                      />
+                    );
+                  })}
+                </StickyVideoCarousel>
+              )}
 
-              const videoId = extractVideoId(video.video_url) || video.video_id;
-              const videoData = videoProgress.get(videoId);
-              const progress = videoData ? (typeof videoData === 'number' ? videoData : videoData.percentage) : 0;
-              const isWatched = videoData ? (typeof videoData === 'object' ? videoData.hasFullyWatched : false) : false;
+              {/* Regular Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 animate-fade-in">
+                {regularVideos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((video, index) => {
+                  const originalIndex = activePlaylistItems.findIndex(v => v.id === video.id);
+                  return (
+                    <VideoCard
+                      key={video.id}
+                      video={video}
+                      index={index}
+                      originalIndex={originalIndex}
+                      isSelected={selectedVideoIndex === originalIndex}
+                      isCurrentlyPlaying={currentVideoIndex === originalIndex}
+                      videoFolders={videoFolderAssignments[video.id] || []}
+                      selectedFolder={selectedFolder}
+                      onVideoClick={() => handleVideoClick(video, index)}
+                      onStarClick={(e) => handleStarClick(e, video)}
+                      onStarColorLeftClick={handleStarColorLeftClick}
+                      onStarColorRightClick={handleStarColorRightClick}
+                      onMenuOptionClick={(option) => {
+                        if (option.action === 'toggleSticky') {
+                          handleToggleSticky(activePlaylistId, video.id);
+                        } else {
+                          handleMenuOptionClick(option, video);
+                        }
+                      }}
+                      onQuickAssign={handleStarClick}
+                      bulkTagMode={bulkTagMode}
+                      bulkTagSelections={bulkTagSelections[video.id] || new Set()}
+                      onBulkTagColorClick={(color) => handleBulkTagColorClick(video, color)}
+                      onPinClick={() => { }} // Handled internally in VideoCard via store
+                      isStickied={(allStickiedVideos[activePlaylistId] || []).includes(video.id)}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <div className="text-center text-slate-400 py-8">
+              No videos found in this playlist.
+            </div>
+          )}
 
-              return (
-                <VideoCard
-                  key={video.id || index}
-                  video={video}
-                  index={index}
-                  originalIndex={originalIndex}
-                  isSelected={isSelected}
-                  isCurrentlyPlaying={isCurrentlyPlaying}
-                  videoFolders={videoFolders}
-                  selectedFolder={selectedFolder}
-                  onVideoClick={() => handleVideoClick(video, index)}
-                  onStarClick={(e) => handleStarClick(e, video)}
-                  onStarColorLeftClick={handleStarColorLeftClick}
-                  onStarColorRightClick={handleStarColorRightClick}
-                  onMenuOptionClick={(option) => handleMenuOptionClick(option, video)}
-                  bulkTagMode={bulkTagMode}
-                  bulkTagSelections={bulkTagSelections[video.id] || new Set()}
-                  onBulkTagColorClick={(folderColor) => handleBulkTagColorClick(video, folderColor)}
-                  onSecondPlayerSelect={onSecondPlayerSelect}
-                  progress={progress}
-                  isWatched={isWatched}
-                />
-              );
-            })}
-          </div>
-
-          {/* Pagination Controls */}
-          {sortedVideos.length > itemsPerPage && (
+          {/* Pagination Controls - Based on Regular Videos only, since Stickies are always shown */}
+          {regularVideos.length > itemsPerPage && (
             <div className="flex justify-center items-center gap-4 mt-8 mb-4">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -868,12 +944,12 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
               </button>
 
               <span className="text-slate-400 font-medium">
-                Page {currentPage} of {Math.ceil(sortedVideos.length / itemsPerPage)}
+                Page {currentPage} of {Math.ceil(regularVideos.length / itemsPerPage)}
               </span>
 
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(sortedVideos.length / itemsPerPage)))}
-                disabled={currentPage >= Math.ceil(sortedVideos.length / itemsPerPage)}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(regularVideos.length / itemsPerPage)))}
+                disabled={currentPage >= Math.ceil(regularVideos.length / itemsPerPage)}
                 className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors border border-slate-600 text-sky-400 hover:text-sky-300"
               >
                 Next
