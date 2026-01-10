@@ -282,6 +282,11 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 - `currentThemeId`: string - ID of the active theme (e.g., 'nebula', 'sunset')
 - `userName`: string - User's display name for banners (default: 'Boss')
 - `userAvatar`: string - User's ASCII art avatar (default: '( ͡° ͜ʖ ͡°)')
+- `customOrbImage`: string | null - Base64 encoded custom orb image
+- `isSpillEnabled`: boolean - Master toggle for orb spill effect
+- `orbSpill`: Object - Quadrant spill flags ({ tl, tr, bl, br })
+- `orbImageScale`: number - Orb image zoom level (0.5 - 3.0)
+- `orbImageXOffset`/`YOffset`: number - Orb image pan offsets
 - Legacy layout settings (deprecated/removed from UI but present in store structure)
 
 **Actions:**

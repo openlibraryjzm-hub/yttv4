@@ -33,17 +33,21 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
 - **Orb Image**: Displays the current video's thumbnail by default, or a custom uploaded image if set. The image is clipped to a circular shape with optional "spill" effects that allow the image to extend beyond the circle boundaries in configurable quadrants (top-left, top-right, bottom-left, bottom-right).
 - **Upload Button**: On hover, an upload icon appears at the top of the orb (12 o'clock position). Clicking opens a file picker to upload a custom image. The uploaded image is immediately displayed and persisted to localStorage.
 - **Orb Buttons**: Eight buttons appear around the orb on hover, positioned in a radial pattern:
-  - **Editor** (Scissors icon) - Currently no action
+  - **Editor** (Scissors icon) - [Placeholder] Reserved for future direct pixel-editing/masking tools.
   - **Search** (Search icon) - Currently no action
   - **Menu** (Menu icon) - Currently no action
   - **Spill** (Maximize2 icon) - Toggles spill/clipping mode
   - **Channel** (Youtube icon) - Currently no action
-  - **Config** (Settings icon) - Opens configuration page (Settings) for application themes, profile, and **Orb customization**.
+  - **Config** (Settings icon) - [Functional] Opens the full Settings Page, which includes the **Orb Tab** for advanced customization (Image, Spill, Scale).
   - **History** (Clock icon) - Navigates to History page
   - **Clipping** (Circle/Minimize2 icon) - Toggles spill/clipping mode (same as Spill)
 - **Spill Toggle**: When enabled, the orb image can extend beyond the circular boundary. Users can configure which quadrants allow spill via the **Settings Page > Orb** tab. The spill state is persisted to localStorage (`isSpillEnabled`).
 - **Config Panel & Orb Settings**: When Config button is clicked, users are navigated to the Settings Page.
-  - **Orb Tab**: A new tab allows users to upload a custom orb image and visually toggle spill for each of the 4 quadrants (Top-Left, Top-Right, Bottom-Left, Bottom-Right) using an interactive preview.
+  - **Orb Tab**: A comprehensive configuration suite for the central element:
+    - **Image Upload**: Upload custom images (png, jpg, gif) which are automatically resized and compressed for performance.
+    - **Spill Control**: An interactive 4-quadrant toggle system allows users to selectively enable/disable image spill for the Top-Left, Top-Right, Bottom-Left, and Bottom-Right corners.
+    - **Image Scaling**: A slider control (0.5x to 3.0x) allows precise zooming of the orb image within the spill boundaries.
+    - **Visualizer Integration**: The spill effect works in tandem with the audio visualizer border.
 
 **2: File Manifest**
 
@@ -59,8 +63,8 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
   - `customOrbImage`: Base64 image data, persisted to localStorage
   - `isSpillEnabled`: Boolean, persisted to localStorage
   - `orbSpill`: Object with `{ tl, tr, bl, br }` boolean flags for quadrant spill, persisted to localStorage
-  - `orbImageScale`, `orbImageScaleW`, `orbImageScaleH`: Scaling values
-  - `orbImageXOffset`, `orbImageYOffset`: Position offsets
+  - `orbImageScale`, `orbImageScaleW`, `orbImageScaleH`: Float (0.5 - 3.0), controls image zoom level, persisted to localStorage
+  - `orbImageXOffset`, `orbImageYOffset`: Integers, control image panning (currently internal/dev only), persisted to localStorage
 
 **API/Bridge:**
 - No Tauri commands - all state is client-side

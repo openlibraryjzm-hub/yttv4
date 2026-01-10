@@ -822,69 +822,8 @@ Users see a modal dialog when selecting "Move to Playlist" or "Copy to Playlist"
    - User clicks playlist → `handlePlaylistSelect(playlistId)`
    - **Copy**: Calls `addVideoToPlaylist`
    - **Move**: Calls `addVideoToPlaylist` then `removeVideoFromPlaylist` (from source)
-   - Updates UI (removes video from grid if moved)
+     - Updates UI (removes video from grid if moved)
    - Closes modal and clears state
-
----
-
-#### ### 4.1.6 Settings Page
-
-**1: User-Perspective Description**
-
-Users access the configuration area via the "Config" (Settings icon) button on the main Player Controller orb. The Settings Page provides a tabbed interface for application-wide customization:
-
-- **Theme Tab**:
-  - Allows selection of the global visual theme (e.g., Blue, Rose, Amber, etc.).
-  - Displays preview cards for each theme.
-  - Changes apply immediately to the entire application.
-
-- **Profile Tab**:
-  - **Display Name**: Text input to set the username shown on banners.
-  - **Avatar Selection**:
-    - **Preset ASCII Art**: Grid of predefined ASCII avatars.
-    - **Custom ASCII**: Input field to paste custom multi-line ASCII art.
-  - **Preview**: Live preview of how the name and avatar will appear on the Page Banner.
-
-- **Orb Tab**:
-  - **Custom Orb Image**:
-    - **Upload**: Button to select a local image file for the central orb.
-    - **Preview**: Shows the currently selected custom image.
-    - **Remove**: Button to clear the custom image and revert to default.
-  - **Spill Controls**:
-    - **Spill Toggle**: Master switch to enable/disable image overflow (spill).
-    - **Quadrant Selection**: An interactive visualizer allows users to click four quadrants (TL, TR, BL, BR) to individually enable/disable spill for that corner.
-    - **Visual Feedback**: The visualizer shows the image with a circular mask and highlights selected spill areas using the actual image data.
-
-**2: File Manifest**
-
-**UI/Components:**
-- `src/components/SettingsPage.jsx`: Main settings container and tabs.
-- `src/store/configStore.js`: centralized state for all settings.
-
-**State Management:**
-- `src/store/configStore.js`:
-  - `currentThemeId`: Active theme ID.
-  - `userName`: User's display name.
-  - `userAvatar`: User's ASCII avatar string.
-  - `customOrbImage`: Base64 string of uploaded orb image.
-  - `isSpillEnabled`: Boolean master toggle for orb spill.
-  - `orbSpill`: Object `{ tl: bool, tr: bool, bl: bool, br: bool }` for quadrant control.
-  - All state is persisted to `localStorage` via Zustand persist middleware.
-
-**3: The Logic & State Chain**
-
-**Trigger → Action → Persistence Flow:**
-
-1. **Orb Image Upload:**
-   - User selects file → `FileReader` reads as Data URL.
-   - `setCustomOrbImage(dataUrl)` updates store.
-   - Store persists to `localStorage`.
-   - `PlayerController` detects change → Updates orb image source.
-
-2. **Spill Configuration:**
-   - User toggles quadrant → `setOrbSpill({ ...orbSpill, [q]: !val })` updates store.
-   - `PlayerController` detects change → Re-renders SVG `clipPath` with/without specific `<rect>` elements for that quadrant.
-   - Image overflows or clips accordingly.
 
 ---
 
@@ -934,36 +873,68 @@ The Explorer Page offers an alternative, focused way to browse content using a t
 
 ---
 
-#### ### 4.2 Settings Page
+#### ### 4.1.6 Settings Page
 
 **1: User-Perspective Description**
 
-The Settings Page allows users to configure application-wide preferences. It is accessed via the **Config** button (Settings icon) in the PlayerController's central orb menu.
-
-- **Navigation Tabs**:
-  - **Theme**: Select application color themes.
-  - **Profile**: Customize user identity.
+Users access the configuration area via the "Config" (Settings icon) button on the main Player Controller orb. The Settings Page provides a tabbed interface for application-wide customization:
 
 - **Theme Tab**:
-  - Grid of available color themes (e.g., Nebula, Sunset, Ocean).
-  - Clicking a theme immediately applies it to the entire application.
+  - Allows selection of the global visual theme (e.g., Blue, Rose, Amber, etc.).
+  - Displays preview cards for each theme.
+  - Changes apply immediately to the entire application.
 
 - **Profile Tab**:
-  - **Display Name**: Text input to set the user's name (displayed in banners).
-  - **Avatar Selection**: Grid of predefined ASCII art avatars (classic Lenny faces).
-  - **Custom Avatar**:
-    - **Custom ASCII**: Text area for pasting custom ASCII art.
-    - **Multi-line Support**: Automatically detects multi-line text and renders it in a preserved-whitespace block.
-  - **Live Preview**: Shows exactly how the Name + Avatar will look in the Page Banner.
-    - **Single-line**: Avatar large and side-by-side with name.
-    - **Multi-line**: Avatar small (4px font) and positioned *below* the name.
+  - **Display Name**: Text input to set the username shown on banners.
+  - **Avatar Selection**:
+    - **Preset ASCII Art**: Grid of predefined ASCII avatars.
+    - **Custom ASCII**: Input field to paste custom multi-line ASCII art.
+  - **Preview**: Live preview of how the name and avatar will appear on the Page Banner.
+
+- **Orb Tab**:
+  - **Custom Orb Image**:
+    - **Upload**: Button to select a local image file for the central orb.
+    - **Preview**: Shows the currently selected custom image.
+    - **Remove**: Button to clear the custom image and revert to default.
+  - **Spill Controls**:
+    - **Spill Toggle**: Master switch to enable/disable image overflow (spill).
+    - **Quadrant Selection**: An interactive visualizer allows users to click four quadrants (TL, TR, BL, BR) to individually enable/disable spill for that corner.
+    - **Visual Feedback**: The visualizer shows the image with a circular mask and highlights selected spill areas using the actual image data.
+  - **Image Scaling**:
+    - **Zoom Slider**: A range slider (0.5x to 3.0x) allows users to zoom the orb image in/out within the spill boundaries.
 
 **2: File Manifest**
 
-- `src/components/SettingsPage.jsx`: Main component
-- `src/store/configStore.js`: State management (`currentThemeId`, `userName`, `userAvatar`)
-- `src/utils/themes.js`: Theme definitions
+**UI/Components:**
+- `src/components/SettingsPage.jsx`: Main settings container and tabs.
+- `src/store/configStore.js`: centralized state for all settings.
 
-**3: Visual Design**
-- Uses a clean, card-based layout with `ConfigSection` components.
-- Live preview box uses the same gradient and styling as the actual Page Banner for accurate feedback.
+**State Management:**
+- `src/store/configStore.js`:
+  - `currentThemeId`: Active theme ID.
+  - `userName`: User's display name.
+  - `userAvatar`: User's ASCII avatar string.
+  - `customOrbImage`: Base64 string of uploaded orb image.
+  - `isSpillEnabled`: Boolean master toggle for orb spill.
+  - `orbSpill`: Object `{ tl: bool, tr: bool, bl: bool, br: bool }` for quadrant control.
+  - `orbImageScale`: Float (0.5 - 3.0) for image zooming.
+  - All state is persisted to `localStorage` via Zustand persist middleware.
+
+**3: The Logic & State Chain**
+
+**Trigger → Action → Persistence Flow:**
+
+1. **Orb Image Upload:**
+   - User selects file → `FileReader` reads as Data URL.
+   - `setCustomOrbImage(dataUrl)` updates store.
+   - Store persists to `localStorage`.
+   - `PlayerController` detects change → Updates orb image source.
+
+2. **Spill Configuration:**
+   - User toggles quadrant → `setOrbSpill({ ...orbSpill, [q]: !val })` updates store.
+   - `PlayerController` detects change → Re-renders SVG `clipPath` with/without specific `<rect>` elements for that quadrant.
+   - Image overflows or clips accordingly.
+
+3. **Image Scaling:**
+   - User drags slider → `setOrbImageScale(val)` updates store.
+   - `PlayerController` applies CSS transform scale to the image element.
