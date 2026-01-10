@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLayoutStore } from './store/layoutStore';
 import { useConfigStore } from './store/configStore';
+import WindowControls from './components/WindowControls';
 import './LayoutShell.css';
 
 const LayoutShell = ({
@@ -30,8 +31,10 @@ const LayoutShell = ({
         id="top-controller-anchor"
         className={`layout-shell__top-controller ${showDebugBounds ? 'debug-bounds debug-bounds--top-controller' : ''}`}
         data-debug-label="Top Controller"
+        data-tauri-drag-region
         style={customBannerImage ? { backgroundImage: `url(${customBannerImage})` } : undefined}
       >
+        <WindowControls />
         {!showDebugBounds && (
           <div className="layout-shell__top-controller-wrapper">
             {topController || (
