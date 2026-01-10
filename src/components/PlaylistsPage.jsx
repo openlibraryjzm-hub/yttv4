@@ -495,66 +495,40 @@ const PlaylistsPage = ({ onVideoSelect }) => {
         </div>
       ) : (
         <>
-          {/* Header with Tabs, Upload Button and Folder Toggle */}
-          <div className="flex flex-col border-b border-slate-700">
-            {/* Top row: Title and Actions */}
-            <div className="flex items-center justify-between p-4 pb-2 relative">
-              <h2 className="text-lg font-semibold" style={{ color: '#052F4A' }}>Playlists</h2>
-              <div className="flex items-center gap-2">
-                {/* Close button */}
+          {/* Header with Tabs, Upload Button and Folder Toggle - Compact Mode */}
+          <div className="flex items-center gap-2 px-2 py-1 border-b border-slate-700">
+            {/* Tabs - Flexible width */}
+            <TabBar onAddPlaylistToTab={addPlaylistToTab} />
 
-                <button
-                  onClick={() => {
-                    console.log('Toggle folders clicked in PlaylistsPage, current state:', showColoredFolders);
-                    setShowColoredFolders(!showColoredFolders);
-                  }}
-                  title={getInspectTitle(showColoredFolders ? 'Hide colored folders' : 'Show colored folders') || (showColoredFolders ? 'Hide colored folders' : 'Show colored folders')}
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    backgroundColor: showColoredFolders ? '#0284c7' : '#475569',
-                    color: '#ffffff',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '8px',
-                  }}
-                >
-                  <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                  </svg>
-                </button>
+            {/* Actions - Fixed width */}
+            <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+              {/* Folder Toggle */}
+              <button
+                onClick={() => {
+                  console.log('Toggle folders clicked in PlaylistsPage, current state:', showColoredFolders);
+                  setShowColoredFolders(!showColoredFolders);
+                }}
+                title={getInspectTitle(showColoredFolders ? 'Hide colored folders' : 'Show colored folders') || (showColoredFolders ? 'Hide colored folders' : 'Show colored folders')}
+                className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${showColoredFolders ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+              </button>
 
-                <button
-                  onClick={() => setShowBulkImporter(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-500 rounded-lg font-medium hover:bg-purple-600 transition-colors"
-                  style={{ color: '#052F4A' }}
-                  title={getInspectTitle('Config playlist')}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
-                  <span>Config Playlist</span>
-                </button>
-                <button
-                  onClick={() => setShowUploader(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-sky-500 rounded-lg font-medium hover:bg-sky-600 transition-colors"
-                  style={{ color: '#052F4A' }}
-                  title={getInspectTitle('Add playlist')}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>Add</span>
-                </button>
-
-              </div>
-            </div>
-            {/* Bottom row: Tabs */}
-            <div className="px-4 pb-2">
-              <TabBar onAddPlaylistToTab={addPlaylistToTab} />
+              {/* Add Button */}
+              <button
+                onClick={() => setShowUploader(true)}
+                className="flex items-center gap-1 px-3 py-1.5 bg-sky-500 rounded-lg text-xs font-medium hover:bg-sky-600 transition-colors"
+                style={{ color: '#052F4A' }}
+                title={getInspectTitle('Add playlist')}
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add</span>
+              </button>
             </div>
           </div>
 
