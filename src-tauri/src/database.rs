@@ -146,6 +146,27 @@ impl Database {
             [],
         )?;
 
+        // Create folder_metadata table for custom folder names/descriptions
+        self.conn.execute(
+            "CREATE TABLE IF NOT EXISTS folder_metadata (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                playlist_id INTEGER NOT NULL,
+                folder_color TEXT NOT NULL,
+                custom_name TEXT,
+                description TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
+                UNIQUE(playlist_id, folder_color)
+            )",
+            [],
+        )?;
+
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_folder_metadata_playlist_color ON folder_metadata(playlist_id, folder_color)",
+            [],
+        )?;
+
         // Migration: Add is_local column to playlist_items if it doesn't exist
         // SQLite doesn't support IF NOT EXISTS for ALTER TABLE, so we check if column exists
         let mut stmt = self.conn.prepare("PRAGMA table_info(playlist_items)")?;
@@ -798,6 +819,56 @@ impl Database {
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(video_ids)
+    }
+
+    // Folder Metadata operations
+    pub fn get_folder_metadata(
+        &self,
+        playlist_id: i64,
+        folder_color: &str,
+    ) -> Result<Option<(String, String)>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT custom_name, description FROM folder_metadata WHERE playlist_id = ?1 AND folder_color = ?2",
+        )?;
+
+        match stmt.query_row(params![playlist_id, folder_color], |row| {
+            Ok((
+                row.get::<_, Option<String>>(0)?.unwrap_or_default(),
+                row.get::<_, Option<String>>(1)?.unwrap_or_default(),
+            ))
+        }) {
+            Ok((name, desc)) => {
+                if name.is_empty() && desc.is_empty() {
+                    Ok(None)
+                } else {
+                    Ok(Some((name, desc)))
+                }
+            }
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn set_folder_metadata(
+        &self,
+        playlist_id: i64,
+        folder_color: &str,
+        name: Option<&str>,
+        description: Option<&str>,
+    ) -> Result<bool> {
+        let now = Utc::now().to_rfc3339();
+
+        let rows = self.conn.execute(
+            "INSERT INTO folder_metadata (playlist_id, folder_color, custom_name, description, created_at, updated_at) 
+             VALUES (?1, ?2, ?3, ?4, ?5, ?5)
+             ON CONFLICT(playlist_id, folder_color) DO UPDATE SET
+             custom_name = excluded.custom_name,
+             description = excluded.description,
+             updated_at = excluded.updated_at",
+            params![playlist_id, folder_color, name, description, now],
+        )?;
+
+        Ok(rows > 0)
     }
 
     // Video progress operations

@@ -310,6 +310,12 @@ Users see a 3-column grid of video cards showing videos from the current playlis
   - **Save/Cancel Buttons**: Appear when in bulk tag mode
   - **Pagination Controls**: For performance, videos are paginated (50 videos per page). Previous/Next controls appear at the bottom of the grid.
 
+  - **Page Banner**: 
+  - **Location**: Displayed at the top of the scrollable content area, above the Sticky Video Carousel.
+  - **Content**: Shows the title (Playlist Name, "{Color} Folder", or "Unsorted Videos") and description text.
+  - **Styling**: Uses vibrant gradients (matching folder color) and glassmorphism effects for a premium look.
+  - **Edit Button**: Small pen icon in the top-right corner (on hover) allows renaming the playlist or colored folder and updating its description. Custom folder names persist. (Not available for Unsorted Videos).
+
 - **Sticky Video Carousel**: 
   - **Purpose**: Displays important videos at the very top of the page.
   - **Behavior**:
@@ -319,7 +325,7 @@ Users see a 3-column grid of video cards showing videos from the current playlis
     - **Unsorted Exclusion**: The carousel is hidden on the "Unsorted" view.
   - **Format**: 
     - 1-3 stickied videos: Displayed in a standard grid layout.
-    - 4+ stickied videos: Displayed in a horizontal carousel (scrollable via mouse wheel).
+    - 4+ stickied videos: Displayed in a horizontal carousel (scrollable via side buttons).
   - **Controls**: Sticky status toggled via video 3-dot menu ("Sticky Video" / "Unsticky Video").
   - **Persistence**: Scoped ID sets are persisted to localStorage (`sticky-storage`).
 
@@ -347,6 +353,9 @@ Users see a 3-column grid of video cards showing videos from the current playlis
 - `src/components/FolderSelector.jsx`: Folder filter selector
 - `src/components/PlaylistSelectionModal.jsx`: Modal for selecting playlist (Move/Copy actions)
 - `src/components/StickyVideoCarousel.jsx`: Sticky video grid/carousel component
+- `src/components/PageBanner.jsx`: Banner component for playlist/folder titles
+- `src/components/EditPlaylistModal.jsx`: Modal for editing playlist metadata
+
 
 **State Management:**
 - `src/store/playlistStore.js`:

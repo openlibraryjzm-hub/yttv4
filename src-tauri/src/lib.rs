@@ -64,6 +64,8 @@ pub fn run() {
             commands::toggle_stuck_folder,
             commands::is_folder_stuck,
             commands::get_all_stuck_folders,
+            commands::get_folder_metadata,
+            commands::set_folder_metadata,
             commands::add_to_watch_history,
             commands::get_watch_history,
             commands::clear_watch_history,

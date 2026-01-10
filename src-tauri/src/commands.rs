@@ -205,6 +205,36 @@ pub fn get_all_stuck_folders(db: State<Mutex<Database>>) -> Result<Vec<(i64, Str
     db.get_all_stuck_folders().map_err(|e| e.to_string())
 }
 
+// Folder Metadata commands
+#[tauri::command]
+pub fn get_folder_metadata(
+    db: State<Mutex<Database>>,
+    playlist_id: i64,
+    folder_color: String,
+) -> Result<Option<(String, String)>, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.get_folder_metadata(playlist_id, &folder_color)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn set_folder_metadata(
+    db: State<Mutex<Database>>,
+    playlist_id: i64,
+    folder_color: String,
+    name: Option<String>,
+    description: Option<String>,
+) -> Result<bool, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.set_folder_metadata(
+        playlist_id,
+        &folder_color,
+        name.as_deref(),
+        description.as_deref(),
+    )
+    .map_err(|e| e.to_string())
+}
+
 // Watch history commands
 #[tauri::command]
 pub fn add_to_watch_history(

@@ -145,8 +145,29 @@ export const getAllStuckFolders = async () => {
   }
 };
 
+// Folder Metadata operations
+export const getFolderMetadata = async (playlistId, folderColor) => {
+  try {
+    const result = await invoke('get_folder_metadata', { playlistId, folderColor });
+    return result || null; // Returns [name, description] or null
+  } catch (error) {
+    console.error('Error in getFolderMetadata API:', error);
+    throw error;
+  }
+};
+
+export const setFolderMetadata = async (playlistId, folderColor, name, description) => {
+  try {
+    return await invoke('set_folder_metadata', { playlistId, folderColor, name, description });
+  } catch (error) {
+    console.error('Error in setFolderMetadata API:', error);
+    throw error;
+  }
+};
+
 /**
  * Export playlist to JSON format
+
  * Includes playlist data, all videos, and folder assignments
  */
 export const exportPlaylist = async (playlistId) => {

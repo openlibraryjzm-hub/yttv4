@@ -11,6 +11,9 @@ import PlaylistUploader from './PlaylistUploader';
 import { addVideoToPlaylist, getPlaylistItems } from '../api/playlistApi';
 import { useStickyStore } from '../store/stickyStore';
 import StickyVideoCarousel from './StickyVideoCarousel';
+import PageBanner from './PageBanner';
+import EditPlaylistModal from './EditPlaylistModal';
+import { updatePlaylist, getAllPlaylists, getFolderMetadata, setFolderMetadata } from '../api/playlistApi';
 
 const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   const {
@@ -22,6 +25,8 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     previewPlaylistId,
     previewFolderInfo,
     setPreviewPlaylist,
+    allPlaylists,
+    setAllPlaylists,
   } = usePlaylistStore();
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(null);
   const {
@@ -57,6 +62,8 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   const [selectedVideoForAction, setSelectedVideoForAction] = useState(null);
   const [actionType, setActionType] = useState(null); // 'move' or 'copy'
   const [showUploader, setShowUploader] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [folderMetadata, setFolderMetadataState] = useState(null); // { custom_name, description }
 
   // Use preview items if available, otherwise use current playlist items
   const activePlaylistItems = previewPlaylistItems || currentPlaylistItems;
@@ -132,7 +139,8 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
         for (const progress of allProgress) {
           progressMap.set(progress.video_id, {
             percentage: progress.progress_percentage,
-            hasFullyWatched: progress.has_fully_watched
+            hasFullyWatched: progress.has_fully_watched,
+            last_updated: progress.last_updated
           });
         }
         setVideoProgress(progressMap);
@@ -598,6 +606,60 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     }
   };
 
+  // Fetch folder metadata when selected folder changes
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      if (activePlaylistId && selectedFolder && selectedFolder !== 'unsorted') {
+        try {
+          const metadata = await getFolderMetadata(activePlaylistId, selectedFolder);
+          // API returns [name, description] or null.
+          // Wait, check rust implementation: returns (String, String) or None.
+          // Check JS implementation: returns result || null.
+          // So if result is array/tuple, it's [name, desc].
+          // Let's verify what Tauri returns for tuple. It usually returns array.
+
+          if (metadata) {
+            // Destructure carefully if it's array
+            setFolderMetadataState({ name: metadata[0], description: metadata[1] });
+          } else {
+            setFolderMetadataState(null);
+          }
+        } catch (error) {
+          console.error("Failed to fetch folder metadata:", error);
+          setFolderMetadataState(null);
+        }
+      } else {
+        setFolderMetadataState(null);
+      }
+    };
+
+    fetchMetadata();
+  }, [activePlaylistId, selectedFolder]);
+
+
+  const handleUpdateMetadata = async (data) => {
+    if (!activePlaylistId) return;
+
+    try {
+      if (selectedFolder && selectedFolder !== 'unsorted') {
+        // Update Folder Metadata
+        await setFolderMetadata(activePlaylistId, selectedFolder, data.name, data.description);
+        // Refresh local state
+        setFolderMetadataState({ name: data.name, description: data.description });
+      } else {
+        // Update Playlist Metadata
+        await updatePlaylist(activePlaylistId, data.name, data.description);
+
+        // Update global state store by reloading all playlists
+        const playlists = await getAllPlaylists();
+        setAllPlaylists(playlists);
+      }
+    } catch (error) {
+      console.error('Failed to update metadata:', error);
+      throw error;
+    }
+  };
+
   // Sort videos based on selected sort option
   // IMPORTANT: This hook must be called BEFORE any early returns
   const sortedVideos = useMemo(() => {
@@ -634,7 +696,6 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
       // But user said "I want that button to be a toggle to show/hide fully watched videos - leaving just partially watched and unwatched behind" 
       // This implies the ACTION of the button is to REMOVE them.
       // So if `showOnlyCompleted` is TRUE, we HIDE them.
-      // Just to satisfy the prompt exactly: "toggle to show/hide fully watched videos"
       // If the state is true, we HIDE them. If false, we SHOW them.
       // Let's assume the button label should ideally change or is abstract "Toggle Completed".
       if (showOnlyCompleted) {
@@ -686,6 +747,95 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     0
   );
 
+  // Helper to get banner info
+  const activeObject = useMemo(() => {
+    if (selectedFolder && selectedFolder !== 'unsorted') {
+      return folderMetadata; // This will be null or {name, description}
+    }
+    return allPlaylists.find(p => p.id === activePlaylistId);
+  }, [allPlaylists, activePlaylistId, selectedFolder, folderMetadata]);
+
+  const bannerInfo = useMemo(() => {
+    let title = '';
+    let description = '';
+    let color = null;
+    let isEditable = true;
+
+    if (selectedFolder) {
+      if (selectedFolder === 'unsorted') {
+        title = 'Unsorted Videos';
+        description = `Videos from "${allPlaylists.find(p => p.id === activePlaylistId)?.name || 'Playlist'}" that haven't been assigned to any folder.`;
+        color = 'unsorted';
+        isEditable = false;
+      } else {
+        // Folder View
+        const colorInfo = FOLDER_COLORS.find(c => c.id === selectedFolder);
+        color = selectedFolder;
+
+        if (activeObject) { // activeObject here refers to folderMetadataState
+          title = activeObject.name || (colorInfo ? `${colorInfo.name} Folder` : 'Folder');
+          description = activeObject.description || '';
+        } else {
+          // Fallback to default names if no metadata
+          title = colorInfo ? `${colorInfo.name} Folder` : 'Folder';
+          description = `Videos in the ${title}.`;
+        }
+        isEditable = true; // Folders are editable
+      }
+    } else {
+      // Playlist View
+      title = activeObject ? activeObject.name : '';
+      description = activeObject ? activeObject.description : '';
+      color = null;
+      isEditable = true;
+    }
+
+    return { title, description, color, isEditable };
+  }, [activeObject, selectedFolder, activePlaylistId, allPlaylists]);
+
+  // Determine initial data for modal
+  const modalInitialData = useMemo(() => {
+    if (selectedFolder && selectedFolder !== 'unsorted') {
+      // Folder edit
+      const colorInfo = FOLDER_COLORS.find(c => c.id === selectedFolder);
+      const defaultName = colorInfo ? `${colorInfo.name} Folder` : 'Folder';
+
+      return {
+        name: activeObject?.name || defaultName,
+        description: activeObject?.description || ''
+      };
+    } else {
+      // Playlist edit
+      return {
+        name: activeObject?.name || '',
+        description: activeObject?.description || ''
+      };
+    }
+  }, [activeObject, selectedFolder]);
+
+  // Find most recently watched video for "Continue" feature
+  const continueVideo = useMemo(() => {
+    if (!videosToDisplay || videosToDisplay.length === 0) return null;
+
+    let mostRecent = null;
+    let maxTime = 0;
+
+    for (const video of videosToDisplay) {
+      const videoId = extractVideoId(video.video_url) || video.video_id;
+      const progress = videoProgress.get(videoId);
+
+      if (progress && progress.last_updated) {
+        const time = new Date(progress.last_updated).getTime();
+        if (time > maxTime) {
+          maxTime = time;
+          mostRecent = video;
+        }
+      }
+    }
+
+    return mostRecent;
+  }, [videosToDisplay, videoProgress]);
+
   return (
     <div className="w-full h-full flex flex-col">
       {/* ... (Header omitted) ... */}
@@ -700,9 +850,34 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
           />
         </div>
       ) : (
-        <div
-          ref={scrollContainerRef}
-        >
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-8">
+          {/* Page Banner - Always visible for context */}
+          {activePlaylistId && (
+            <PageBanner
+              title={bannerInfo.title}
+              description={bannerInfo.description}
+              folderColor={bannerInfo.color}
+              onEdit={bannerInfo.isEditable ? () => setShowEditModal(true) : undefined}
+              videoCount={videosToDisplay.length}
+              creationYear="2026"
+              author="( ͡° ͜ʖ ͡°) Boss"
+              continueVideo={continueVideo}
+              onContinue={() => {
+                if (continueVideo && onVideoSelect) {
+                  onVideoSelect(continueVideo.video_url);
+                }
+              }}
+            />
+          )}
+
+          {/* Edit Playlist/Folder Modal */}
+          <EditPlaylistModal
+            isOpen={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            onSave={handleUpdateMetadata}
+            initialData={modalInitialData}
+          />
+
           {loadingFolders ? (
             <div className="flex items-center justify-center h-64 text-slate-400">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mr-3"></div>

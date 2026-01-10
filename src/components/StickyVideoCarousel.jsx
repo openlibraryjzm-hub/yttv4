@@ -7,26 +7,7 @@ const StickyVideoCarousel = ({ children }) => {
 
     const count = React.Children.count(children);
 
-    // Handle horizontal scroll on mouse wheel
-    React.useEffect(() => {
-        const container = scrollContainerRef.current;
-        if (container) {
-            const handleWheel = (e) => {
-                if (e.deltaY !== 0) {
-                    e.preventDefault();
-                    // Multiply by 3 for faster scrolling (better sensitivity)
-                    container.scrollLeft += e.deltaY * 3;
-                }
-            };
 
-            // Add non-passive event listener to support preventDefault
-            container.addEventListener('wheel', handleWheel, { passive: false });
-
-            return () => {
-                container.removeEventListener('wheel', handleWheel);
-            };
-        }
-    });
 
     if (count === 0) return null;
 

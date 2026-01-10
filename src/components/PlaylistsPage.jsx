@@ -781,41 +781,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                               </svg>
                             </div>
                           )}
-                          {/* Mini Thumbnail Overlay - Most Recently Watched */}
-                          {recentVideo && (
-                            <div
-                              onClick={async (e) => {
-                                e.stopPropagation(); // Prevent parent click
-                                try {
-                                  const items = await getPlaylistItems(playlist.id);
-                                  setPlaylistItems(items, playlist.id);
-                                  if (onVideoSelect) {
-                                    onVideoSelect(recentVideo.video_url);
-                                  }
-                                } catch (error) {
-                                  console.error('Failed to load playlist items for recent video:', error);
-                                }
-                              }}
-                              className="absolute bottom-2 left-2 z-20 rounded-md overflow-hidden shadow-lg border border-slate-700/50 hover:border-sky-500 hover:scale-105 transition-all cursor-pointer"
-                              style={{
-                                width: '30%', // About a quarter area
-                                aspectRatio: '16/9',
-                              }}
-                              title={`Continue watching: ${recentVideo.title || 'Recent video'}`}
-                            >
-                              <img
-                                src={getThumbnailUrl(recentVideo.video_id, 'medium')}
-                                alt="Recent"
-                                className="w-full h-full object-cover"
-                              />
-                              {/* Play icon overlay on hover */}
-                              <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
-                                <svg className="w-6 h-6 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24" style={{ color: '#052F4A' }}>
-                                  <path d="M8 5v14l11-7z" />
-                                </svg>
-                              </div>
-                            </div>
-                          )}
+
 
                           {/* Play overlay on hover */}
                           <div style={{
