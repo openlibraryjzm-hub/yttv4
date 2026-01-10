@@ -1,7 +1,8 @@
 use crate::database::Database;
 use crate::models::*;
+use crate::audio_capture::AudioCapture;
 use std::sync::Mutex;
-use tauri::{Manager, State};
+use tauri::{AppHandle, Manager, State};
 
 // Playlist commands
 #[tauri::command]
@@ -361,4 +362,60 @@ pub fn get_video_stream_url(file_path: String, app: tauri::AppHandle) -> Result<
     // Get streaming URL for the file
     let stream_url = server.get_stream_url(&file_path);
     Ok(stream_url)
+}
+
+// Audio capture commands
+static AUDIO_CAPTURE: Mutex<Option<AudioCapture>> = Mutex::new(None);
+
+#[tauri::command]
+pub fn test_audio_command() -> String {
+    eprintln!("[TEST] test_audio_command called from frontend!");
+    println!("[TEST] test_audio_command called from frontend (stdout)!");
+    "Test command works!".to_string()
+}
+
+#[tauri::command]
+pub fn start_audio_capture(app: AppHandle) -> Result<(), String> {
+    eprintln!("[Commands] start_audio_capture called!");
+    let mut capture = AUDIO_CAPTURE.lock().map_err(|e| format!("Lock error: {}", e))?;
+    
+    if capture.is_none() {
+        eprintln!("[Commands] Creating new AudioCapture instance");
+        *capture = Some(AudioCapture::new());
+    } else {
+        eprintln!("[Commands] AudioCapture instance already exists");
+    }
+    
+    eprintln!("[Commands] Starting audio capture...");
+    let result = capture
+        .as_mut()
+        .ok_or("Failed to create audio capture")?
+        .start(app)
+        .map_err(|e| format!("Failed to start audio capture: {}", e));
+    
+    match &result {
+        Ok(_) => eprintln!("[Commands] start_audio_capture succeeded"),
+        Err(e) => eprintln!("[Commands] start_audio_capture failed: {}", e),
+    }
+    
+    result
+}
+
+#[tauri::command]
+pub fn stop_audio_capture() -> Result<(), String> {
+    eprintln!("[Commands] stop_audio_capture called!");
+    let mut capture = AUDIO_CAPTURE.lock().map_err(|e| format!("Lock error: {}", e))?;
+    
+    if let Some(ref mut cap) = capture.as_mut() {
+        eprintln!("[Commands] Stopping audio capture...");
+        let result = cap.stop().map_err(|e| format!("Failed to stop audio capture: {}", e));
+        match &result {
+            Ok(_) => eprintln!("[Commands] stop_audio_capture succeeded"),
+            Err(e) => eprintln!("[Commands] stop_audio_capture failed: {}", e),
+        }
+        result
+    } else {
+        eprintln!("[Commands] stop_audio_capture: Audio capture not running");
+        Err("Audio capture not running".to_string())
+    }
 }

@@ -65,6 +65,7 @@ import { getAllPlaylists, getPlaylistItems, getAllFoldersWithVideos, getVideosIn
 import { getThumbnailUrl } from '../utils/youtubeUtils';
 import { getFolderColorById, FOLDER_COLORS } from '../utils/folderColors';
 import { THEMES } from '../utils/themes';
+import AudioVisualizer from './AudioVisualizer';
 
 
 
@@ -230,6 +231,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   const [isConfigOnRight, setIsConfigOnRight] = useState(false);
   const [customOrbImage, setCustomOrbImage] = useState(null);
   const [isAdjustingImage, setIsAdjustingImage] = useState(false);
+  const [isVisualizerEnabled, setIsVisualizerEnabled] = useState(false);
 
   // Load custom orb image from localStorage on mount
   useEffect(() => {
@@ -242,6 +244,27 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
       console.error('Failed to load custom orb image from localStorage:', error);
     }
   }, []);
+
+  // Load visualizer enabled state from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('visualizerEnabled');
+      if (saved !== null) {
+        setIsVisualizerEnabled(saved === 'true');
+      }
+    } catch (error) {
+      console.error('Failed to load visualizer state from localStorage:', error);
+    }
+  }, []);
+
+  // Save visualizer enabled state to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('visualizerEnabled', isVisualizerEnabled.toString());
+    } catch (error) {
+      console.error('Failed to save visualizer state to localStorage:', error);
+    }
+  }, [isVisualizerEnabled]);
 
   // Save custom orb image to localStorage whenever it changes
   useEffect(() => {
@@ -1362,7 +1385,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   const orbButtons = [
     { icon: Scissors, label: 'Editor', action: null },
     { icon: Search, label: 'Search', action: null },
-    { icon: MenuIcon, label: 'Menu', action: null },
+    { icon: MenuIcon, label: 'Menu', action: () => setIsVisualizerEnabled(!isVisualizerEnabled) },
     { icon: Maximize2, label: 'Spill', action: () => setIsSpillEnabled(!isSpillEnabled) },
     { icon: Youtube, label: 'Channel', action: null },
     { icon: Settings, label: 'Config', action: () => setCurrentPage('settings') },
@@ -1548,6 +1571,28 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
 
           {/* THE ORB SECTION - Centered */}
           <div className="flex items-center justify-center relative group z-30 flex-shrink-0" style={{ marginLeft: `${orbMenuGap}px`, marginRight: `${orbMenuGap}px` }}>
+            {/* Audio Visualizer - Around Orb */}
+            <AudioVisualizer
+              enabled={isVisualizerEnabled}
+              orbSize={orbSize}
+              barCount={113}
+              barWidth={4}
+              radius={76}
+              radiusY={76}
+              maxBarLength={76}
+              minBarLength={7}
+              colors={[255, 255, 255, 255]}
+              smoothing={0}
+              angleTotal={Math.PI * 2}
+              angleStart={-Math.PI / 2}
+              clockwise={true}
+              inward={false}
+              fftSize={2048}
+              freqMin={60}
+              freqMax={11000}
+              sensitivity={64}
+              updateRate={25}
+            />
             <div
               className={`rounded-full bg-sky-50 backdrop-blur-3xl border-[6px] ${theme.orbBorder} shadow-2xl flex items-center justify-center transition-all relative overflow-visible`}
               style={{ width: `${orbSize}px`, height: `${orbSize}px` }}
@@ -1582,7 +1627,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
               {orbButtons.map((btn, i) => {
                 const BtnIcon = btn.icon;
                 return (
-                  <button key={i} onClick={btn.action} className="absolute rounded-full flex items-center justify-center bg-white shadow-xl hover:scale-110 active:scale-95 group/btn z-50 border-2 border-sky-50 opacity-0 group-hover:opacity-100 transition-all duration-300" style={{ ...getOrbButtonStyle(i), width: `28px`, height: `28px` }} title={getInspectTitle(btn.label) || btn.label}>
+                  <button key={i} onClick={btn.action || (() => {})} className="absolute rounded-full flex items-center justify-center bg-white shadow-xl hover:scale-110 active:scale-95 group/btn z-50 border-2 border-sky-50 opacity-0 group-hover:opacity-100 transition-all duration-300" style={{ ...getOrbButtonStyle(i), width: `28px`, height: `28px` }} title={getInspectTitle(btn.label) || btn.label}>
                     <BtnIcon size={14} className="text-slate-800" strokeWidth={2.5} />
                   </button>
                 );
@@ -1841,7 +1886,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                           </div>
                         </button>
                         {isMoreMenuOpen && (
-                          <div className="absolute bottom-full right-0 mb-3 w-56 bg-sky-50 border border-sky-300 rounded-lg shadow-xl overflow-hidden z-[100] animate-in fade-in zoom-in-95 duration-100 flex flex-col p-1">
+                          <div className="absolute top-full right-0 mt-3 w-56 bg-sky-50 border border-sky-300 rounded-lg shadow-xl overflow-hidden z-[10001] animate-in fade-in zoom-in-95 duration-100 flex flex-col p-1" style={{ zIndex: 10001 }}>
                             <button
                               className="w-full text-left px-4 py-2 text-sm text-sky-900 hover:bg-sky-200 transition-colors flex items-center gap-2"
                               onClick={() => {
@@ -1873,6 +1918,17 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                             >
                               <Upload size={14} />
                               Change Banner
+                            </button>
+
+                            <button
+                              className="w-full text-left px-4 py-2 text-sm text-sky-900 hover:bg-sky-200 transition-colors flex items-center gap-2"
+                              onClick={() => {
+                                setIsVisualizerEnabled(!isVisualizerEnabled);
+                                setIsMoreMenuOpen(false);
+                              }}
+                            >
+                              {isVisualizerEnabled ? <EyeOff size={14} /> : <Eye size={14} />}
+                              {isVisualizerEnabled ? 'Hide Audio Visualizer' : 'Show Audio Visualizer'}
                             </button>
                             <input
                               type="file"

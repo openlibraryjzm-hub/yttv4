@@ -121,6 +121,7 @@ yttv2/
 │   ├── history.md
 │   ├── videoplayer.md
 │   ├── local-videos.md
+│   ├── audio-visualizer.md
 │   ├── debug.md
 │   ├── state-management.md
 │   ├── database-schema.md
@@ -153,6 +154,7 @@ yttv2/
 | **Watch History** | `history.md` | `database-schema.md`, `api-bridge.md`, `state-management.md` |
 | **Video Player** | `videoplayer.md` | `database-schema.md`, `api-bridge.md`, `state-management.md` |
 | **Local Videos** | `local-videos.md` | `videoplayer.md`, `database-schema.md`, `api-bridge.md`, `importexport.md` |
+| **Audio Visualizer** | `audio-visualizer.md` | `advanced-player-controller.md`, `api-bridge.md` |
 | **Debug/Testing** | `debug.md` | `ui.md` (inspect mode, debug bounds) |
 
 ### By Technical Domain
@@ -202,6 +204,11 @@ yttv2/
 **Covers**: Local video file playback, file upload, HTML5 video player
 **Key Topics**: Local file paths, file selection dialog, progress tracking for local videos, player routing
 **Cross-References**: See `videoplayer.md` for player architecture, `database-schema.md` for is_local field, `api-bridge.md` for file commands
+
+#### `audio-visualizer.md`
+**Covers**: System-wide audio visualization, cpal backend integration, FFT processing
+**Key Topics**: Rust audio capture, thread safety, frequency mapping, performance tuning
+**Cross-References**: See `advanced-player-controller.md` for UI integration, `api-bridge.md` for commands
 
 #### `debug.md`
 **Covers**: Debug bounds, inspect mode, layout debugging, ruler overlay (non-functional)

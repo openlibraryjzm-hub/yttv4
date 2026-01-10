@@ -2,6 +2,7 @@ mod commands;
 mod database;
 mod models;
 mod streaming_server;
+mod audio_capture;
 
 use database::Database;
 use std::sync::{Arc, Mutex};
@@ -76,6 +77,9 @@ pub fn run() {
             commands::select_video_files,
             commands::read_video_file,
             commands::get_video_stream_url,
+            commands::start_audio_capture,
+            commands::stop_audio_capture,
+            commands::test_audio_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
