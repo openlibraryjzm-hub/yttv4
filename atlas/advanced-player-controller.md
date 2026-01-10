@@ -38,21 +38,17 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
   - **Menu** (Menu icon) - Currently no action
   - **Spill** (Maximize2 icon) - Toggles spill/clipping mode
   - **Channel** (Youtube icon) - Currently no action
-  - **Config** (Settings icon) - Opens configuration panel for adjusting orb and menu positioning
+  - **Config** (Settings icon) - Opens configuration page (Settings) for application themes.
   - **History** (Clock icon) - Navigates to History page
   - **Clipping** (Circle/Minimize2 icon) - Toggles spill/clipping mode (same as Spill)
 - **Spill Toggle**: When enabled, the orb image can extend beyond the circular boundary. Users can configure which quadrants allow spill via the config panel. The spill state is persisted to localStorage (`isSpillEnabled`).
-- **Config Panel**: When Config button is clicked, a settings panel appears (left or right side, toggleable) with sliders for:
-  - Orb image scaling (master, width %, height %)
-  - Orb image offsets (X, Y)
-  - Spill quadrant toggles
-  - All menu positioning values
+- **Config Panel**: When Config button is clicked, users are navigated to the Settings Page where they can select the application theme. Legacy layout adjustment sliders have been removed to preserve the stable, fixed layout.
 
 **2: File Manifest**
 
 **UI/Components:**
 - `src/components/PlayerController.jsx` (lines 1408-1450): Orb rendering, image display, upload button, orb buttons, spill/clipping logic
-- `src/components/PlayerController.jsx` (lines 1662-1734): Config panel with all adjustment sliders
+- `src/components/SettingsPage.jsx`: Configuration page for application themes (accessed via Config button)
 
 **State Management:**
 - `src/components/PlayerController.jsx` (local state):
