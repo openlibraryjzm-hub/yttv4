@@ -5,8 +5,8 @@
 > **Current Status: RESTORED / USABLE**
 > - Layout has been rebuilt with fixed dimensions (102px height, 340px width) and absolute positioning.
 > - **Top Video Menu:** Buttons aligned on 40px grid. Navigation controls clustered left, actions right.
-> - **Metadata Bubbles:** Video metadata and Playlist title now use consistent "floating bubble" styling (bg-white/60) above the menus.
-> - **Typography:** "Views" replaces "LIVE", playlist title size increased (1.2x).
+> - **Top Playlist Menu:** Thumbnail removed. Title moved inside, with video metadata (Author/Views) displayed below it.
+> - **Metadata Bubbles:** Video metadata has been moved into the playlist menu, removing the floating bubble above the video menu.
 > - **Action Required:** Minor visual tuning may still be desired, but the critical regression is resolved. The default values in `configStore.js` now match this restored state.
 
 The Advanced Player Controller is a comprehensive UI component positioned at the top of the application layout. It provides centralized control for playlist navigation, video playback, folder management, and preview functionality through an orb-based design with surrounding menu rectangles.
@@ -226,12 +226,14 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
     - Right-click opens color picker to set quick shuffle default
     - Left-click shuffles to random video from selected folder (or all videos)
   - **Priority Pin Button** (20px offset): A yellow/amber pin button that sets the current video as the priority pin. 
-    - Distinctive amber border (#fbbf24) and filled amber pin icon. 
+  - **Priority Pin Button** (20px offset): A yellow/amber pin button that sets the current video as the priority pin.
+    - Distinctive amber border (#fbbf24) and filled amber pin icon.
     - Clicking sets the video as the priority pin (always leftmost in pin track).
   - **Like Button** (60px offset): A circular button with thumbs-up icon.
     - **Filled with blue** = video is liked (in "Likes" playlist)
     - **Empty/outline** = video not liked
     - Clicking toggles like status
+  - **Tab Button** (80px offset): A circular button with a tab icon that toggles the Tab Preset dropdown.
   - **More Menu Button** (92px offset): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
     - **Hide/Show Preview Menus**: Toggles visibility of side navigation menus.
     - **Hide/Show Dev Toolbar**: Toggles visibility of floating development toolbar.
@@ -353,21 +355,18 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
 
 The Top Playlist Menu is the left rectangle in the PlayerController. It has been significantly refined for compactness and accessibility:
 
-*   **Display**: Shows the current playlist's thumbnail image, fully contained with vertical borders.
-*   **Priority Pin Display**: The **Priority Pin** (if set) is displayed prominently in this menu, positioned at the bottom-right (above the navigation capsule). It is larger than normal pins (74px × 56px) and features a distinct amber border.
-*   **Playlist Navigation Capsule**: A compact, pill-shaped control at the **bottom-right** of the menu (74px width, 32px height). contains:
-    *   **Previous/Next Chevrons**: For navigating playlists.
-    *   **Grid Icon**: Center button to go to Playlists Page.
-    *   **Always Visible**: Controls are always visible (no hover required).
-*   **Tab & Shuffle Buttons**:
-    *   **Tab Button**: Located at `top-1 left-1`. Opens tab selection (currently placeholder).
-    *   **Shuffle Button**: Located at `top-1 left-12`. Randomizes playlist.
+*   **Display**: Shows the current playlist's title, centered within the menu (thumbnail removed).
+*   **Bottom Control Bar**: Divided into two distinct zones:
+    *   **Left Side (Metadata)**: Displays the current video's author and view count.
+    *   **Right Side (Controls)**: Contains only the Navigation buttons (Previous, Grid, Next). The Tab and Shuffle buttons have been moved or removed.
+*   **Priority Pin Display**: The **Priority Pin** (if set) is displayed at the **top-right** of the menu.
 *   **Spacing**: The gap between this menu, the central orb, and the video menu (`orbMenuGap`) is 20px.
 
 Users see:
-- **Main Display**: The playlist thumbnail, centered and framed.
-- **Priority Pin**: If active, overlaid at bottom-right.
-- **Actions**: Always-visible navigation capsule and top-left buttons.
+- **Main Display**: The playlist title text, centered and framed.
+- **Bottom Bar**: Metadata on the left, Navigation Controls on the right.
+- **Priority Pin**: If active, overlaid at top-right.
+- **Actions**: Bottom bar with navigation and tool buttons.
 
 
 
@@ -381,7 +380,7 @@ Users see:
 **2: File Manifest**
 
 **UI/Components:**
-- `src/components/PlayerController.jsx` (lines 1322-1404): Playlist menu rectangle, header modes, capsule controls
+- `src/components/PlayerController.jsx` (lines 1322-1404): Playlist menu rectangle, bottom bar controls
 - `src/components/PlayerController.jsx` (lines 562-665): Playlist navigation handlers (`handleNextPlaylist`, `handlePreviousPlaylist`)
 - `src/components/PlayerController.jsx` (lines 787-834): Tab/preset navigation (`navigateTabs`, `navigatePlaylist`)
 - `src/components/PlayerController.jsx` (lines 1000-1006): Header mode toggle (`handleToggleHeader`)

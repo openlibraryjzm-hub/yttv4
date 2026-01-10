@@ -1390,88 +1390,93 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                 </div>
               </div>
               <div className={`border-4 shadow-2xl flex flex-col relative overflow-visible transition-all duration-300 group/playlist ${isEditMode ? 'ring-4 ring-sky-400/30' : theme.orbBorder + ' ' + theme.menuBg + ' backdrop-blur-2xl rounded-2xl overflow-hidden'}`} style={{ width: `${menuWidth}px`, height: `${menuHeight}px` }}>
-                {/* Playlist Image */}
-                {/* Playlist Image with Vertical Borders */}
-                <div className="absolute inset-0 z-0 rounded-2xl overflow-hidden flex items-center justify-center">
-                  <img src={previewTabImage || playlistImage} alt="" className={`h-full w-auto border-x-4 ${theme.orbBorder}`} />
-                </div>
-
-                {/* Header Title - Centered above */}
-                <div className="absolute bottom-[100%] left-0 w-full flex items-end justify-center z-40 pointer-events-none pb-0">
-                  <div className="w-full h-10 flex items-center justify-center px-3 pointer-events-auto relative top-1">
-                    <span
-                      className={`font-black text-sky-900 text-center leading-tight truncate tracking-tight cursor-pointer hover:text-sky-600 transition-colors bg-white/60 backdrop-blur-md px-3 py-1 rounded-full shadow-sm border border-white/50`}
-                      style={{ fontSize: `${metadataFontSize * 1.2}px` }}
-                      onClick={handlePlaylistsGrid}
-                      title={playlistTitle}
-                    >
-                      {playlistTitle}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Hover Overlay Controls (Capsule, Tab, Shuffle) - Always Visible */}
-                <div className="absolute inset-0 z-30 pointer-events-none">
-                  {/* --- Row 1 --- */}
-                  {/* Tab Button (Top Left) */}
-                  <button className="absolute top-1 left-1 text-sky-700/90 hover:text-sky-900 transition-colors bg-white/60 p-2 rounded-full hover:bg-white/80 hover:scale-110 active:scale-90 shadow-sm pointer-events-auto" title={getInspectTitle('Tab Menu')}>
-                    <List size={18} strokeWidth={2.5} />
-                  </button>
-
-                  {/* Shuffle Button (Next to Tab) */}
-                  <button
-                    className="absolute top-1 left-11 text-sky-700/90 hover:text-sky-900 transition-colors bg-white/60 p-2 rounded-full hover:bg-white/80 hover:scale-110 active:scale-90 shadow-sm pointer-events-auto"
-                    title={getInspectTitle('Shuffle to Random Playlist')}
-                    onClick={() => handleShufflePlaylist()}
+                <div className="flex-grow flex flex-col items-center justify-center px-4 relative z-10 overflow-hidden w-full h-full">
+                  <h1
+                    className="font-black text-sky-950 text-center leading-tight line-clamp-3 tracking-tight transition-all pb-1 cursor-pointer hover:text-sky-700"
+                    style={{ fontSize: `${titleFontSize}px` }}
+                    onClick={handlePlaylistsGrid}
+                    title={playlistTitle}
                   >
-                    <Shuffle size={16} strokeWidth={2.5} />
-                  </button>
+                    {playlistTitle}
+                  </h1>
 
-                  {/* --- Row 2 (Placeholders) --- */}
-                  <button className="absolute top-11 left-1 text-sky-700/90 hover:text-sky-900 transition-colors bg-white/60 w-[34px] h-[34px] flex items-center justify-center rounded-full hover:bg-white/80 hover:scale-110 active:scale-90 shadow-sm pointer-events-auto" title="Placeholder">
-                    <span className="font-bold text-sm">?</span>
-                  </button>
-                  <button className="absolute top-11 left-11 text-sky-700/90 hover:text-sky-900 transition-colors bg-white/60 w-[34px] h-[34px] flex items-center justify-center rounded-full hover:bg-white/80 hover:scale-110 active:scale-90 shadow-sm pointer-events-auto" title="Placeholder">
-                    <span className="font-bold text-sm">?</span>
-                  </button>
+                </div>
 
+                {/* Priority Pin (Top Right) */}
+                {(() => {
+                  const priorityPinData = pins.find(pin => isPriorityPin(pin.video.id));
+                  if (!priorityPinData) return null;
+                  const thumbnailUrl = getThumbnailUrl(priorityPinData.video.video_id, 'default');
+                  return (
+                    <div className="absolute top-1 right-1 pointer-events-auto group/pin z-40">
+                      <button
+                        onClick={() => handlePinClick(priorityPinData.video)}
+                        className={`rounded-lg flex items-center justify-center transition-all shadow-md overflow-hidden ${activePin === priorityPinData.id ? 'ring-2 ring-sky-400' : ''}`}
+                        style={{ width: '52px', height: '39px', border: '2px solid #fbbf24' }}
+                        title={`Priority Pin: ${priorityPinData.video.title || 'Untitled Video'}`}
+                      >
+                        {thumbnailUrl ? (
+                          <img src={thumbnailUrl} alt={priorityPinData.video.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <Pin size={24} fill="#fbbf24" strokeWidth={2} />
+                        )}
+                      </button>
+                      <button
+                        className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/pin:opacity-100 transition-opacity shadow-sm border border-white z-20"
+                        onClick={(e) => handleUnpin(e, priorityPinData.video)}
+                        title="Unpin video"
+                      >
+                        <X size={10} strokeWidth={4} />
+                      </button>
+                    </div>
+                  );
+                })()}
 
+                <div className={`border-t flex items-center px-3 shrink-0 relative rounded-b-2xl ${theme.bottomBar}`} style={{ height: `${bottomBarHeight}px` }}>
+                  <div className="w-full h-full relative">
+                    {/* Left Side: Video Metadata */}
+                    <div className={`absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1 ${theme.accent} font-bold uppercase tracking-widest opacity-80`} style={{ fontSize: `${metadataFontSize}px` }}>
+                      <span className="truncate max-w-[100px]">{displayVideo.author}</span>
+                      {displayVideo.verified && <CheckCircle2 size={metadataFontSize} className="fill-current shrink-0" />}
+                      <span className="mx-1 opacity-50">|</span>
+                      <span>{displayVideo.viewers}</span>
+                    </div>
 
-                  {/* Priority Pin (Above Capsule) */}
-                  {(() => {
-                    const priorityPinData = pins.find(pin => isPriorityPin(pin.video.id));
-                    if (!priorityPinData) return null;
-                    const thumbnailUrl = getThumbnailUrl(priorityPinData.video.video_id, 'default');
-                    return (
-                      <div className="absolute bottom-9 right-1 pointer-events-auto group/pin z-40">
-                        <button
-                          onClick={() => handlePinClick(priorityPinData.video)}
-                          className={`rounded-lg flex items-center justify-center transition-all shadow-md overflow-hidden ${activePin === priorityPinData.id ? 'ring-2 ring-sky-400' : ''}`}
-                          style={{ width: '74px', height: '56px', border: '3px solid #fbbf24' }}
-                          title={`Priority Pin: ${priorityPinData.video.title || 'Untitled Video'}`}
-                        >
-                          {thumbnailUrl ? (
-                            <img src={thumbnailUrl} alt={priorityPinData.video.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <Pin size={24} fill="#fbbf24" strokeWidth={2} />
-                          )}
-                        </button>
-                        <button
-                          className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/pin:opacity-100 transition-opacity shadow-sm border border-white z-20"
-                          onClick={(e) => handleUnpin(e, priorityPinData.video)}
-                          title="Unpin video"
-                        >
-                          <X size={10} strokeWidth={4} />
-                        </button>
+                    {/* Right Components: Action & Navigation Buttons */}
+                    {/* Right Components: Navigation Buttons (Tab Button moved to Video Menu, Shuffle Removed) */}
+
+                    {/* Navigation Contols (Right Cluster - "Far Right") */}
+                    {/* Previous Playlist - Left of Grid */}
+                    <button
+                      onClick={() => navigatePlaylist('down')}
+                      className="absolute left-1/2 top-1/2 p-0.5 text-sky-400"
+                      style={{ transform: `translate(calc(-50% + 92px), -50%)` }}
+                      title={getInspectTitle('Previous playlist')}
+                    >
+                      <ChevronLeft size={navChevronSize} strokeWidth={3} />
+                    </button>
+
+                    {/* Grid Button - Center of Cluster */}
+                    <button
+                      onClick={handlePlaylistsGrid}
+                      className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
+                      style={{ transform: `translate(calc(-50% + 120px), -50%)` }}
+                      title={getInspectTitle('View playlists grid')}
+                    >
+                      <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px` }}>
+                        <Library size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
                       </div>
-                    );
-                  })()}
+                    </button>
 
-                  {/* Playlist Capsule (Bottom Right) */}
-                  <div className={`absolute bottom-1 right-0.5 pointer-events-auto flex items-center gap-1 p-1 rounded-full shadow-2xl border border-white/20 bg-white/90 overflow-hidden transition-transform duration-300`} style={{ width: `${playlistCapsuleWidth}px`, height: `${playlistCapsuleHeight}px` }}>
-                    <button onClick={() => navigatePlaylist('down')} className="flex-grow flex items-center justify-center text-sky-400 active:scale-90" style={{ transform: `translateX(${playlistChevronLeftX}px)` }} title={getInspectTitle('Previous playlist')}><ChevronLeft size={playlistChevronIconSize} strokeWidth={4} /></button>
-                    <button onClick={handlePlaylistsGrid} className={`rounded-full flex items-center justify-center shadow-sm shrink-0 transition-transform ${theme.accentBg}`} style={{ width: `${playlistHandleSize}px`, height: `${playlistHandleSize}px`, transform: `translateX(${playlistPlayCircleX}px)` }} title={getInspectTitle('View playlists grid')}><Library size={playlistPlayIconSize} fill="white" color="white" /></button>
-                    <button onClick={() => navigatePlaylist('up')} className="flex-grow flex items-center justify-center text-sky-400 active:scale-90" style={{ transform: `translateX(${playlistChevronRightX}px)` }} title={getInspectTitle('Next playlist')}><ChevronRight size={playlistChevronIconSize} strokeWidth={4} /></button>
+                    {/* Next Playlist - Right of Grid */}
+                    <button
+                      onClick={() => navigatePlaylist('up')}
+                      className="absolute left-1/2 top-1/2 p-0.5 text-sky-400"
+                      style={{ transform: `translate(calc(-50% + 148px), -50%)` }}
+                      title={getInspectTitle('Next playlist')}
+                    >
+                      <ChevronRight size={navChevronSize} strokeWidth={3} />
+                    </button>
                   </div>
                 </div>
 
@@ -1608,13 +1613,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                   )}
                 </div>
                 {/* Header Metadata - Centered above (Mirrors Playlist Title) */}
-                <div className="absolute bottom-[100%] left-0 w-full flex items-end justify-center z-40 pointer-events-none pb-0">
-                  <div className="w-full h-10 flex items-center justify-center px-3 pointer-events-auto relative top-1">
-                    <div className={`flex items-center justify-center gap-1 ${theme.accent} font-black uppercase tracking-widest bg-white/60 backdrop-blur-md px-3 py-1 rounded-full shadow-sm border border-white/50`} style={{ fontSize: `${metadataFontSize}px` }}>
-                      <span className="opacity-90">{displayVideo.author}</span>{displayVideo.verified && <CheckCircle2 size={metadataFontSize} className="fill-current" />}<span className="opacity-30 mx-1">|</span><span>{displayVideo.viewers} Views</span>
-                    </div>
-                  </div>
-                </div>
+                {/* Header Metadata - Removed from here, moved to Playlist Menu */}
 
                 <div className="flex-grow flex flex-col items-center justify-center px-4 relative z-10 overflow-hidden">
                   {showColorPicker ? (
@@ -1788,7 +1787,18 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                         </div>
                       </button>
 
-                      <div className="absolute left-1/2 top-1/2" style={{ transform: `translate(calc(-50% + ${menuButtonX}px), -50%)` }}>
+                      {/* Tab Button - Moved from Playlist Menu (Far Right) */}
+                      <button
+                        className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
+                        style={{ transform: `translate(calc(-50% + ${menuButtonX}px), -50%)` }}
+                        title={getInspectTitle('Tab Menu')}
+                      >
+                        <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px` }}>
+                          <List size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
+                        </div>
+                      </button>
+
+                      <div className="absolute left-1/2 top-1/2" style={{ transform: `translate(calc(-50% + ${menuButtonX + 32}px), -50%)` }}>
                         <button
                           onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
                           className="flex items-center justify-center group/tool"
