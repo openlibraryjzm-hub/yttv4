@@ -14,6 +14,7 @@ The Audio Visualizer creates a circular, audio-reactive visualization around the
 *   **Thread-Safe Backend**: Uses a dedicated audio thread to prevent UI freezing.
 *   **Zero-Latency Loopback**: Uses `WASAPI Loopback` via the `cpal` crate.
 *   **Overflows Controller**: Visualizer bars extend beyond the controller area, overlapping the video player for an immersive effect.
+*   **Orb Border Integration**: The visualizer radius is tightly tuned (77px) to act as the border of the 154px Orb, replacing the static CSS border.
 *   **Toggleable**: Can be turned on/off via the User Interface.
 
 ---

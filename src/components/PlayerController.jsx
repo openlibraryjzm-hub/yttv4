@@ -1572,13 +1572,14 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
           {/* THE ORB SECTION - Centered */}
           <div className="flex items-center justify-center relative group z-30 flex-shrink-0" style={{ marginLeft: `${orbMenuGap}px`, marginRight: `${orbMenuGap}px` }}>
             {/* Audio Visualizer - Around Orb */}
+            {/* Audio Visualizer - Around Orb */}
             <AudioVisualizer
               enabled={isVisualizerEnabled}
               orbSize={orbSize}
               barCount={113}
               barWidth={4}
-              radius={76}
-              radiusY={76}
+              radius={77}
+              radiusY={77}
               maxBarLength={76}
               minBarLength={7}
               colors={[255, 255, 255, 255]}
@@ -1595,7 +1596,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
               updateRate={16}
             />
             <div
-              className={`rounded-full bg-sky-50 backdrop-blur-3xl border-[6px] ${theme.orbBorder} shadow-2xl flex items-center justify-center transition-all relative overflow-visible`}
+              className={`rounded-full bg-sky-50 backdrop-blur-3xl shadow-2xl flex items-center justify-center transition-all relative overflow-visible`}
               style={{ width: `${orbSize}px`, height: `${orbSize}px` }}
             >
               {/* IMAGE LAYER */}

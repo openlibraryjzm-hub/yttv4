@@ -15,13 +15,24 @@ The UI system provides a consistent layout shell with a side menu that displays 
 
 #### ### 4.0 Layout & Styling
 
-**1: Visual Design System**
+**1: Window Architecture (Borderless)**
+The application uses a modern **Borderless Window** design (`decorations: false`):
+- **No Title Bar**: The native OS title bar is removed for a seamless, premium look.
+- **Custom Window Controls**: A custom `WindowControls` component (Minimize, Maximize, Close) is integrated into the top-right corner of the banner.
+- **Draggable Banner**: The entire Top Banner is a draggable region (`data-tauri-drag-region`), allowing users to move the window.
+- **Dimensions**: Defaults to 1920x1030 (fullscreen width, taskbar-aware height) positioned at (0,0).
+
+**2: Visual Design System**
 The application employs a high-contrast, structured design with distinct borders:
 
 - **Unified Border Color**: A deep dark blue (`rgb(4, 41, 65)`) is used for:
   - Video Player container border (12px padding).
   - Side Menu top border (4px solid line).
   - Banner "bleed" gradient (bottom edge).
+
+- **Audio Visualizer Integration**:
+  - The Audio Visualizer acts as the dynamic border for the central Orb, replacing static borders.
+  - It uses `overflow: visible` to bleed onto the Video Player area below (approx 52px overlap), creating a layered, immersive effect.
 
 - **Top Banner**:
   - Displays a custom image (`/public/banner.PNG`) spanning the full width of the controller.

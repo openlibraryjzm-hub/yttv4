@@ -28,6 +28,8 @@ The Top Banner now supports an infinite horizontal scroll animation for seamless
 **1: User-Perspective Description**
 
 The Central Orb is a circular element (154px diameter by default) positioned at the center of the PlayerController. Users see:
+- **Audio Visualizer Border**: The static blue border has been removed. The Audio Visualizer now acts as the dynamic, reactive border for the orb, starting exactly where the image ends (Radius 77px).
+- **Window Controls**: Custom Minimize/Maximize/Close buttons interactively float in the top-right corner of the banner area.
 - **Orb Image**: Displays the current video's thumbnail by default, or a custom uploaded image if set. The image is clipped to a circular shape with optional "spill" effects that allow the image to extend beyond the circle boundaries in configurable quadrants (top-left, top-right, bottom-left, bottom-right).
 - **Upload Button**: On hover, an upload icon appears at the top of the orb (12 o'clock position). Clicking opens a file picker to upload a custom image. The uploaded image is immediately displayed and persisted to localStorage.
 - **Orb Buttons**: Eight buttons appear around the orb on hover, positioned in a radial pattern:
