@@ -19,7 +19,7 @@ Users see a 3-column grid of playlist cards in the Playlists page:
 
 - **Playlist Cards**: Each card displays:
   - **Thumbnail**: 16:9 aspect ratio image showing the first video's thumbnail from the playlist
-  - **Mini Thumbnail**: Small overlay in the bottom-left corner showing the most recently watched video from that playlist (if any).
+  - **Mini Thumbnail**: Removed (Functionality moved to Page Banner).
   - **Playlist Name**: Displayed below thumbnail, truncates if too long
   - **Description**: Optional description text, line-clamped to 2 lines
   - **Video Count**: Shows "X video(s)" below description
@@ -187,7 +187,7 @@ Users see colored folders as a way to organize videos within playlists:
   - **Global Display** (when toggle is on): All folders appear as separate cards in the playlist grid, showing:
     - Colored left border (2px) matching folder color
     - Folder thumbnail (first video in folder)
-    - Folder name (e.g., "Red Folder")
+    - Folder name (default "Red Folder" or custom name from `folder_metadata`)
     - Parent playlist name
     - Video count
     - Stuck folders are excluded from global display (shown in playlist section instead)
@@ -253,6 +253,7 @@ Users see colored folders as a way to organize videos within playlists:
 - Database tables:
   - `video_folder_assignments`: Folder assignments (id, playlist_id, item_id, folder_color, created_at)
   - `stuck_folders`: Stuck folder assignments (id, playlist_id, folder_color, created_at)
+  - `folder_metadata`: Custom folder names/descriptions (id, playlist_id, folder_color, custom_name, description, created_at, updated_at)
 
 **3: The Logic & State Chain**
 
