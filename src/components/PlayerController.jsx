@@ -61,7 +61,7 @@ import { useTabStore } from '../store/tabStore';
 import { useConfigStore } from '../store/configStore';
 import { useTabPresetStore } from '../store/tabPresetStore';
 import { useInspectLabel } from '../utils/inspectLabels';
-import { getAllPlaylists, getPlaylistItems, getAllFoldersWithVideos, getVideosInFolder, getAllStuckFolders, assignVideoToFolder, unassignVideoFromFolder, getVideoFolderAssignments, createPlaylist, addVideoToPlaylist, removeVideoFromPlaylist } from '../api/playlistApi';
+import { getAllPlaylists, getPlaylistItems, getAllFoldersWithVideos, getVideosInFolder, getAllStuckFolders, assignVideoToFolder, unassignVideoFromFolder, getVideoFolderAssignments, createPlaylist, addVideoToPlaylist, removeVideoFromPlaylist, getFolderMetadata } from '../api/playlistApi';
 import { getThumbnailUrl } from '../utils/youtubeUtils';
 import { getFolderColorById, FOLDER_COLORS } from '../utils/folderColors';
 import { THEMES } from '../utils/themes';
@@ -222,6 +222,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   const [starColor, setStarColor] = useState('#0ea5e9');
 
   const [currentVideoFolders, setCurrentVideoFolders] = useState([]); // Current video's folder assignments
+  const [currentVideoFolderNames, setCurrentVideoFolderNames] = useState({}); // Map of folderId -> customName
   const [shuffleColor, setShuffleColor] = useState('#6366f1');
 
   const [likeColor, setLikeColor] = useState('#0ea5e9');
@@ -329,13 +330,30 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
       if (targetVideo && targetPlaylistId && targetVideo.id) {
         try {
           const folders = await getVideoFolderAssignments(targetPlaylistId, targetVideo.id);
-          setCurrentVideoFolders(folders || []);
+          const safeFolders = folders || [];
+          setCurrentVideoFolders(safeFolders);
+
+          // Fetch custom names for these folders
+          const namesMap = {};
+          await Promise.all(safeFolders.map(async (folderId) => {
+            try {
+              const metadata = await getFolderMetadata(targetPlaylistId, folderId);
+              if (metadata && metadata[0]) {
+                namesMap[folderId] = metadata[0];
+              }
+            } catch (err) {
+              // Ignore errors, will fall back to default color name
+            }
+          }));
+          setCurrentVideoFolderNames(namesMap);
         } catch (error) {
           console.error('Failed to load video folder assignments:', error);
           setCurrentVideoFolders([]);
+          setCurrentVideoFolderNames({});
         }
       } else {
         setCurrentVideoFolders([]);
+        setCurrentVideoFolderNames({});
       }
     };
     loadVideoFolders();
@@ -1399,6 +1417,30 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                   >
                     {playlistTitle}
                   </h1>
+
+                  {/* Video Folder Badge */}
+                  {currentVideoFolders.length > 0 && (
+                    <div className="flex flex-wrap justify-center gap-1 mb-0.5 animate-in fade-in zoom-in duration-300">
+                      {currentVideoFolders.map(folderId => {
+                        const folderColor = FOLDER_COLORS.find(c => c.id === folderId);
+                        if (!folderColor) return null;
+                        const customName = currentVideoFolderNames[folderId];
+                        return (
+                          <span
+                            key={folderId}
+                            className="text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded-full border shadow-sm backdrop-blur-sm"
+                            style={{
+                              color: folderColor.hex,
+                              borderColor: folderColor.hex,
+                              backgroundColor: `${folderColor.hex}15`
+                            }}
+                          >
+                            {customName || folderColor.name}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
 
                 </div>
 

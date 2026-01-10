@@ -355,7 +355,7 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
 
 The Top Playlist Menu is the left rectangle in the PlayerController. It has been significantly refined for compactness and accessibility:
 
-*   **Display**: Shows the current playlist's title, centered within the menu (thumbnail removed).
+*   **Display**: Shows the current playlist's title, centered within the menu. If the video belongs to a colored folder, a colored badge displaying the folder name appears below the title.
 *   **Bottom Control Bar**: Divided into two distinct zones:
     *   **Left Side (Metadata)**: Displays the current video's author and view count.
     *   **Right Side (Controls)**: Contains only the Navigation buttons (Previous, Grid, Next). The Tab and Shuffle buttons have been moved or removed.
@@ -363,7 +363,7 @@ The Top Playlist Menu is the left rectangle in the PlayerController. It has been
 *   **Spacing**: The gap between this menu, the central orb, and the video menu (`orbMenuGap`) is 20px.
 
 Users see:
-- **Main Display**: The playlist title text, centered and framed.
+- **Main Display**: The playlist title text, centered and framed. Below it, colored badges appear if the video belongs to a folder.
 - **Bottom Bar**: Metadata on the left, Navigation Controls on the right.
 - **Priority Pin**: If active, overlaid at top-right.
 - **Actions**: Bottom bar with navigation and tool buttons.

@@ -46,9 +46,7 @@ The application employs a high-contrast, structured design with distinct borders
   - Scales responsively with view modes (Full/Half/Quarter).
 
 - **Floating Metadata Bubbles**:
-  - Information bubbles for playlist titles and video metadata that float above their respective menus.
-  - **Styling**: Uses a "glassmorphism" effect: `bg-white/60`, `backdrop-blur-md`, `rounded-full`, and `shadow-sm`.
-  - **Typography**: Dark blue text for legibility against dynamic backgrounds. Playlist titles are sized 1.2x larger than metadata bubbles.
+  - **Removed**: Video metadata (Author/View Count) and Playlist titles are now integrated directly into the Top Playlist/Video Menus for a cleaner, encapsulated look (see `advanced-player-controller.md`).
 
 #### ### 4.1 Side Menu
 
