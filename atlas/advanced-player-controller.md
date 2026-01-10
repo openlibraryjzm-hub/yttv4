@@ -38,11 +38,12 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
   - **Menu** (Menu icon) - Currently no action
   - **Spill** (Maximize2 icon) - Toggles spill/clipping mode
   - **Channel** (Youtube icon) - Currently no action
-  - **Config** (Settings icon) - Opens configuration page (Settings) for application themes and profile customization.
+  - **Config** (Settings icon) - Opens configuration page (Settings) for application themes, profile, and **Orb customization**.
   - **History** (Clock icon) - Navigates to History page
   - **Clipping** (Circle/Minimize2 icon) - Toggles spill/clipping mode (same as Spill)
-- **Spill Toggle**: When enabled, the orb image can extend beyond the circular boundary. Users can configure which quadrants allow spill via the config panel. The spill state is persisted to localStorage (`isSpillEnabled`).
-- **Config Panel**: When Config button is clicked, users are navigated to the Settings Page where they can select the application theme and customize their profile (name/avatar). Legacy layout adjustment sliders have been removed.
+- **Spill Toggle**: When enabled, the orb image can extend beyond the circular boundary. Users can configure which quadrants allow spill via the **Settings Page > Orb** tab. The spill state is persisted to localStorage (`isSpillEnabled`).
+- **Config Panel & Orb Settings**: When Config button is clicked, users are navigated to the Settings Page.
+  - **Orb Tab**: A new tab allows users to upload a custom orb image and visually toggle spill for each of the 4 quadrants (Top-Left, Top-Right, Bottom-Left, Bottom-Right) using an interactive preview.
 
 **2: File Manifest**
 
@@ -52,13 +53,14 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
 
 **State Management:**
 - `src/components/PlayerController.jsx` (local state):
-  - `customOrbImage` (line 243): Base64 image data, persisted to localStorage
-  - `isSpillEnabled` (line 1194): Boolean, persisted to localStorage
-  - `spillMap` (line 1221): Object with `{ tl, tr, bl, br }` boolean flags for quadrant spill
-  - `orbImageScale`, `orbImageScaleW`, `orbImageScaleH` (lines 1216-1218): Scaling values
-  - `orbImageXOffset`, `orbImageYOffset` (lines 1219-1220): Position offsets
   - `isEditMode` (line 241): Controls config panel visibility
   - `isAdjustingImage` (line 245): Visual indicator when image is being adjusted
+- `src/store/configStore.js`:
+  - `customOrbImage`: Base64 image data, persisted to localStorage
+  - `isSpillEnabled`: Boolean, persisted to localStorage
+  - `orbSpill`: Object with `{ tl, tr, bl, br }` boolean flags for quadrant spill, persisted to localStorage
+  - `orbImageScale`, `orbImageScaleW`, `orbImageScaleH`: Scaling values
+  - `orbImageXOffset`, `orbImageYOffset`: Position offsets
 
 **API/Bridge:**
 - No Tauri commands - all state is client-side
@@ -98,7 +100,7 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
 **State Dependencies:**
 - When `customOrbImage` changes → Orb image source updates → Image re-renders
 - When `isSpillEnabled` changes → ClipPath SVG updates → Image clipping behavior changes
-- When `spillMap` changes → ClipPath SVG rect elements update → Specific quadrants allow/disallow spill
+- When `orbSpill` changes → ClipPath SVG rect elements update → Specific quadrants allow/disallow spill
 - When `orbImageScale*` or `orbImageXOffset/YOffset` change → Image transform style updates → Image position/size changes
 
 ---

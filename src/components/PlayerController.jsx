@@ -220,30 +220,20 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   const [showColorPicker, setShowColorPicker] = useState(null);
   const [hoveredColorName, setHoveredColorName] = useState(null);
   const [starColor, setStarColor] = useState('#0ea5e9');
-  const [quickAssignColor, setQuickAssignColor] = useState('sky'); // Default quick assign color ID
+
   const [currentVideoFolders, setCurrentVideoFolders] = useState([]); // Current video's folder assignments
   const [shuffleColor, setShuffleColor] = useState('#6366f1');
-  const [quickShuffleColor, setQuickShuffleColor] = useState('all'); // Default quick shuffle color ID ('all' means all videos)
+
   const [likeColor, setLikeColor] = useState('#0ea5e9');
   const [likesPlaylistId, setLikesPlaylistId] = useState(null); // ID of the special "Likes" playlist
   const [isVideoLiked, setIsVideoLiked] = useState(false); // Whether current video is liked
   const [isEditMode, setIsEditMode] = useState(false);
   const [isConfigOnRight, setIsConfigOnRight] = useState(false);
-  const [customOrbImage, setCustomOrbImage] = useState(null);
+
   const [isAdjustingImage, setIsAdjustingImage] = useState(false);
   const [isVisualizerEnabled, setIsVisualizerEnabled] = useState(false);
 
-  // Load custom orb image from localStorage on mount
-  useEffect(() => {
-    try {
-      const savedOrbImage = localStorage.getItem('customOrbImage');
-      if (savedOrbImage) {
-        setCustomOrbImage(savedOrbImage);
-      }
-    } catch (error) {
-      console.error('Failed to load custom orb image from localStorage:', error);
-    }
-  }, []);
+
 
   // Load visualizer enabled state from localStorage on mount
   useEffect(() => {
@@ -266,58 +256,11 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
     }
   }, [isVisualizerEnabled]);
 
-  // Save custom orb image to localStorage whenever it changes
-  useEffect(() => {
-    if (customOrbImage) {
-      try {
-        localStorage.setItem('customOrbImage', customOrbImage);
-      } catch (error) {
-        console.error('Failed to save custom orb image to localStorage:', error);
-      }
-    }
-  }, [customOrbImage]);
 
-  // Load quick assign color from localStorage
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('quickAssignColor');
-      if (saved) {
-        setQuickAssignColor(saved);
-      }
-    } catch (error) {
-      console.error('Failed to load quick assign color:', error);
-    }
-  }, []);
 
-  // Save quick assign color to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('quickAssignColor', quickAssignColor);
-    } catch (error) {
-      console.error('Failed to save quick assign color:', error);
-    }
-  }, [quickAssignColor]);
 
-  // Load quick shuffle color from localStorage
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('quickShuffleColor');
-      if (saved) {
-        setQuickShuffleColor(saved);
-      }
-    } catch (error) {
-      console.error('Failed to load quick shuffle color:', error);
-    }
-  }, []);
 
-  // Save quick shuffle color to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('quickShuffleColor', quickShuffleColor);
-    } catch (error) {
-      console.error('Failed to save quick shuffle color:', error);
-    }
-  }, [quickShuffleColor]);
+
 
   // Initialize active pin based on current mode
   useEffect(() => {
@@ -1219,20 +1162,13 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
     }
   };
 
-  const handleImageUpload = (e) => {
+  const handleOrbImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const imageDataUrl = reader.result;
-        setCustomOrbImage(imageDataUrl);
+        setCustomOrbImage(reader.result);
         setIsAdjustingImage(true);
-        // Save to localStorage immediately
-        try {
-          localStorage.setItem('customOrbImage', imageDataUrl);
-        } catch (error) {
-          console.error('Failed to save custom orb image to localStorage:', error);
-        }
       };
       reader.readAsDataURL(file);
     }
@@ -1295,40 +1231,16 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
     playlistToggleX, playlistTabsX, playlistInfoX, playlistInfoWidth,
     videoChevronLeftX, videoChevronRightX,
     modeSwitcherX, shuffleButtonX, gridButtonX, starButtonX,
-    setCustomBannerImage
+    setCustomBannerImage,
+    // Orb State (From Config Store now)
+    customOrbImage, setCustomOrbImage,
+    isSpillEnabled, setIsSpillEnabled,
+    orbSpill, setOrbSpill,
+    // Quick Assign/Shuffle (From Config Store)
+    quickAssignColor, setQuickAssignColor,
+    quickShuffleColor, setQuickShuffleColor
   } = useConfigStore();
 
-
-
-  // --- Orb Spill States ---
-  // Default to false (clipped/no spill) - user must explicitly enable spill
-  const [isSpillEnabled, setIsSpillEnabled] = useState(false);
-
-  // Load spill/clipping state from localStorage on mount
-  useEffect(() => {
-    try {
-      const savedSpillState = localStorage.getItem('isSpillEnabled');
-      if (savedSpillState !== null) {
-        setIsSpillEnabled(savedSpillState === 'true');
-      }
-      // If no saved state, keep default (false/clipped)
-    } catch (error) {
-      console.error('Failed to load spill state from localStorage:', error);
-    }
-  }, []);
-
-  // Save spill/clipping state to localStorage whenever it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem('isSpillEnabled', isSpillEnabled.toString());
-    } catch (error) {
-      console.error('Failed to save spill state to localStorage:', error);
-    }
-  }, [isSpillEnabled]);
-
-  const [spillMap, setSpillMap] = useState({
-    tl: true, tr: true, bl: true, br: true
-  });
 
 
   // --- Derived Constants ---
@@ -1378,9 +1290,8 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
     return { left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' };
   };
 
-  const toggleSpillQuadrant = (q) => {
-    setSpillMap(prev => ({ ...prev, [q]: !prev[q] }));
-  };
+  // Note: toggleSpillQuadrant is now handled via SettingsPage and configStore
+
 
   const orbButtons = [
     { icon: Scissors, label: 'Editor', action: null },
@@ -1446,10 +1357,10 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
           <defs>
             <clipPath id="orbClipPath" clipPathUnits="objectBoundingBox">
               <circle cx="0.5" cy="0.5" r="0.5" />
-              {isSpillEnabled && spillMap.tl && <rect x="-50" y="-50" width="50.5" height="50.5" />}
-              {isSpillEnabled && spillMap.tr && <rect x="0.5" y="-50" width="50.5" height="50.5" />}
-              {isSpillEnabled && spillMap.bl && <rect x="-50" y="0.5" width="50.5" height="50.5" />}
-              {isSpillEnabled && spillMap.br && <rect x="0.5" y="0.5" width="50.5" height="50.5" />}
+              {isSpillEnabled && orbSpill.tl && <rect x="-50" y="-50" width="50.5" height="50.5" />}
+              {isSpillEnabled && orbSpill.tr && <rect x="0.5" y="-50" width="50.5" height="50.5" />}
+              {isSpillEnabled && orbSpill.bl && <rect x="-50" y="0.5" width="50.5" height="50.5" />}
+              {isSpillEnabled && orbSpill.br && <rect x="0.5" y="0.5" width="50.5" height="50.5" />}
             </clipPath>
           </defs>
         </svg>
@@ -1596,7 +1507,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
               updateRate={16}
             />
             <div
-              className={`rounded-full bg-sky-50 backdrop-blur-3xl shadow-2xl flex items-center justify-center transition-all relative overflow-visible`}
+              className={`rounded-full bg-sky-50 backdrop-blur-3xl shadow-2xl flex items-center justify-center transition-all relative overflow-visible z-20`}
               style={{ width: `${orbSize}px`, height: `${orbSize}px` }}
             >
               {/* IMAGE LAYER */}
@@ -1623,7 +1534,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
               <div className="absolute inset-0 z-10 overflow-hidden rounded-full border-4 border-sky-100/50 pointer-events-none"><div className="absolute inset-0 bg-sky-200/10" /></div>
               <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-transparent opacity-60 z-10 pointer-events-none rounded-full" />
 
-              <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+              <input type="file" ref={fileInputRef} onChange={handleOrbImageUpload} accept="image/*" className="hidden" />
               <button className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center bg-white shadow-xl hover:scale-110 active:scale-95 group/btn z-50 border-2 border-sky-100 opacity-0 group-hover:opacity-100 transition-all duration-300" style={{ width: `28px`, height: `28px` }} onClick={() => fileInputRef.current.click()} title={getInspectTitle('Upload orb image')}><Upload size={16} className={theme.accent} strokeWidth={3} /></button>
 
               {orbButtons.map((btn, i) => {

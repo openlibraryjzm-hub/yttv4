@@ -96,6 +96,14 @@ export const useConfigStore = create(
             customBannerImage: null,
             setCustomBannerImage: (val) => set({ customBannerImage: val }),
 
+            // Custom Orb Image & Spill
+            customOrbImage: null,
+            setCustomOrbImage: (val) => set({ customOrbImage: val }),
+            isSpillEnabled: false,
+            setIsSpillEnabled: (val) => set({ isSpillEnabled: val }),
+            orbSpill: { tl: true, tr: true, bl: true, br: true },
+            setOrbSpill: (val) => set({ orbSpill: val }),
+
             // Restored Missing Keys (Defaults)
             pinFirstButtonSize: 34,
             setPinFirstButtonSize: (val) => set({ pinFirstButtonSize: val }),
@@ -139,6 +147,12 @@ export const useConfigStore = create(
 
             orbButtonSpread: 35,
             setOrbButtonSpread: (val) => set({ orbButtonSpread: val }),
+
+            // Quick Assign/Shuffle Colors
+            quickAssignColor: null,
+            setQuickAssignColor: (val) => set({ quickAssignColor: val }),
+            quickShuffleColor: 'all',
+            setQuickShuffleColor: (val) => set({ quickShuffleColor: val }),
 
             // User Profile
             userName: 'Boss',
