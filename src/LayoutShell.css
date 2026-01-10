@@ -31,7 +31,8 @@
   border-bottom: none;
   position: relative;
   /* This is the new 'anchor' for the component */
-  overflow: hidden;
+  /* This is the new 'anchor' for the component */
+  overflow: visible;
   /* Temporarily hide the mess so we can find center */
   display: flex;
   align-items: center;
@@ -67,7 +68,7 @@
   width: 100%;
   height: 100%;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Prevent the internal component from breaking the layout */
@@ -449,6 +450,11 @@
 
 /* Infinite Banner Scroll Animation */
 @keyframes bannerScrollRight {
-  from { background-position-x: 0; }
-  to { background-position-x: 100vw; }
+  from {
+    background-position-x: 0;
+  }
+
+  to {
+    background-position-x: 100vw;
+  }
 }

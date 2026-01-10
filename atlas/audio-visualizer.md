@@ -13,6 +13,7 @@ The Audio Visualizer creates a circular, audio-reactive visualization around the
 *   **Rainmeter Aesthetic**: 113 bars, white, outward-facing, circular layout (270° start).
 *   **Thread-Safe Backend**: Uses a dedicated audio thread to prevent UI freezing.
 *   **Zero-Latency Loopback**: Uses `WASAPI Loopback` via the `cpal` crate.
+*   **Overflows Controller**: Visualizer bars extend beyond the controller area, overlapping the video player for an immersive effect.
 *   **Toggleable**: Can be turned on/off via the User Interface.
 
 ---
