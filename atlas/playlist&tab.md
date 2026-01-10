@@ -19,18 +19,13 @@ Users see a 3-column grid of playlist cards in the Playlists page:
 
 - **Playlist Cards**: Each card displays:
   - **Thumbnail**: 16:9 aspect ratio image showing the first video's thumbnail from the playlist
-  - **Mini Thumbnail**: Removed (Functionality moved to Page Banner).
-  - **Playlist Name**: Displayed below thumbnail, truncates if too long
-  - **Description**: Optional description text, line-clamped to 2 lines
-  - **Video Count**: Shows "X video(s)" below description
+  - **Mini Thumbnail**: Removed.
+  - **Title Overlay**: Playlist name displayed at the bottom of the thumbnail with "Epic WordArt" styling (font-black, italic, text-3xl, dark blue text with white stroke and 3D sky blue shadow).
   - **Hover Overlay**: On hover, a semi-transparent overlay appears with:
     - **Preview Button** (eye icon): Opens playlist in preview mode without changing current playback
     - **Play Button** (large play icon): Loads playlist and starts playing first video
-  - **3-Dot Menu**: Always visible to the right of the playlist name:
-    - **Expand/Collapse Folders**: Toggles inline folder display for this playlist
-    - **Export Playlist**: Downloads playlist as JSON file with folder assignments
-    - **Add to Tab**: Submenu showing all tabs, with checkmarks for tabs containing this playlist
-    - **Delete**: Deletes playlist with confirmation dialog
+  - **Interactive Elements Overlay**:
+    - **3-Dot Menu**: Positioned at the top-right of the thumbnail, visible on hover. Provides options for Expand/Collapse, Export, Add to Tab, and Delete.
 
 - **Playlist Expansion**: When a playlist is expanded (via menu), its colored folders appear inline in the grid immediately after the playlist card. Folders show:
   - Colored left border (2px wide) matching folder color

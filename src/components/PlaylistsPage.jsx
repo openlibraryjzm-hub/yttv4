@@ -733,13 +733,11 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                         className="cursor-pointer group relative"
                         title={getInspectTitle(`Playlist: ${playlist.name}`)}
                       >
-                        {/* Thumbnail - TEST: Fixed height like modal */}
-                        <div className="rounded-lg overflow-hidden" style={{
-                          position: 'relative',
+                        {/* Thumbnail */}
+                        <div className="rounded-lg overflow-hidden relative group" style={{
                           width: '100%',
                           paddingBottom: '56.25%', // 16:9 aspect ratio
                           backgroundColor: '#0f172a',
-                          overflow: 'hidden'
                         }}>
                           {thumbnailUrl ? (
                             <img
@@ -796,7 +794,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: '12px',
-                            // pointerEvents: 'none' // Removed to allow interaction with buttons
+                            zIndex: 10
                           }}
                             className="group-hover:bg-black/40"
                           >
@@ -845,19 +843,8 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                             </div>
                           </div>
 
-                        </div>
-
-                        {/* Playlist Info */}
-                        <div className="mt-2 relative flex items-start justify-between gap-2">
-                          <h3 className="font-medium text-sm truncate transition-colors flex-1"
-                            style={{ color: '#052F4A' }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
-                            onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
-                            {playlist.name}
-                          </h3>
-
-                          {/* 3-dot menu */}
-                          <div className="flex-shrink-0 relative z-20" onClick={e => e.stopPropagation()}>
+                          {/* 3-dot menu - moved to hover overlay (Top Right) */}
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30" onClick={e => e.stopPropagation()}>
                             <CardMenu
                               options={[
                                 {
@@ -929,6 +916,20 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                                 }
                               }}
                             />
+                          </div>
+
+                          {/* Playlist Title Overlay */}
+                          <div className="absolute bottom-0 left-0 right-0 p-3 z-20">
+                            <h3 className="font-black text-3xl italic tracking-wide truncate"
+                              style={{
+                                color: '#052F4A',
+                                WebkitTextStroke: '2px white',
+                                textShadow: '4px 4px 0 #38bdf8',
+                                paddingBottom: '4px' // Prevent shadow clipping
+                              }}
+                              title={playlist.name}>
+                              {playlist.name}
+                            </h3>
                           </div>
                         </div>
                       </div>

@@ -221,16 +221,16 @@ See **Section 2.1: Playlists** for complete logic flow. The UI-specific aspects:
 Users see playlist cards built using the reusable Card component system:
 
 - **Card Structure**:
-  - **Thumbnail Area**: Top portion, 16:9 aspect ratio, rounded corners
+  - **Thumbnail Area**: 16:9 aspect ratio, rounded corners
     - Image: First video's thumbnail from playlist
     - Fallback: Gray placeholder icon if no thumbnail
-    - **Mini Thumbnail**: Removed (Functionality moved to Page Banner).
-    - Hover overlay: Semi-transparent black with play/preview buttons and 3-dot menu
-   - **Content Area**: Title and menu row, positioned below thumbnail
-     - Title: Playlist name, dark blue text (RGB(5, 47, 74) / #052F4A), truncates if too long, flex-1
-     - **3-Dot Menu**: Always visible, aligned to the right of the title
-     - Subtitle: Description (if available), gray text, line-clamped to 2 lines
-     - Metadata: Video count (e.g., "5 videos"), small gray text
+    - **Title Overlay**: Positioned at the bottom of the thumbnail with no backdrop.
+    - **Typography**: "Epic WordArt" style: `font-black`, `italic`, `text-3xl`.
+    - **Styling**: Dark blue text (`#052F4A`) with a white stroke (`2px white`) and a solid sky blue 3D shadow (`4px 4px 0 #38bdf8`) for maximum impact and readability.
+    - **Hover Overlay**: Semi-transparent black with play/preview buttons
+  - **Interactive Elements Overlay**:
+    - **3-Dot Menu**: Positioned at the top-right of the thumbnail, visible on hover.
+   - **Content Area**: (Removed - Title and Menu are now overlaid on the thumbnail)
   
 - **Visual States**:
   - **Default**: Transparent background, no border
@@ -330,7 +330,7 @@ Users see a 3-column grid of video cards showing videos from the current playlis
     - **Multi-line Avatar**: Rendered in a compact monospace block (text-[4px]) below the name.
   - **Styling**: Uses vibrant gradients (matching folder color) and glassmorphism effects for a premium look.
   - **Background Pattern**: Features a smooth, continuously moving diagonal stripe pattern overlay (`animate-diagonal-pattern`) that adapts to any background color.
-  - **Edit Button**: Small pen icon in the top-right corner (on hover) allows renaming the playlist or colored folder and updating its description via `EditPlaylistModal`. Custom folder names persist in `folder_metadata`. (Not available for Unsorted Videos).
+  - **Edit Button**: Small pen icon in the top-left corner (on hover) allows renaming the playlist or colored folder and updating its description via `EditPlaylistModal`. Custom folder names persist in `folder_metadata`. (Not available for Unsorted Videos).
   - **Continue Watching**: A "CONTINUE?" section appears in the bottom-right corner if the playlist/folder has a recently watched video.
     - Displays "CONTINUE?" text and the video thumbnail.
     - Hovering reveals a Play icon.

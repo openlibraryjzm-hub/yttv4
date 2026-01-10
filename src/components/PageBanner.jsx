@@ -63,7 +63,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                         e.stopPropagation();
                         onEdit();
                     }}
-                    className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-105 z-20"
+                    className="absolute top-6 left-6 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-105 z-20"
                     title="Edit Details"
                 >
                     <Pen size={18} />
