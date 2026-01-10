@@ -19,6 +19,7 @@ import { addToWatchHistory, getWatchHistory, getAllPlaylists, getPlaylistItems }
 import { extractVideoId } from './utils/youtubeUtils';
 import RadialMenuStandalone from './components/RadialMenuStandalone';
 import SettingsPage from './components/SettingsPage';
+import SupportPage from './components/SupportPage';
 import { THEMES } from './utils/themes';
 import './App.css';
 
@@ -581,6 +582,8 @@ function App() {
             <ExplorerPage onVideoSelect={handleVideoSelect} />
           ) : !showPlaylists && currentPage === 'settings' ? (
             <SettingsPage currentThemeId={currentThemeId} onThemeChange={setCurrentThemeId} />
+          ) : !showPlaylists && currentPage === 'support' ? (
+            <SupportPage onVideoSelect={handleVideoSelect} />
           ) : null
         }
       />

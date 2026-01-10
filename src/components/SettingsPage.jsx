@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Palette, User, Smile } from 'lucide-react';
+import { Palette, User, Smile, ExternalLink, Copy, Check } from 'lucide-react';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { useConfigStore } from '../store/configStore';
 import { THEMES } from '../utils/themes';
 
@@ -51,6 +52,15 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
         orbImageScale, setOrbImageScale
     } = useConfigStore();
     const [customAvatar, setCustomAvatar] = useState('');
+    const [copied, setCopied] = useState(false);
+
+    const promptText = 'maintain style as much as possible. dont change anything about original image. im looking for a "zoom out" so that I can [insert desired changes]. reference the single primary color markings which mark out how I want things expanded. remove single primary color markings from final image.';
+
+    const handleCopyPrompt = () => {
+        navigator.clipboard.writeText(promptText);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     const handleAvatarSelect = (avatar) => {
         if (avatar === 'custom') {
@@ -102,7 +112,7 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'profile' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
                         }`}
                 >
-                    <User size={16} /> Profile
+                    <User size={16} /> Signature
                 </button>
                 <button
                     onClick={() => setActiveTab('orb')}
@@ -272,12 +282,92 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                                 )}
                             </div>
                         </ConfigSection>
+
+                        {/* Background Removal Banner */}
+                        <button
+                            onClick={() => openUrl('https://www.remove.bg/upload')}
+                            className="w-full p-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl shadow-lg shadow-teal-200 group hover:shadow-xl hover:shadow-teal-300 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden"
+                        >
+                            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                            <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+
+                            <div className="relative z-10 flex items-center justify-between">
+                                <div className="text-left space-y-1">
+                                    <h3 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+                                        Make it Pop
+                                        <span className="px-2 py-0.5 bg-white/20 rounded-full text-[10px] uppercase tracking-wider font-bold">Free Tool</span>
+                                    </h3>
+                                    <p className="text-emerald-50 text-xs font-medium max-w-sm leading-relaxed">
+                                        Use <span className="font-bold text-white underline decoration-white/50 underline-offset-2">remove.bg</span> to clear image backgrounds. This creates a stunning 3D pop-out effect when using spilled corners on your Orb!
+                                    </p>
+                                </div>
+                                <div className="p-3 bg-white/10 rounded-xl group-hover:bg-white/20 transition-colors backdrop-blur-sm">
+                                    <ExternalLink className="text-white" size={20} />
+                                </div>
+                            </div>
+                        </button>
+
+                        {/* Pro Tip Section */}
+                        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                            <div className="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                                <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                                    <span className="bg-amber-400 text-white px-2 py-0.5 rounded text-[10px]">PRO TIP</span>
+                                    Handling Cropped Images
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                <div className="flex gap-6 items-start">
+                                    <img
+                                        src="/tip.png"
+                                        alt="Tip: Extending cropped images"
+                                        className="w-32 h-32 object-contain rounded-lg border border-slate-100 bg-slate-50 shadow-sm"
+                                    />
+                                    <div className="space-y-2 text-xs text-slate-500 leading-relaxed">
+                                        <p className="font-bold text-slate-700">Image cut off? No problem.</p>
+                                        <p>
+                                            Sometimes an image is too zoomed in or cropped awkwardly for the orb. You can use Generative Fill tools (like in Photoshop or online AI editors) to "zoom out" and extend the artwork.
+                                        </p>
+                                        <p>
+                                            Mark the area you want to expand with a primary color (like red) and use the prompt below to generate the missing parts while keeping the original style.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-slate-900 rounded-xl p-4 relative group">
+                                    <div className="absolute top-3 right-3">
+                                        <button
+                                            onClick={handleCopyPrompt}
+                                            className={`
+                                                flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all
+                                                ${copied
+                                                    ? 'bg-emerald-500 text-white'
+                                                    : 'bg-white/10 text-slate-400 hover:bg-white/20 hover:text-white'
+                                                }
+                                            `}
+                                        >
+                                            {copied ? (
+                                                <>
+                                                    <Check size={12} /> Copied!
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy size={12} /> Copy Prompt
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                    <div className="text-xs font-mono text-emerald-400 mb-2 select-none opacity-50">GEN FILL PROMPT</div>
+                                    <p className="font-mono text-xs text-slate-300 pr-24 leading-relaxed selection:bg-emerald-500/30 selection:text-emerald-200">
+                                        {promptText}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <ConfigSection title="Identity" icon={User}>
+                        <ConfigSection title="Pseudonym" icon={User}>
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase text-slate-400 ml-1">Display Name</label>
                                 <input
                                     type="text"
                                     value={userName}
@@ -288,7 +378,7 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                             </div>
                         </ConfigSection>
 
-                        <ConfigSection title="Avatar (ASCII Art)" icon={Smile}>
+                        <ConfigSection title="Signature" icon={Smile}>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {AVATARS.map((avatar, index) => {
                                     const isCustom = avatar === 'custom';
@@ -351,6 +441,30 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                                 )}
                             </div>
                         </div>
+
+                        {/* External Link Banner */}
+                        <button
+                            onClick={() => openUrl('https://emojicombos.com/')}
+                            className="w-full p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg shadow-purple-200 group hover:shadow-xl hover:shadow-purple-300 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden"
+                        >
+                            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                            <div className="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+
+                            <div className="relative z-10 flex items-center justify-between">
+                                <div className="text-left space-y-1">
+                                    <h3 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+                                        Need more ASCII art?
+                                        <span className="px-2 py-0.5 bg-white/20 rounded-full text-[10px] uppercase tracking-wider font-bold">Recommended</span>
+                                    </h3>
+                                    <p className="text-indigo-50 text-xs font-medium max-w-sm leading-relaxed">
+                                        Visit <span className="font-bold text-white underline decoration-white/50 underline-offset-2">EmojiCombos.com</span> to find the perfect text art collection or draw your own masterpiece.
+                                    </p>
+                                </div>
+                                <div className="p-3 bg-white/10 rounded-xl group-hover:bg-white/20 transition-colors backdrop-blur-sm">
+                                    <ExternalLink className="text-white" size={20} />
+                                </div>
+                            </div>
+                        </button>
                     </div>
                 )}
             </div>

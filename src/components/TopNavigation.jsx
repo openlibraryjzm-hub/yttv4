@@ -19,12 +19,13 @@ const TopNavigation = () => {
     { id: 'history', label: 'History' },
     { id: 'explorer', label: 'Explorer' },
     { id: 'settings', label: 'Settings' },
+    { id: 'support', label: 'Support' },
   ];
 
   const handleTabClick = (tabId) => {
     setCurrentPage(tabId);
     // Auto-switch to half mode when clicking tabs if in full mode
-    const isNavigationTab = ['playlists', 'videos', 'history', 'explorer', 'settings'].includes(tabId);
+    const isNavigationTab = ['playlists', 'videos', 'history', 'explorer', 'settings', 'support'].includes(tabId);
     if (isNavigationTab && viewMode === 'full') {
       setViewMode('half');
     }

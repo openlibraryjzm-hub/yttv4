@@ -882,12 +882,14 @@ Users access the configuration area via the "Config" (Settings icon) button on t
   - Displays preview cards for each theme.
   - Changes apply immediately to the entire application.
 
-- **Profile Tab**:
-  - **Display Name**: Text input to set the username shown on banners.
-  - **Avatar Selection**:
+- **Signature Tab**:
+  - **Pseudonym**: Text input to set the username shown on banners.
+  - **Signature**:
     - **Preset ASCII Art**: Grid of predefined ASCII avatars.
     - **Custom ASCII**: Input field to paste custom multi-line ASCII art.
   - **Preview**: Live preview of how the name and avatar will appear on the Page Banner.
+  - **External Resources**:
+    - **ASCII Art Banner**: A large, interactive banner linking to *EmojiCombos.com* for finding or creating ASCII art. Opens in the user's default browser.
 
 - **Orb Tab**:
   - **Custom Orb Image**:
@@ -900,6 +902,11 @@ Users access the configuration area via the "Config" (Settings icon) button on t
     - **Visual Feedback**: The visualizer shows the image with a circular mask and highlights selected spill areas using the actual image data.
   - **Image Scaling**:
     - **Zoom Slider**: A range slider (0.5x to 3.0x) allows users to zoom the orb image in/out within the spill boundaries.
+  - **External Resources**:
+    - **Background Removal Banner**: A large, interactive banner linking to *remove.bg* for easily removing backgrounds from images. This facilitates the creation of "pop-out" 3D effects when used with the Orb's spill functionality. Opens in the user's default browser.
+    - **Pro Tip**: A dedicated section explaining how to handle cropped or "zoomed-in" images using generative fill.
+      - Includes an example image (`tip.png`).
+      - Provides a **copyable prompt** for use with AI generation tools to "zoom out" and extend artwork while maintaining style.
 
 **2: File Manifest**
 
@@ -934,5 +941,54 @@ Users access the configuration area via the "Config" (Settings icon) button on t
    - Image overflows or clips accordingly.
 
 3. **Image Scaling:**
-   - User drags slider → `setOrbImageScale(val)` updates store.
-   - `PlayerController` applies CSS transform scale to the image element.
+    - User drags slider → `setOrbImageScale(val)` updates store.
+    - `PlayerController` applies CSS transform scale to the image element.
+
+---
+
+#### ### 4.1.7 Support Page
+
+**1: User-Perspective Description**
+
+The Support Page acts as a central hub for community engagement, resources, and developer connection. It features a unique **Radial Ring UI** that is distinct from the rest of the grid-based interface.
+
+- **Radial Ring Layout**:
+  - A central hub featuring 5 interactive segments arranged in a circle.
+  - **Segments**:
+    1.  **Code**: Links to the open-source GitHub repository.
+    2.  **Developer**: Links to the head developer's X (Twitter) profile.
+    3.  **Community**: Links to the Discord community server.
+    4.  **Future Plans**: Navigates to a "Promo" playlist within the app detailing future projects.
+    5.  **Resources**: Navigates to a "Resources" playlist helping users get started.
+  - **Interactions**:
+    - Hovering a segment expands it and updates the specific information card below.
+    - Clicking an external link segment opens the URL in the system browser.
+    - Clicking an internal link segment (Future Plans, Resources) navigates to the respective playlist in the Videos view.
+
+- **Visual Design**:
+  - Features a custom SVG implementation for the segmented ring.
+  - Includes complex gradients and hover animations (scale, opacity, drop shadow).
+  - Background includes a subtle dot matrix pattern with a radial mask.
+
+**2: File Manifest**
+
+**UI/Components:**
+- `src/components/SupportPage.jsx`: Standalone page component implementing the custom radial UI.
+- `src/components/TopNavigation.jsx`: Updated to include "Support" tab.
+
+**State Management:**
+- `src/store/navigationStore.js`: Handles routing to `support` page.
+- `src/store/playlistStore.js`: Handles searching for and setting active playlists for internal navigation links.
+
+**3: The Logic & State Chain**
+
+**Internal Navigation Flow (Promo/Resources):**
+1. User clicks "Future Plans" or "Resources" segment.
+2. `navigateToPlaylist(keyword)` function is triggered.
+3. Searches loaded playlists for name match (case-insensitive).
+4. If found:
+   - Fetches playlist items via `getPlaylistItems()`.
+   - Updates `playlistStore` with new items.
+   - Sets `navigationStore.currentPage` to `'videos'`.
+5. If not found:
+   - Displays alert to user.

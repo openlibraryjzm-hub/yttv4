@@ -81,6 +81,7 @@ yttv2/
 │   │   ├── PageBanner.jsx              # Banner with metadata and animated diagonal pattern
 │   │   ├── EditPlaylistModal.jsx       # Modal for editing playlist/folder metadata
 │   │   ├── SettingsPage.jsx            # Application configuration (Theme, Profile)
+│   │   ├── SupportPage.jsx             # Radial Support Hub (Code, Dev, Community, Resources)
 │   │   └── DebugRuler.jsx              # Ruler overlay component (non-functional - see debug.md)
 │   ├── store/                    # Zustand state management
 │   │   ├── configStore.js        # Theme and Profile configuration
@@ -150,7 +151,8 @@ yttv2/
 | Feature | Primary Document | Related Documents |
 |---------|-----------------|-------------------|
 | **Player Controller** | `advanced-player-controller.md` | `navigation-routing.md`, `state-management.md` |
-| **Settings & Profile** | `ui.md` | `state-management.md` (configStore) |
+| **Settings & Signature** | `ui.md` | `state-management.md` (configStore) |
+| **Support Hub** | `ui.md` | `navigation-routing.md`, `playlistStore.js` |
 | **Playlists & Tabs** | `playlist&tab.md` | `database-schema.md`, `api-bridge.md`, `state-management.md` |
 | **Import/Export** | `importexport.md` | `api-bridge.md`, `database-schema.md` |
 | **UI Components** | `ui.md` | `state-management.md`, `navigation-routing.md` |
@@ -189,8 +191,8 @@ yttv2/
 **Cross-References**: See `api-bridge.md` for import commands, `database-schema.md` for data structure
 
 #### `ui.md`
-**Covers**: Side menu, page layouts, card components, grid systems, star color picker menu
-**Key Topics**: PlaylistsPage, VideosPage, **HistoryPage (List Layout)**, Card architecture, folder selector, star hover menu
+**Covers**: Side menu, page layouts, card components, grid systems, star color picker menu, **Support Hub**
+**Key Topics**: PlaylistsPage, VideosPage, **HistoryPage (List Layout)**, **SupportPage (Radial UI)**, Card architecture, folder selector
 **Cross-References**: See `state-management.md` for page routing, `navigation-routing.md` for navigation flows
 
 #### `history.md`

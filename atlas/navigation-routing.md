@@ -259,7 +259,16 @@ When navigating playlists:
 4. Calls `onVideoSelect(firstVideo.video_url)` → Starts playing
 5. Navigates to Videos page → `setCurrentPage('videos')` (if not already there)
 
-### Entry Point 2: Folder Card Click
+### Entry Point 2: Support Hub Navigation
+
+**Flow (Promo/Resources Links):**
+1. User clicks radial segment (promo/resources) → `navigateToPlaylist(keyword)` (SupportPage.jsx)
+2. Searches loaded playlists for name match
+3. Calls `getPlaylistItems(playlistId)` → Gets videos
+4. Calls `setPlaylistItems(items, playlistId)` → Updates store
+5. Navigates to Videos page → `setCurrentPage('videos')`
+
+### Entry Point 3: Folder Card Click
 
 **Flow:**
 1. User clicks folder card → `onClick` handler
@@ -268,7 +277,7 @@ When navigating playlists:
 4. Calls `onVideoSelect(firstVideo.video_url)` → Starts playing
 5. Navigates to Videos page → `setCurrentPage('videos')`
 
-### Entry Point 3: Video Card Click
+### Entry Point 4: Video Card Click
 
 **Flow:**
 1. User clicks video card → `handleVideoClick(video, index)` (VideosPage.jsx)
@@ -281,7 +290,7 @@ When navigating playlists:
    - When found → Loads playlist items, sets playlist context, sets video index, starts playing
 6. Video starts playing → Updates `currentVideoIndex`
 
-### Entry Point 4: History Card Click
+### Entry Point 5: History Card Click
 
 **Flow:**
 1. User clicks history card → `handleVideoClick(item)` (HistoryPage.jsx)
@@ -291,7 +300,7 @@ When navigating playlists:
 5. Sets video index → `setCurrentVideoIndex(index)`
 6. Video starts playing → Watch history may be updated
 
-### Entry Point 5: PlayerController Navigation
+### Entry Point 6: PlayerController Navigation
 
 **Flow:**
 1. User clicks next/prev playlist → `nextPlaylist()` / `previousPlaylist()`
