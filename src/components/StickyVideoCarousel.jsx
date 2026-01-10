@@ -5,9 +5,13 @@ const StickyVideoCarousel = ({ children }) => {
     const scrollContainerRef = useRef(null);
     const [showControls, setShowControls] = useState(false);
 
+    // Drag to scroll state
+    const [isDown, setIsDown] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+    const isDraggingRef = useRef(false); // Ref to track if a drag occurred to prevent clicks
+
     const count = React.Children.count(children);
-
-
 
     if (count === 0) return null;
 
@@ -26,7 +30,7 @@ const StickyVideoCarousel = ({ children }) => {
         );
     }
 
-    // If more than 3, show carousel
+    // Scroll buttons logic
     const scroll = (direction) => {
         if (scrollContainerRef.current) {
             const { clientWidth } = scrollContainerRef.current;
@@ -35,6 +39,57 @@ const StickyVideoCarousel = ({ children }) => {
                 left: direction === 'left' ? -scrollAmount : scrollAmount,
                 behavior: 'smooth',
             });
+        }
+    };
+
+    // Drag to scroll handlers
+    const handleMouseDown = (e) => {
+        setIsDown(true);
+        setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+        setScrollLeft(scrollContainerRef.current.scrollLeft);
+        isDraggingRef.current = false;
+        // Disable scroll snap while dragging for smoothness
+        scrollContainerRef.current.style.scrollSnapType = 'none';
+        scrollContainerRef.current.style.cursor = 'grabbing';
+    };
+
+    const handleMouseLeave = () => {
+        setIsDown(false);
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.style.scrollSnapType = 'x mandatory'; // Re-enable snap
+            scrollContainerRef.current.style.cursor = 'grab';
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsDown(false);
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.style.scrollSnapType = 'x mandatory'; // Re-enable snap
+            scrollContainerRef.current.style.cursor = 'grab';
+        }
+        // Don't reset isDraggingRef immediately so click capture can check it
+        setTimeout(() => {
+            isDraggingRef.current = false;
+        }, 100);
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainerRef.current.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll speed multiplier
+        scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+
+        if (Math.abs(walk) > 5) {
+            isDraggingRef.current = true;
+        }
+    };
+
+    // Prevent click if dragged
+    const handleCaptureClick = (e) => {
+        if (isDraggingRef.current) {
+            e.preventDefault();
+            e.stopPropagation();
         }
     };
 
@@ -52,7 +107,25 @@ const StickyVideoCarousel = ({ children }) => {
                 </span>
             </div>
 
-            <div className="relative -mx-4 px-4"> {/* Negative margin to allow full-bleed scroll effect if desired, but keeping contained for now */}
+            <div className="relative -mx-4 px-4 sticky-carousel-wrapper">
+                <style jsx>{`
+                    .sticky-carousel-wrapper ::-webkit-scrollbar {
+                        height: 8px;
+                    }
+                    .sticky-carousel-wrapper ::-webkit-scrollbar-track {
+                        background: rgba(0, 0, 0, 0.05);
+                        border-radius: 4px;
+                        margin-left: 16px;
+                        margin-right: 16px;
+                    }
+                    .sticky-carousel-wrapper ::-webkit-scrollbar-thumb {
+                        background: rgba(5, 47, 74, 0.2); 
+                        border-radius: 4px;
+                    }
+                    .sticky-carousel-wrapper ::-webkit-scrollbar-thumb:hover {
+                        background: rgba(5, 47, 74, 0.5); 
+                    }
+                `}</style>
 
                 {/* Left Control */}
                 <button
@@ -65,15 +138,20 @@ const StickyVideoCarousel = ({ children }) => {
 
                 <div
                     ref={scrollContainerRef}
-                    className="flex gap-6 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory scrollbar-hide mask-fade-sides"
+                    className="flex gap-6 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory cursor-grab"
+                    onMouseDown={handleMouseDown}
+                    onMouseLeave={handleMouseLeave}
+                    onMouseUp={handleMouseUp}
+                    onMouseMove={handleMouseMove}
+                    onClickCapture={handleCaptureClick}
                     style={{
-                        scrollbarWidth: 'none', // Firefox
-                        msOverflowStyle: 'none', // IE/Edge
-                        scrollBehavior: 'auto' // Force instant scroll for wheel event responsiveness
+                        scrollbarWidth: 'auto', // Ensure scrollbar is visible
+                        // msOverflowStyle: 'none', // Removed hiding
+                        scrollBehavior: 'auto'
                     }}
                 >
                     {React.Children.map(children, (child) => (
-                        <div className="w-[calc(33.333%-16px)] snap-start flex-shrink-0">
+                        <div className="w-[calc(33.333%-16px)] snap-start flex-shrink-0 select-none">
                             {child}
                         </div>
                     ))}

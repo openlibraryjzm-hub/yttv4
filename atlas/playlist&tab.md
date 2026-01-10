@@ -212,6 +212,7 @@ Users see colored folders as a way to organize videos within playlists:
 - **Start-of-List Sticky Videos**:
   - Each specific colored folder view supports its own set of "Sticky Videos" (see `ui.md` 4.1.2).
   - Videos stickied while viewing a folder will only appear in that folder's sticky carousel, not in other folders or the main view.
+  - **Filter Immunity**: Videos in these sticky carousels are immune to watch time filters, ensuring visibility regardless of watch status.
  
 **2: File Manifest**
 

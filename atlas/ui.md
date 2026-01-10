@@ -301,10 +301,12 @@ Users see a 3-column grid of video cards showing videos from the current playlis
 
 - **Header**: Top of page shows:
   - **Sort Dropdown**: "Sort by" dropdown with options:
-    - "Default" (playlist order)
-    - "Unwatched" (0% progress)
-    - "Partially Watched" (<85% progress)
-    - "Watched" (≥85% progress)
+    - "Default Order" (playlist order)
+    - "Watch Progress" (sorts by view percentage)
+  - **Progress Filters** (visible when "Watch Progress" selected):
+    - **Sort Direction**: Toggle between Ascending/Descending.
+    - **Show Unwatched**: Toggle to include/exclude unwatched (0%) videos.
+    - **Hide Watched**: Toggle to hide fully watched (≥85%) videos.
   - **Add Button**: Opens the Config Playlist Modal (pre-selecting current playlist) to add videos/playlists.
   - **Bulk Tag Mode Toggle**: Button to enter/exit bulk tagging mode
   - **Save/Cancel Buttons**: Appear when in bulk tag mode
@@ -329,9 +331,10 @@ Users see a 3-column grid of video cards showing videos from the current playlis
     - **Scoped State**: Sticky status is scoped per playlist AND per folder context. A video stickied in the "Red" folder only appears in the "Red" folder's carousel.
     - **Root Context**: Videos stickied in the main "All Videos" view only appear in the root carousel.
     - **Unsorted Exclusion**: The carousel is hidden on the "Unsorted" view.
+    - **Filter Immunity**: Videos in the Sticky Carousel are immune to watch time filters (e.g., "Hide Watched"), ensuring they remain visible regardless of their watch status.
   - **Format**: 
     - 1-3 stickied videos: Displayed in a standard grid layout.
-    - 4+ stickied videos: Displayed in a horizontal carousel (scrollable via side buttons, no mouse wheel scroll).
+    - 4+ stickied videos: Displayed in a horizontal carousel (scrollable via side buttons, visible horizontal scrollbar, and touch-style drag-to-scroll).
   - **Controls**: Sticky status toggled via video 3-dot menu ("Sticky Video" / "Unsticky Video").
   - **Persistence**: Scoped ID sets are persisted to localStorage (`sticky-storage`).
 
@@ -491,6 +494,7 @@ Users see video cards built using the Card component system with video-specific 
       - **Bottom-left**: Video number badge (e.g., "#1", "#42")
       - **Bottom-right**: Pin icon button (amber when pinned, gray when not)
       - **Top-right**: (Empty)
+    - **Progress Bar**: Red horizontal line at the bottom of the thumbnail indicating watch progress percentage.
     - **Hover Overlay**: Play button (blue) and priority pin button (amber/yellow pin icon)
     - **Bulk Tag Overlay**: When in bulk tag mode, color grid appears on hover
     - **Star Color Picker Overlay**: When hovering over star icon for 1.2 seconds, a grid of 16 colored stars appears centered at the top of the thumbnail

@@ -42,11 +42,10 @@ Users experience watch-time tracking automatically in the background:
   - Relative timestamps (e.g., "2 hours ago", "Just now")
   - Click to replay videos
 
-- **Sorting by Watch Status**: On Videos page, users can sort by:
-  - Default (playlist order)
-  - Unwatched only
-  - Partially Watched only
-  - Watched only
+- **Sorting and Filtering by Watch Status**: On Videos page, users can:
+  - **Sort by Progress**: Order videos by their watch percentage.
+  - **Show Unwatched**: Toggle to explicitly show/hide unwatched videos.
+  - **Hide Watched**: Toggle to hide fully watched videos.
 
 - **No User Interaction Required**: All tracking happens automatically, no manual actions needed
 

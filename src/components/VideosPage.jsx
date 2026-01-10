@@ -170,7 +170,11 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
           const allProgress = await getAllVideoProgress();
           const progressMap = new Map();
           for (const progress of allProgress) {
-            progressMap.set(progress.video_id, progress.progress_percentage);
+            progressMap.set(progress.video_id, {
+              percentage: progress.progress_percentage,
+              hasFullyWatched: progress.has_fully_watched,
+              last_updated: progress.last_updated
+            });
           }
           setVideoProgress(progressMap);
         } catch (error) {
@@ -732,7 +736,8 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
 
   // Split sorted videos into stickied and regular
   // Use allStickiedVideos to ensure reactivity
-  const stickiedVideos = sortedVideos.filter(v => {
+  // Sticky videos should NOT be affected by filters, so we use videosToDisplay (unfiltered) instead of sortedVideos
+  const stickiedVideos = videosToDisplay.filter(v => {
     // Check specific folder key
     const folderKey = selectedFolder === null ? 'root' : selectedFolder;
     const key = `${activePlaylistId}::${folderKey}`;
@@ -838,7 +843,111 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* ... (Header omitted) ... */}
+      <div className="flex items-center justify-between px-8 py-4 bg-transparent shrink-0 z-10">
+        <div className="flex items-center gap-4">
+          {/* Sort Dropdown */}
+          <div className="relative group">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-sm hover:bg-white transition-colors appearance-none pr-8"
+              title={getInspectTitle('Sort videos')}
+            >
+              <option value="default">Default Order</option>
+              <option value="progress">Watch Progress</option>
+            </select>
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Progress Filters (Only show when Sort by Progress is active) */}
+          {sortBy === 'progress' && (
+            <div className="flex items-center gap-2 animate-fade-in">
+              <button
+                onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
+                className="p-1.5 rounded-lg bg-white/50 hover:bg-white text-slate-600 border border-slate-200"
+                title={sortDirection === 'asc' ? 'Sort Ascending' : 'Sort Descending'}
+              >
+                {sortDirection === 'asc' ? (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4 4m0 0l4 4m-4-4v12" /></svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4 4m0 0l4 4m-4-4v12" transform="scale(1, -1) translate(0, -24)" /></svg>
+                )}
+              </button>
+
+              <button
+                onClick={() => setIncludeUnwatched(!includeUnwatched)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${includeUnwatched
+                  ? 'bg-sky-100 border-sky-300 text-sky-700'
+                  : 'bg-white/50 border-slate-200 text-slate-500 hover:text-slate-700'
+                  }`}
+              >
+                Show Unwatched
+              </button>
+
+              <button
+                onClick={() => setShowOnlyCompleted(!showOnlyCompleted)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${showOnlyCompleted
+                  ? 'bg-green-100 border-green-300 text-green-700'
+                  : 'bg-white/50 border-slate-200 text-slate-500 hover:text-slate-700'
+                  }`}
+              >
+                Hide Watched
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Bulk Tag Controls */}
+          {bulkTagMode ? (
+            <div className="flex items-center gap-2 animate-fade-in">
+              <span className="text-sm font-medium text-slate-600 bg-white/50 px-3 py-1.5 rounded-lg border border-slate-200">
+                {bulkTagSelectionCount} selected
+              </span>
+              <button
+                onClick={handleSaveBulkTags}
+                disabled={savingBulkTags || bulkTagSelectionCount === 0}
+                className="flex items-center gap-2 px-4 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium shadow-sm transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {savingBulkTags ? 'Saving...' : 'Save Tags'}
+              </button>
+              <button
+                onClick={handleCancelBulkTags}
+                className="px-4 py-1.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-lg font-medium shadow-sm transition-all text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setBulkTagMode(true)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-white/80 hover:bg-white text-slate-700 border border-slate-200 rounded-lg font-medium shadow-sm transition-colors text-sm backdrop-blur-sm"
+              title={getInspectTitle('Enter bulk tag mode')}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              Bulk Tag
+            </button>
+          )}
+
+          {/* Add Video Button */}
+          <button
+            onClick={() => setShowUploader(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-medium shadow-sm transition-colors text-sm"
+            title={getInspectTitle('Add videos to playlist')}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add
+          </button>
+        </div>
+      </div>
 
       {/* Video Grid - 3 per row */}
       {showUploader ? (
@@ -917,6 +1026,15 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
                         onBulkTagColorClick={(color) => handleBulkTagColorClick(video, color)}
                         onPinClick={() => { }} // Handled internally in VideoCard via store
                         isStickied={true} // It is stickied in this list
+                        progress={(() => {
+                          const videoId = extractVideoId(video.video_url) || video.video_id;
+                          const data = videoProgress.get(videoId);
+                          return data ? (typeof data === 'number' ? data : data.percentage) : 0;
+                        })()}
+                        isWatched={(() => {
+                          const videoId = extractVideoId(video.video_url) || video.video_id;
+                          return watchedVideoIds.has(videoId);
+                        })()}
                       />
                     );
                   })}
@@ -959,6 +1077,15 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
                       onBulkTagColorClick={(color) => handleBulkTagColorClick(video, color)}
                       onPinClick={() => { }} // Handled internally in VideoCard via store
                       isStickied={isContextStickied}
+                      progress={(() => {
+                        const videoId = extractVideoId(video.video_url) || video.video_id;
+                        const data = videoProgress.get(video.id) || videoProgress.get(extractVideoId(video.video_url));
+                        return data ? (typeof data === 'number' ? data : data.percentage) : 0;
+                      })()}
+                      isWatched={(() => {
+                        const videoId = extractVideoId(video.video_url) || video.video_id;
+                        return watchedVideoIds.has(videoId);
+                      })()}
                     />
                   );
                 })}
