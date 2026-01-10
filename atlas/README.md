@@ -78,6 +78,8 @@ yttv2/
 │   │   ├── PlaylistFolderSelector.jsx  # Universal playlist/folder selector
 │   │   ├── PlaylistSelectionModal.jsx  # Modal for selecting playlist (Move/Copy actions)
 │   │   ├── StickyVideoCarousel.jsx     # Carousel/Grid for stickied videos
+│   │   ├── PageBanner.jsx              # Banner with metadata and animated diagonal pattern
+│   │   ├── EditPlaylistModal.jsx       # Modal for editing playlist/folder metadata
 │   │   └── DebugRuler.jsx              # Ruler overlay component (non-functional - see debug.md)
 │   ├── store/                    # Zustand state management
 │   │   ├── layoutStore.js        # View mode, menu state, debug/inspect/ruler/dev toolbar toggles

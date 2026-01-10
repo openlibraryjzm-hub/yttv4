@@ -11,6 +11,7 @@ This document provides a complete reference for the SQLite database schema, incl
   - `watch_history` → `history.md`
   - `video_progress` → `videoplayer.md`
   - `stuck_folders` → `playlist&tab.md` Section 2.2
+  - `folder_metadata` → `playlist&tab.md` Section 2.2
 
 ## Overview
 
@@ -255,6 +256,46 @@ CREATE TABLE IF NOT EXISTS stuck_folders (
 
 ---
 
+### 7. `folder_metadata`
+
+**Purpose**: Stores custom names and descriptions for colored folders within playlists
+
+**Schema:**
+```sql
+CREATE TABLE IF NOT EXISTS folder_metadata (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    playlist_id INTEGER NOT NULL,
+    folder_color TEXT NOT NULL,
+    custom_name TEXT,
+    description TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
+    UNIQUE(playlist_id, folder_color)
+)
+```
+
+**Columns:**
+- `id` (INTEGER PRIMARY KEY AUTOINCREMENT) - Unique metadata record identifier
+- `playlist_id` (INTEGER NOT NULL) - Foreign key to `playlists.id`
+- `folder_color` (TEXT NOT NULL) - Folder color ID (e.g., "red", "blue")
+- `custom_name` (TEXT) - User-defined name for the folder
+- `description` (TEXT) - User-defined description for the folder
+- `created_at` (TEXT NOT NULL) - ISO 8601 timestamp (RFC3339 format)
+- `updated_at` (TEXT NOT NULL) - ISO 8601 timestamp (RFC3339 format)
+
+**Indexes:**
+- `idx_folder_metadata_playlist_color` - On `(playlist_id, folder_color)` for fast lookups
+
+**Unique Constraint**: `(playlist_id, folder_color)` - One metadata record per folder per playlist
+
+**Relationships**:
+- Foreign key to `playlists.id` (ON DELETE CASCADE)
+
+**Cascade Behavior**: When a playlist is deleted, its folder metadata is automatically deleted.
+
+---
+
 ## Relationships Diagram
 
 ```
@@ -264,6 +305,8 @@ playlists (1) ──< (many) playlist_items
     │       └──< (many) playlist_items
     │
     └──< (many) stuck_folders
+    │
+    └──< (many) folder_metadata
 
 watch_history (standalone)
 video_progress (standalone, keyed by video_id)
@@ -288,6 +331,7 @@ All foreign keys use `ON DELETE CASCADE`, meaning:
 | `idx_watch_history_video_id` | `watch_history` | `video_id` | Video history lookups |
 | `idx_video_progress_video_id` | `video_progress` | `video_id` | Progress lookups |
 | `idx_stuck_folders_playlist_color` | `stuck_folders` | `(playlist_id, folder_color)` | Stuck folder lookups |
+| `idx_folder_metadata_playlist_color` | `folder_metadata` | `(playlist_id, folder_color)` | Folder metadata lookups |
 
 ## Data Types
 

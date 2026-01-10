@@ -215,7 +215,7 @@ Users see playlist cards built using the reusable Card component system:
   - **Thumbnail Area**: Top portion, 16:9 aspect ratio, rounded corners
     - Image: First video's thumbnail from playlist
     - Fallback: Gray placeholder icon if no thumbnail
-    - **Mini Thumbnail**: Overlaid on bottom-left, shows the most recently watched video from the playlist.
+    - **Mini Thumbnail**: Removed (Functionality moved to Page Banner).
     - Hover overlay: Semi-transparent black with play/preview buttons and 3-dot menu
    - **Content Area**: Title and menu row, positioned below thumbnail
      - Title: Playlist name, dark blue text (RGB(5, 47, 74) / #052F4A), truncates if too long, flex-1
@@ -312,9 +312,15 @@ Users see a 3-column grid of video cards showing videos from the current playlis
 
   - **Page Banner**: 
   - **Location**: Displayed at the top of the scrollable content area, above the Sticky Video Carousel.
-  - **Content**: Shows the title (Playlist Name, "{Color} Folder", or "Unsorted Videos") and description text.
+  - **Content**: Shows the title (Playlist Name, "{Color} Folder", custom folder name, or "Unsorted Videos") and description text.
+  - **Metadata**: Displays video count, creation year (hardcoded 2026), and author (hardcoded "( ͡° ͜ʖ ͡°) Boss") in a row of badges.
   - **Styling**: Uses vibrant gradients (matching folder color) and glassmorphism effects for a premium look.
-  - **Edit Button**: Small pen icon in the top-right corner (on hover) allows renaming the playlist or colored folder and updating its description. Custom folder names persist. (Not available for Unsorted Videos).
+  - **Background Pattern**: Features a smooth, continuously moving diagonal stripe pattern overlay (`animate-diagonal-pattern`) that adapts to any background color.
+  - **Edit Button**: Small pen icon in the top-right corner (on hover) allows renaming the playlist or colored folder and updating its description via `EditPlaylistModal`. Custom folder names persist in `folder_metadata`. (Not available for Unsorted Videos).
+  - **Continue Watching**: A "CONTINUE?" section appears in the bottom-right corner if the playlist/folder has a recently watched video.
+    - Displays "CONTINUE?" text and the video thumbnail.
+    - Hovering reveals a Play icon.
+    - Clicking resumes the most recently watched video.
 
 - **Sticky Video Carousel**: 
   - **Purpose**: Displays important videos at the very top of the page.
@@ -325,7 +331,7 @@ Users see a 3-column grid of video cards showing videos from the current playlis
     - **Unsorted Exclusion**: The carousel is hidden on the "Unsorted" view.
   - **Format**: 
     - 1-3 stickied videos: Displayed in a standard grid layout.
-    - 4+ stickied videos: Displayed in a horizontal carousel (scrollable via side buttons).
+    - 4+ stickied videos: Displayed in a horizontal carousel (scrollable via side buttons, no mouse wheel scroll).
   - **Controls**: Sticky status toggled via video 3-dot menu ("Sticky Video" / "Unsticky Video").
   - **Persistence**: Scoped ID sets are persisted to localStorage (`sticky-storage`).
 
