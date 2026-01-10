@@ -1582,7 +1582,8 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
               maxBarLength={76}
               minBarLength={7}
               colors={[255, 255, 255, 255]}
-              smoothing={0}
+              smoothing={0.75}
+              preAmpGain={4.0}
               angleTotal={Math.PI * 2}
               angleStart={-Math.PI / 2}
               clockwise={true}
@@ -1591,7 +1592,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
               freqMin={60}
               freqMax={11000}
               sensitivity={64}
-              updateRate={25}
+              updateRate={16}
             />
             <div
               className={`rounded-full bg-sky-50 backdrop-blur-3xl border-[6px] ${theme.orbBorder} shadow-2xl flex items-center justify-center transition-all relative overflow-visible`}
@@ -1627,7 +1628,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
               {orbButtons.map((btn, i) => {
                 const BtnIcon = btn.icon;
                 return (
-                  <button key={i} onClick={btn.action || (() => {})} className="absolute rounded-full flex items-center justify-center bg-white shadow-xl hover:scale-110 active:scale-95 group/btn z-50 border-2 border-sky-50 opacity-0 group-hover:opacity-100 transition-all duration-300" style={{ ...getOrbButtonStyle(i), width: `28px`, height: `28px` }} title={getInspectTitle(btn.label) || btn.label}>
+                  <button key={i} onClick={btn.action || (() => { })} className="absolute rounded-full flex items-center justify-center bg-white shadow-xl hover:scale-110 active:scale-95 group/btn z-50 border-2 border-sky-50 opacity-0 group-hover:opacity-100 transition-all duration-300" style={{ ...getOrbButtonStyle(i), width: `28px`, height: `28px` }} title={getInspectTitle(btn.label) || btn.label}>
                     <BtnIcon size={14} className="text-slate-800" strokeWidth={2.5} />
                   </button>
                 );

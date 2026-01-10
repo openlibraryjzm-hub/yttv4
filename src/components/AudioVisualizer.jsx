@@ -26,7 +26,8 @@ const AudioVisualizer = ({
   maxBarLength = 76,
   minBarLength = 7,
   colors = [255, 255, 255, 255], // White RGBA
-  smoothing = 0,
+  smoothing = 0.75,
+  preAmpGain = 4.0,
   angleTotal = Math.PI * 2, // 360°
   angleStart = -Math.PI / 2, // 270° (bottom)
   clockwise = true,
@@ -35,7 +36,7 @@ const AudioVisualizer = ({
   freqMin = 60,
   freqMax = 11000,
   sensitivity = 64,
-  updateRate = 25, // 25ms = 40 FPS
+  updateRate = 16, // 16ms = ~60 FPS
 }) => {
   const canvasRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -205,21 +206,13 @@ const AudioVisualizer = ({
 
       // Need at least fftSize samples to process
       if (audioDataQueueRef.current.length < fftSize) {
-        if (audioDataQueueRef.current.length > 0) {
-          console.log('[AudioVisualizer] Queue has', audioDataQueueRef.current.length, 'samples, need', fftSize);
-        }
         return;
       }
 
       try {
-        // Take enough samples for FFT (fftSize samples)
-        const samplesToProcess = audioDataQueueRef.current.splice(0, fftSize);
-
-        // Log sample stats occasionally
-        if (Math.random() < 0.05) { // ~5% chance per frame (every ~500ms at 40fps)
-          const maxInput = Math.max(...samplesToProcess.map(Math.abs));
-          console.log(`[AudioVisualizer] Processing frame. Max Input: ${maxInput.toFixed(4)}, Queue left: ${audioDataQueueRef.current.length}`);
-        }
+        // SLIDING WINDOW: Peek at the LATEST fftSize samples (don't consume/splice)
+        // This allows us to update at 60FPS even if we only have enough new data for 25FPS
+        const samplesToProcess = audioDataQueueRef.current.slice(-fftSize);
 
         // Apply window function (Hanning window) to reduce spectral leakage
         const windowed = new Float32Array(fftSize);
@@ -239,17 +232,17 @@ const AudioVisualizer = ({
         const frequencyBinCount = fftSize / 2;
         const frequencyData = new Uint8Array(frequencyBinCount);
 
-        let maxFreqVal = 0;
         for (let i = 0; i < frequencyBinCount; i++) {
-          // Scale magnitude to 0-255 range
-          // Adjust scale factor based on typical audio levels (may need tuning)
-          const normalized = Math.min(255, Math.round(magnitudes[i] * 100)); // Increased scaling factor from 0.01 to 100 to test sensitivity
+          // preAmpGain adjustment (default 4.0)
+          // 200 was previous implicit gain (100 in code * 2 roughly?).
+          // Let's rely on the prop. Code had 100.
+          // Let's use preAmpGain * 25 as a baseline scaler?
+          // If preAmpGain is 4.0, we want ~100x multiplier?
+          // Magnitude from fft-js is usually small.
+          // Let's try: magnitude * 100 * (preAmpGain / 4.0) ?
+          // Or just magnitude * 25 * preAmpGain
+          const normalized = Math.min(255, Math.round(magnitudes[i] * 25 * preAmpGain));
           frequencyData[i] = normalized;
-          if (normalized > maxFreqVal) maxFreqVal = normalized;
-        }
-
-        if (maxFreqVal > 0 && Math.random() < 0.1) {
-          console.log(`[AudioVisualizer] Non-zero freq data! Max: ${maxFreqVal}`);
         }
 
         // Map to bars
@@ -270,15 +263,9 @@ const AudioVisualizer = ({
 
         // Apply sensitivity
         const adjusted = new Uint8Array(smoothed.length);
-        let maxBarVal = 0;
         for (let i = 0; i < smoothed.length; i++) {
           const val = Math.min(255, Math.round(smoothed[i] * (sensitivity / 64)));
           adjusted[i] = val;
-          if (val > maxBarVal) maxBarVal = val;
-        }
-
-        if (maxBarVal > 0 && Math.random() < 0.1) {
-          console.log(`[AudioVisualizer] Bars updated! Max bar: ${maxBarVal}`);
         }
 
         barValuesRef.current = adjusted;
@@ -291,6 +278,14 @@ const AudioVisualizer = ({
     // Process audio every updateRate ms
     processingIntervalRef.current = setInterval(processAudio, updateRate);
 
+    // CLEANUP QUEUE periodically prevents memory leaks
+    const cleanupInterval = setInterval(() => {
+      const maxQueueSize = 16384; // Keep enough for overlap
+      if (audioDataQueueRef.current.length > maxQueueSize) {
+        audioDataQueueRef.current = audioDataQueueRef.current.slice(-maxQueueSize);
+      }
+    }, 1000);
+
     return () => {
       if (unlisten) {
         unlisten();
@@ -298,8 +293,9 @@ const AudioVisualizer = ({
       if (processingIntervalRef.current) {
         clearInterval(processingIntervalRef.current);
       }
+      clearInterval(cleanupInterval);
     };
-  }, [enabled, barCount, freqMin, freqMax, sensitivity, smoothing, fftSize, updateRate]);
+  }, [enabled, barCount, freqMin, freqMax, sensitivity, smoothing, fftSize, updateRate, preAmpGain]);
 
   // Rendering loop
   useEffect(() => {

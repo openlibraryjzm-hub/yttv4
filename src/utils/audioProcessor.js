@@ -40,20 +40,20 @@ export function getFrequencyData(audioContext, analyser, buffer) {
   // Create a source from the buffer
   const source = audioContext.createBufferSource();
   source.buffer = buffer;
-  
+
   // Connect to analyser
   source.connect(analyser);
   analyser.connect(audioContext.destination);
-  
+
   // Get frequency data
   const frequencyBinCount = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(frequencyBinCount);
   analyser.getByteFrequencyData(dataArray);
-  
+
   // Clean up
   source.disconnect();
   analyser.disconnect();
-  
+
   return dataArray;
 }
 
@@ -70,30 +70,48 @@ export function mapFrequencyToBars(frequencyData, barCount, freqMin, freqMax, sa
   const frequencyBinCount = frequencyData.length;
   const nyquist = sampleRate / 2;
   const barValues = new Uint8Array(barCount);
-  
+
   // Calculate frequency range per bin
   const freqPerBin = nyquist / frequencyBinCount;
-  
+
   for (let i = 0; i < barCount; i++) {
-    // Map bar index to frequency range
-    const barFreqMin = freqMin + (freqMax - freqMin) * (i / barCount);
-    const barFreqMax = freqMin + (freqMax - freqMin) * ((i + 1) / barCount);
-    
+    // Map bar index to frequency range (Logarithmic Scale)
+    // Formula: f = min * (max/min)^(i/N)
+    const logMin = Math.pow(freqMax / freqMin, i / barCount);
+    const logMax = Math.pow(freqMax / freqMin, (i + 1) / barCount);
+
+    const barFreqMin = freqMin * logMin;
+    const barFreqMax = freqMin * logMax;
+
     // Find corresponding bins
     const startBin = Math.floor(barFreqMin / freqPerBin);
     const endBin = Math.ceil(barFreqMax / freqPerBin);
-    
+
     // Average or max value in this range
     let sum = 0;
     let count = 0;
-    for (let bin = startBin; bin < endBin && bin < frequencyBinCount; bin++) {
+
+    // Ensure we at least check one bin (if band is narrower than bin width)
+    // Actually our start/end logic covers this: 
+    // If start is 2.6 (2) and end is 2.8 (3), loop runs for 2.
+    // If start is 2.1 (2) and end is 2.2 (3), loop runs for 2.
+    // The only case it might fail is if start/end are exact integers?
+    // e.g. 2.0 to 2.0 (impossible since min < max)
+
+    // Safety check to ensure we don't go out of bounds
+    const safeEndBin = Math.min(endBin, frequencyBinCount);
+    const safeStartBin = Math.min(startBin, safeEndBin - 1);
+
+    // Special case: if range is valid but loop wouldn't run (unlikely with floor/ceil)
+    // But let's just run the loop
+    for (let bin = Math.max(0, safeStartBin); bin < safeEndBin; bin++) {
       sum += frequencyData[bin];
       count++;
     }
-    
+
     barValues[i] = count > 0 ? Math.round(sum / count) : 0;
   }
-  
+
   return barValues;
 }
 
@@ -108,12 +126,12 @@ export function smoothBarValues(barValues, previousValues, smoothing) {
   if (smoothing === 0 || !previousValues) {
     return barValues;
   }
-  
+
   const smoothed = new Uint8Array(barValues.length);
   for (let i = 0; i < barValues.length; i++) {
     const prev = previousValues[i] || 0;
     smoothed[i] = Math.round(barValues[i] * (1 - smoothing) + prev * smoothing);
   }
-  
+
   return smoothed;
 }

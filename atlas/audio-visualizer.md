@@ -36,11 +36,11 @@ The system uses a "push" architecture where the Rust backend captures audio and 
 *   **Rendering**: HTML5 `<canvas>` (High performance 2D Context).
 *   **Processing Pipeline**:
     1.  **Queueing**: Receives raw chunks from Rust and adds them to a ring buffer (`audioDataQueueRef`).
-    2.  **Framing**: Slices the queue into overlapping windows (FFT Size used: 2048).
+    2.  **Framing**: Uses a sliding window (peeks at last 2048 samples) with ~60% overlap effectively.
     3.  **FFT**: Computes Fast Fourier Transform using `fft-js`.
-    4.  **Mapping**: Maps frequency bins to 113 visual bars (Logarithmic scale).
+    4.  **Mapping**: Maps frequency bins to 113 visual bars (Logarithmic scale matches human hearing).
     5.  **Smoothing**: Applies temporal smoothing to prevent jitter.
-    6.  **Drawing**: Clears and redraws the canvas 40 times per second.
+    6.  **Drawing**: Clears and redraws the canvas 60 times per second (16ms).
 
 ---
 
