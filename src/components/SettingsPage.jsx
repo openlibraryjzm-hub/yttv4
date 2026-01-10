@@ -1,33 +1,188 @@
-import React from 'react';
-import { Palette } from 'lucide-react';
+import React, { useState } from 'react';
+import { Palette, User, Smile } from 'lucide-react';
+import { useConfigStore } from '../store/configStore';
 import { THEMES } from '../utils/themes';
 
+const AVATARS = [
+    '( ͡° ͜ʖ ͡°)',
+    '( ͠° ͟ʖ ͡°)',
+    '( ͡~ ͜ʖ ͡°)',
+    '( . •́ _ʖ •̀ .)',
+    '( ಠ ͜ʖ ಠ)',
+    '( ͡o ͜ʖ ͡o)',
+    '( ͡◉ ͜ʖ ͡◉)',
+    '( ͡☉ ͜ʖ ͡☉)',
+    '( ͡⚆ ͜ʖ ͡⚆)',
+    '( ͡◎ ͜ʖ ͡◎)',
+    '( ✧≖ ͜ʖ≖)',
+    '( ง ͠° ͟ل͜ ͡°) ง',
+    '( ͡° ͜V ͡°)',
+    '¯\\_(ツ)_/¯',
+    '(>_>)',
+    '(^_^)',
+    '(¬_¬)',
+    `
+   /\\
+  /  \\
+  |  |
+  |  |
+ / == \\
+ |/**\\|
+`,
+    `
+ .--.
+|o_o |
+|:_/ |
+//   \\ \\
+(|     | )
+/'\\_   _/\`\\
+\\___)=(___/
+`,
+    'custom'
+];
+
 export default function SettingsPage({ currentThemeId, onThemeChange }) {
+    const [activeTab, setActiveTab] = useState('theme');
+    const { userName, setUserName, userAvatar, setUserAvatar } = useConfigStore();
+    const [customAvatar, setCustomAvatar] = useState('');
+
+    const handleAvatarSelect = (avatar) => {
+        if (avatar === 'custom') {
+            setUserAvatar(customAvatar || 'Custom');
+        } else {
+            setUserAvatar(avatar.trim());
+        }
+    };
+
+    const isMultiLine = (text) => text.includes('\n');
+
     return (
-        <div className="w-full h-full p-6 text-slate-800 space-y-8 overflow-y-auto">
+        <div className="w-full h-full p-6 text-slate-800 space-y-6 overflow-y-auto">
+            {/* ... keep existing header and tabs code ... */}
             <div className="flex items-center gap-3 border-b border-sky-50 pb-4">
-                <Palette className="text-sky-600" size={24} />
+                <div className="p-2 bg-sky-50 rounded-lg">
+                    {activeTab === 'theme' ? <Palette className="text-sky-600" size={24} /> : <User className="text-sky-600" size={24} />}
+                </div>
                 <h1 className="text-xl font-black uppercase tracking-widest text-sky-600">Configuration</h1>
             </div>
 
+            {/* Tabs */}
+            <div className="flex p-1 bg-slate-100 rounded-xl w-fit">
+                <button
+                    onClick={() => setActiveTab('theme')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'theme' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                >
+                    <Palette size={16} /> Theme
+                </button>
+                <button
+                    onClick={() => setActiveTab('profile')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'profile' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                >
+                    <User size={16} /> Profile
+                </button>
+            </div>
+
             <div className="space-y-8 pb-20">
-                <ConfigSection title="Theme" icon={Palette}>
-                    <div className="grid grid-cols-2 gap-2">
-                        {Object.entries(THEMES).map(([id, theme]) => (
-                            <button
-                                key={id}
-                                onClick={() => onThemeChange && onThemeChange(id)}
-                                className={`p-3 rounded-xl text-xs font-bold uppercase transition-all border-2 text-left flex flex-col gap-2 ${currentThemeId === id
-                                    ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-sm'
-                                    : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600'
-                                    }`}
-                            >
-                                <div className={`w-full h-8 rounded-md bg-gradient-to-br ${theme.bg.replace('from-', 'from-').replace('via-', 'via-').replace('to-', 'to-')}`}></div>
-                                <span>{theme.name}</span>
-                            </button>
-                        ))}
+                {activeTab === 'theme' ? (
+                    <ConfigSection title="Theme Selection" icon={Palette}>
+                        <div className="grid grid-cols-2 gap-3">
+                            {Object.entries(THEMES).map(([id, theme]) => (
+                                <button
+                                    key={id}
+                                    onClick={() => onThemeChange && onThemeChange(id)}
+                                    className={`p-3 rounded-xl text-xs font-bold uppercase transition-all border-2 text-left flex flex-col gap-2 ${currentThemeId === id
+                                        ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md ring-2 ring-sky-200'
+                                        : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600 hover:shadow-sm'
+                                        }`}
+                                >
+                                    <div className={`w-full h-12 rounded-lg bg-gradient-to-br ${theme.bg.replace('from-', 'from-').replace('via-', 'via-').replace('to-', 'to-')} shadow-inner`}></div>
+                                    <span className="px-1">{theme.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </ConfigSection>
+                ) : (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <ConfigSection title="Identity" icon={User}>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase text-slate-400 ml-1">Display Name</label>
+                                <input
+                                    type="text"
+                                    value={userName}
+                                    onChange={(e) => setUserName(e.target.value)}
+                                    className="w-full p-3 bg-white border-2 border-slate-100 rounded-xl font-bold text-slate-700 outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-100 transition-all placeholder:text-slate-300"
+                                    placeholder="Enter your name..."
+                                />
+                            </div>
+                        </ConfigSection>
+
+                        <ConfigSection title="Avatar (ASCII Art)" icon={Smile}>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                {AVATARS.map((avatar, index) => {
+                                    const isCustom = avatar === 'custom';
+                                    const isSelected = isCustom ? !AVATARS.slice(0, -1).includes(userAvatar) : userAvatar === avatar.trim();
+                                    const multiline = isMultiLine(avatar);
+
+                                    return (
+                                        <button
+                                            key={index}
+                                            onClick={() => handleAvatarSelect(avatar)}
+                                            className={`p-4 rounded-xl text-sm font-medium transition-all border-2 flex items-center justify-center min-h-[64px] ${isSelected
+                                                ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md ring-2 ring-sky-200'
+                                                : 'border-slate-100 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-600 hover:shadow-sm'
+                                                }`}
+                                        >
+                                            {isCustom ? (
+                                                <span className="italic opacity-50">Custom...</span>
+                                            ) : (
+                                                <span className={`font-mono text-xs ${multiline ? 'text-[4px] leading-none whitespace-pre text-left' : 'text-lg'}`}>{avatar.trim()}</span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Custom Avatar Input - Shown if Custom is selected or user types in it */}
+                            <div className={`mt-4 space-y-2 transition-all duration-300 ${!AVATARS.slice(0, -1).map(a => a.trim()).includes(userAvatar) ? 'opacity-100 translate-y-0' : 'opacity-50 grayscale'}`}>
+                                <label className="text-xs font-bold uppercase text-slate-400 ml-1">Custom ASCII Avatar (Multi-line supported)</label>
+                                <textarea
+                                    value={AVATARS.slice(0, -1).map(a => a.trim()).includes(userAvatar) ? customAvatar : userAvatar}
+                                    onChange={(e) => {
+                                        setCustomAvatar(e.target.value);
+                                        setUserAvatar(e.target.value);
+                                    }}
+                                    className="w-full p-3 bg-white border-2 border-slate-100 rounded-xl font-mono text-slate-700 outline-none focus:border-sky-400 focus:ring-4 focus:ring-sky-100 transition-all min-h-[120px] text-xs leading-tight whitespace-pre"
+                                    placeholder="Paste your ASCII art here..."
+                                />
+                            </div>
+                        </ConfigSection>
+
+                        {/* Preview */}
+                        <div className="mt-8 p-6 bg-gradient-to-br from-sky-400 to-blue-500 rounded-2xl shadow-lg text-white">
+                            <h3 className="text-xs font-black uppercase tracking-widest text-sky-100 mb-4 opacity-70 text-center">Banner Preview</h3>
+                            <div className="flex items-center gap-6 justify-center">
+                                {/* Auto-detect Layout wrapped in flexible container */}
+                                {isMultiLine(userAvatar) ? (
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="text-2xl font-black tracking-tight drop-shadow-md opacity-90">
+                                            <span>{userName}</span>
+                                        </div>
+                                        <pre className="font-mono text-[4px] leading-none whitespace-pre text-white/90 drop-shadow-md">
+                                            {userAvatar}
+                                        </pre>
+                                    </div>
+                                ) : (
+                                    <div className="text-3xl font-black tracking-tight drop-shadow-md">
+                                        <span className="mr-2 opacity-90">{userAvatar}</span>
+                                        <span>{userName}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                </ConfigSection>
+                )}
             </div>
         </div>
     );

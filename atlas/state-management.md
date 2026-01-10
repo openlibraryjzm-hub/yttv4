@@ -10,7 +10,7 @@ This document provides a comprehensive overview of all Zustand stores, their rel
 
 ## Overview
 
-The application uses **Zustand** (v5.0.9) for state management. Zustand is a lightweight, unopinionated state management library that provides a simple API for creating reactive stores. There are **7 Zustand stores** that manage different aspects of the application state.
+The application uses **Zustand** (v5.0.9) for state management. Zustand is a lightweight, unopinionated state management library that provides a simple API for creating reactive stores. There are **8 Zustand stores** that manage different aspects of the application state.
 
 ## Store Architecture
 
@@ -29,6 +29,9 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
    - `tabStore` - Tab organization
    - `tabPresetStore` - Tab preset configurations
    - `stickyStore` - Sticky video state management
+
+4. **Configuration State Stores** (persisted to localStorage):
+   - `configStore` - Theme and Profile settings
 
 ## Store Details
 
@@ -268,6 +271,34 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 
 **Dependencies:**
 - When `stickiedVideos` changes → `VideosPage` re-renders → Carousel updates and VideoCard menu items update
+
+---
+
+### 9. configStore (`src/store/configStore.js`)
+
+**Purpose**: Manages application-wide configuration including themes and user profile
+
+**State:**
+- `currentThemeId`: string - ID of the active theme (e.g., 'nebula', 'sunset')
+- `userName`: string - User's display name for banners (default: 'Boss')
+- `userAvatar`: string - User's ASCII art avatar (default: '( ͡° ͜ʖ ͡°)')
+- Legacy layout settings (deprecated/removed from UI but present in store structure)
+
+**Actions:**
+- `setCurrentThemeId(id)` - Sets the active application theme
+- `setUserName(name)` - Sets the user's display name
+- `setUserAvatar(avatar)` - Sets the user's ASCII avatar (supports multi-line)
+
+**Persistence:**
+- Persisted to localStorage: `config-storage`
+
+**Dependencies:**
+- When `currentThemeId` changes → App theme colors update globally
+- When `userName` or `userAvatar` changes → `PageBanner` re-renders with new identity
+- **Profile Customization**:
+  - `SettingsPage` provides UI to update name and avatar.
+  - Supports multi-line ASCII art (rendered in `<pre>` tag with 4px font).
+  - Single-line ASCII art (like Lenny faces) is scaled larger.
 
 ---
 

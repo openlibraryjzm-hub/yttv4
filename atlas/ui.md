@@ -326,7 +326,10 @@ Users see a 3-column grid of video cards showing videos from the current playlis
   - **Page Banner**: 
   - **Location**: Displayed at the top of the scrollable content area, above the Sticky Video Carousel.
   - **Content**: Shows the title (Playlist Name, "{Color} Folder", custom folder name, or "Unsorted Videos") and description text.
-  - **Metadata**: Displays video count, creation year (hardcoded 2026), and author (hardcoded "( ͡° ͜ʖ ͡°) Boss") in a row of badges.
+  - **Metadata**: Displays video count, creation year (hardcoded 2026), and **Author Identity**:
+    - Shows the user's configured **Display Name** and **ASCII Avatar** (from Settings).
+    - **Single-line Avatar**: Rendered large (text-3xl) as a watermark.
+    - **Multi-line Avatar**: Rendered in a compact monospace block (text-[4px]) below the name.
   - **Styling**: Uses vibrant gradients (matching folder color) and glassmorphism effects for a premium look.
   - **Background Pattern**: Features a smooth, continuously moving diagonal stripe pattern overlay (`animate-diagonal-pattern`) that adapts to any background color.
   - **Edit Button**: Small pen icon in the top-right corner (on hover) allows renaming the playlist or colored folder and updating its description via `EditPlaylistModal`. Custom folder names persist in `folder_metadata`. (Not available for Unsorted Videos).
@@ -867,3 +870,39 @@ The Explorer Page offers an alternative, focused way to browse content using a t
 
 **Aggregation Logic:**
 - **Thumbnails**: The Explorer page aggressively pre-fetches `first_video` for all displayed folders/playlists to ensuring rich visual thumbnails are always present, avoiding "empty" card states.
+
+---
+
+#### ### 4.2 Settings Page
+
+**1: User-Perspective Description**
+
+The Settings Page allows users to configure application-wide preferences. It is accessed via the **Config** button (Settings icon) in the PlayerController's central orb menu.
+
+- **Navigation Tabs**:
+  - **Theme**: Select application color themes.
+  - **Profile**: Customize user identity.
+
+- **Theme Tab**:
+  - Grid of available color themes (e.g., Nebula, Sunset, Ocean).
+  - Clicking a theme immediately applies it to the entire application.
+
+- **Profile Tab**:
+  - **Display Name**: Text input to set the user's name (displayed in banners).
+  - **Avatar Selection**: Grid of predefined ASCII art avatars (classic Lenny faces).
+  - **Custom Avatar**:
+    - **Custom ASCII**: Text area for pasting custom ASCII art.
+    - **Multi-line Support**: Automatically detects multi-line text and renders it in a preserved-whitespace block.
+  - **Live Preview**: Shows exactly how the Name + Avatar will look in the Page Banner.
+    - **Single-line**: Avatar large and side-by-side with name.
+    - **Multi-line**: Avatar small (4px font) and positioned *below* the name.
+
+**2: File Manifest**
+
+- `src/components/SettingsPage.jsx`: Main component
+- `src/store/configStore.js`: State management (`currentThemeId`, `userName`, `userAvatar`)
+- `src/utils/themes.js`: Theme definitions
+
+**3: Visual Design**
+- Uses a clean, card-based layout with `ConfigSection` components.
+- Live preview box uses the same gradient and styling as the actual Page Banner for accurate feedback.

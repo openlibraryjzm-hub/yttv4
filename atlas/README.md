@@ -80,8 +80,10 @@ yttv2/
 │   │   ├── StickyVideoCarousel.jsx     # Carousel/Grid for stickied videos
 │   │   ├── PageBanner.jsx              # Banner with metadata and animated diagonal pattern
 │   │   ├── EditPlaylistModal.jsx       # Modal for editing playlist/folder metadata
+│   │   ├── SettingsPage.jsx            # Application configuration (Theme, Profile)
 │   │   └── DebugRuler.jsx              # Ruler overlay component (non-functional - see debug.md)
 │   ├── store/                    # Zustand state management
+│   │   ├── configStore.js        # Theme and Profile configuration
 │   │   ├── layoutStore.js        # View mode, menu state, debug/inspect/ruler/dev toolbar toggles
 │   │   ├── navigationStore.js    # Current page (playlists/videos/history)
 │   │   ├── playlistStore.js      # Current playlist items, video index
@@ -148,6 +150,7 @@ yttv2/
 | Feature | Primary Document | Related Documents |
 |---------|-----------------|-------------------|
 | **Player Controller** | `advanced-player-controller.md` | `navigation-routing.md`, `state-management.md` |
+| **Settings & Profile** | `ui.md` | `state-management.md` (configStore) |
 | **Playlists & Tabs** | `playlist&tab.md` | `database-schema.md`, `api-bridge.md`, `state-management.md` |
 | **Import/Export** | `importexport.md` | `api-bridge.md`, `database-schema.md` |
 | **UI Components** | `ui.md` | `state-management.md`, `navigation-routing.md` |

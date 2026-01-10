@@ -4,7 +4,7 @@ import { Pen, Play } from 'lucide-react';
 import { getThumbnailUrl } from '../utils/youtubeUtils';
 
 
-const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, continueVideo, onContinue }) => {
+const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue }) => {
     // Find color config if folderColor is provided
     // If folderColor is 'unsorted', distinct gray style
     const isUnsorted = folderColor === 'unsorted';
@@ -70,35 +70,57 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                 </button>
             )}
 
-            <div className="relative z-10 flex flex-col justify-center h-full">
-                <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight drop-shadow-md">
-                    {title}
-                </h1>
+            {/* Content Container - Flex Row for Avatar + Text */}
+            <div className="relative z-10 flex items-center h-full gap-8">
+                {/* Avatar Section (Optional) */}
+                {avatar && (
+                    <div className="shrink-0 hidden md:flex flex-col items-center gap-1 animate-in fade-in slide-in-from-left-4 duration-700">
+                        <span className="text-white/90 font-black tracking-widest uppercase opacity-60 mix-blend-overlay text-[10px]">
+                            {author}
+                        </span>
+                        {avatar.includes('\n') ? (
+                            <pre className="font-mono text-[4px] leading-none whitespace-pre text-white/90 drop-shadow-md select-none opacity-70 mix-blend-overlay">
+                                {avatar}
+                            </pre>
+                        ) : (
+                            // Single line avatars (Lenny) are larger
+                            <div className="font-mono text-3xl font-bold text-white/90 drop-shadow-md whitespace-nowrap opacity-80 mix-blend-overlay">
+                                {avatar}
+                            </div>
+                        )}
+                    </div>
+                )}
 
-                {/* Metadata Row */}
-                <div className="flex items-center gap-3 text-white/80 font-medium text-sm md:text-base mb-4">
-                    {videoCount !== undefined && (
-                        <span>{videoCount} {videoCount === 1 ? 'Video' : 'Videos'}</span>
-                    )}
-                    {(videoCount !== undefined && (creationYear || author)) && (
-                        <span className="w-1 h-1 rounded-full bg-white/60" />
-                    )}
-                    {creationYear && (
-                        <span>{creationYear}</span>
-                    )}
-                    {(creationYear && author) && (
-                        <span className="w-1 h-1 rounded-full bg-white/60" />
-                    )}
-                    {author && (
-                        <span>{author}</span>
+                <div className="flex flex-col justify-center">
+                    <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight drop-shadow-md">
+                        {title}
+                    </h1>
+
+                    {/* Metadata Row */}
+                    <div className="flex items-center gap-3 text-white/80 font-medium text-sm md:text-base mb-4">
+                        {videoCount !== undefined && (
+                            <span>{videoCount} {videoCount === 1 ? 'Video' : 'Videos'}</span>
+                        )}
+                        {(videoCount !== undefined && (creationYear || author)) && (
+                            <span className="w-1 h-1 rounded-full bg-white/60" />
+                        )}
+                        {creationYear && (
+                            <span>{creationYear}</span>
+                        )}
+                        {(creationYear && author) && (
+                            <span className="w-1 h-1 rounded-full bg-white/60" />
+                        )}
+                        {author && (
+                            <span>{author}</span>
+                        )}
+                    </div>
+
+                    {description && (
+                        <p className="text-lg md:text-xl text-white/95 font-medium max-w-4xl leading-relaxed drop-shadow-sm opacity-90">
+                            {description}
+                        </p>
                     )}
                 </div>
-
-                {description && (
-                    <p className="text-lg md:text-xl text-white/95 font-medium max-w-4xl leading-relaxed drop-shadow-sm opacity-90">
-                        {description}
-                    </p>
-                )}
             </div>
 
             {/* Continue Section - Bottom Right */}

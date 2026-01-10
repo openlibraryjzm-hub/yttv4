@@ -38,11 +38,11 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
   - **Menu** (Menu icon) - Currently no action
   - **Spill** (Maximize2 icon) - Toggles spill/clipping mode
   - **Channel** (Youtube icon) - Currently no action
-  - **Config** (Settings icon) - Opens configuration page (Settings) for application themes.
+  - **Config** (Settings icon) - Opens configuration page (Settings) for application themes and profile customization.
   - **History** (Clock icon) - Navigates to History page
   - **Clipping** (Circle/Minimize2 icon) - Toggles spill/clipping mode (same as Spill)
 - **Spill Toggle**: When enabled, the orb image can extend beyond the circular boundary. Users can configure which quadrants allow spill via the config panel. The spill state is persisted to localStorage (`isSpillEnabled`).
-- **Config Panel**: When Config button is clicked, users are navigated to the Settings Page where they can select the application theme. Legacy layout adjustment sliders have been removed to preserve the stable, fixed layout.
+- **Config Panel**: When Config button is clicked, users are navigated to the Settings Page where they can select the application theme and customize their profile (name/avatar). Legacy layout adjustment sliders have been removed.
 
 **2: File Manifest**
 

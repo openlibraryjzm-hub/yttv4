@@ -14,6 +14,7 @@ import StickyVideoCarousel from './StickyVideoCarousel';
 import PageBanner from './PageBanner';
 import EditPlaylistModal from './EditPlaylistModal';
 import { updatePlaylist, getAllPlaylists, getFolderMetadata, setFolderMetadata } from '../api/playlistApi';
+import { useConfigStore } from '../store/configStore';
 
 const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   const {
@@ -44,6 +45,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     clearBulkTagSelections,
   } = useFolderStore();
   const { setViewMode, inspectMode } = useLayoutStore();
+  const { userName, userAvatar } = useConfigStore();
 
   // Helper to get inspect label
   const getInspectTitle = (label) => inspectMode ? label : undefined;
@@ -969,7 +971,8 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
               onEdit={bannerInfo.isEditable ? () => setShowEditModal(true) : undefined}
               videoCount={videosToDisplay.length}
               creationYear="2026"
-              author="( ͡° ͜ʖ ͡°) Boss"
+              author={userName}
+              avatar={userAvatar}
               continueVideo={continueVideo}
               onContinue={() => {
                 if (continueVideo && onVideoSelect) {

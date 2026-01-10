@@ -139,6 +139,12 @@ export const useConfigStore = create(
 
             orbButtonSpread: 35,
             setOrbButtonSpread: (val) => set({ orbButtonSpread: val }),
+
+            // User Profile
+            userName: 'Boss',
+            setUserName: (val) => set({ userName: val }),
+            userAvatar: '( ͡° ͜ʖ ͡°)',
+            setUserAvatar: (val) => set({ userAvatar: val }),
         }),
         {
             name: 'config-storage-v5', // name of the item in the storage (must be unique)
