@@ -43,17 +43,18 @@ Users see a 3-column grid of playlist cards in the Playlists page:
 - **Sticky Folders**: Folders that are "stuck" appear in the grid even when their parent playlist is collapsed. They appear after their parent playlist card regardless of expansion state.
 
 - **Header Actions**:
-  - **Folder Toggle Button**: Toggles display of colored folders in the grid (when on, shows all folders as separate cards)
-  - **Config Playlist Button**: Opens the unified Config Playlist Modal (Add/Modify/JSON)
-  - **Add Playlist Button**: Shortcut to open Config Modal in "Add" mode
+  - **Folder Toggle Button**: Toggles display of colored folders in the grid.
+  - **Add Playlist Button**: Opens the Playlist Uploader modal in "Add" mode.
+  - **(Removed)**: Config Playlist Button has been removed; functionality merged into Add/Modify workflows.
 
 - **Tab Bar**: Below header, shows all tabs with:
   - Active tab highlighted in blue
   - Tab name with playlist count in parentheses
-  - Plus button to create new tab
-  - Add button (+) on each tab to add playlists
-  - Delete button (X) on hover to remove tab
-  - Double-click to rename tab
+  - **3-Dot Menu**: Located inside each tab button (on hover/active), providing options to:
+    - **Add Playlists**: Open modal to add playlists to the tab.
+    - **Rename**: Enter rename mode.
+    - **Delete**: Remove the tab.
+  - Plus button to create new tab at the end of the bar.
 
 **2: File Manifest**
 

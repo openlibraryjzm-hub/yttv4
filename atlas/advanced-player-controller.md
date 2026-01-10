@@ -109,17 +109,19 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
 
 The Top Video Menu is the right rectangle in the PlayerController, displaying video information (Title, Author, View Count) and controls for the currently playing video. Metadata is fetched from the database (populated via YouTube API during import).
 
+**Note:** The action buttons (Star, Shuffle, Pin, Like, Menu) have been shifted left by 60px from their original centered positions to create a more compact layout adjacent to the navigation controls.
+
 ##### ### 1.2.1 Pins
 
 **1: User-Perspective Description**
 
-Users see a horizontal track of pinned video thumbnails at the top of the video menu rectangle:
-- **Pin Track**: A horizontal scrollable area displaying rectangular thumbnails of pinned videos. The track spans from an anchor point to a plus button position (configurable via config panel).
-- **Pin Thumbnails**: Each pinned video shows its YouTube thumbnail. Regular pins are 40px × 30px. **Priority pins** (set via yellow pin button) are 30% larger (52px × 39px) and have a 3px solid amber border (#fbbf24) to distinguish them visually.
-- **Priority Pin**: The leftmost pin is always the "priority pin" (only one can exist at a time). It's set via the yellow pin button in the video menu toolbar or from video hover overlay. Priority pins are always first in the track, regardless of when other pins were added.
-- **Eye Toggle Button**: A toggle button (eye icon when visible, eye-off when hidden) controls pin visibility. Located at the left edge of the track.
+Users see a centralized display of pinned videos, split between a dedicated Priority Pin and a flexible list of Normal Pins:
+
+- **Normal Pins Track**: A flexible container positioned **underneath** the Top Video Menu (absolute positioning below the card). It displays standard pinned video thumbnails (40px × 30px).
+- **Priority Pin**: The "Priority Pin" is no longer displayed in this track. It has been relocated to the **Top Playlist Menu** (see Section 1.3) to serve as a prominent visual anchor.
+- **Eye Toggle Button**: A toggle button at the left edge of the video menu controls the visibility of the normal pin track.
 - **Active Pin Indicator**: The currently playing video's pin is highlighted with a ring and scale effect.
-- **Hover Preview**: On hover over a pin, after 2 seconds a preview image appears (currently shows tab preview image, functionality may be incomplete).
+- **Hover Preview**: On hover over a pin, after 2 seconds a preview image appears.
 - **Unpin Button**: On hover over a pin, a small X button appears in the top-right corner to unpin the video.
 - **Click Behavior**: Clicking a pin switches playback to that video. If the video is in the current playlist, it navigates within the playlist. If not, it searches all playlists to find and load the containing playlist.
 
@@ -209,24 +211,24 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
   - **Next Video** (chevron right): Navigates to next video (-92px offset).
 
 - **Action Controls (Right-Aligned Cluster)**:
-  - **Star Button** (0px offset): A circular button with star icon for folder assignment.
+  - **Star Button** (-60px offset): A circular button with star icon for folder assignment.
     - **Filled star with colored border** = video belongs to that folder color
     - **Empty star with colored outline** = video not in folder, outline shows "quick assign" default color
     - Left-click assigns/unassigns video to quick assign folder
     - Right-click opens color picker to set quick assign default
-  - **Shuffle Button** (40px offset): A circular button with shuffle icon.
+  - **Shuffle Button** (-20px offset): A circular button with shuffle icon.
     - **Slate/Dark border** = shuffle from all videos
     - **Colored border** = shuffle from that folder color
     - Right-click opens color picker to set quick shuffle default
     - Left-click shuffles to random video from selected folder (or all videos)
-  - **Priority Pin Button** (80px offset): A yellow/amber pin button that sets the current video as the priority pin. 
+  - **Priority Pin Button** (20px offset): A yellow/amber pin button that sets the current video as the priority pin. 
     - Distinctive amber border (#fbbf24) and filled amber pin icon. 
     - Clicking sets the video as the priority pin (always leftmost in pin track).
-  - **Like Button** (120px offset): A circular button with thumbs-up icon.
+  - **Like Button** (60px offset): A circular button with thumbs-up icon.
     - **Filled with blue** = video is liked (in "Likes" playlist)
     - **Empty/outline** = video not liked
     - Clicking toggles like status
-  - **More Menu Button** (152px offset): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
+  - **More Menu Button** (92px offset): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
     - **Hide/Show Preview Menus**: Toggles visibility of side navigation menus.
     - **Hide/Show Dev Toolbar**: Toggles visibility of floating development toolbar.
 
@@ -345,19 +347,23 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
 
 **1: User-Perspective Description**
 
-The Top Playlist Menu is the left rectangle in the PlayerController. It has been visually refined to focus on content clarity and aesthetic consistency:
+The Top Playlist Menu is the left rectangle in the PlayerController. It has been significantly refined for compactness and accessibility:
 
-*   **Display**: Shows the current playlist's thumbnail image.
-*   **Thumbnail Style**: The image is now displayed fully (`object-contain`) within the menu container, ensuring no part of the thumbnail is cropped. The empty space on the sides (if any) is transparent, allowing the theme-consistent background to show through. Vertical borders (`border-x-4`) frame the image itself.
-*   **Spacing**: The gap between this menu, the central orb, and the video menu (`orbMenuGap`) has been increased (20px) to provide better visual separation.
-*   **Borders**: The menu container feature a consistent 4px border (`border-4`) that matches the Central Orb's color (e.g., Sky Blue), ensuring a cohesive "dashboard" look.
+*   **Display**: Shows the current playlist's thumbnail image, fully contained with vertical borders.
+*   **Priority Pin Display**: The **Priority Pin** (if set) is displayed prominently in this menu, positioned at the bottom-right (above the navigation capsule). It is larger than normal pins (74px × 56px) and features a distinct amber border.
+*   **Playlist Navigation Capsule**: A compact, pill-shaped control at the **bottom-right** of the menu (74px width, 32px height). contains:
+    *   **Previous/Next Chevrons**: For navigating playlists.
+    *   **Grid Icon**: Center button to go to Playlists Page.
+    *   **Always Visible**: Controls are always visible (no hover required).
+*   **Tab & Shuffle Buttons**:
+    *   **Tab Button**: Located at `top-1 left-1`. Opens tab selection (currently placeholder).
+    *   **Shuffle Button**: Located at `top-1 left-12`. Randomizes playlist.
+*   **Spacing**: The gap between this menu, the central orb, and the video menu (`orbMenuGap`) is 20px.
 
 Users see:
 - **Main Display**: The playlist thumbnail, centered and framed.
-- **Hover Interactions**: On hover, controls for navigating items or switching playlists appear (e.g., up/down arrows if enabled).
-- **Navigation Controls**:
-  - **Left Navigation**: A slide-out panel that appears to the left of the menu.
-  - **Tab Presets**: A dropdown for selecting tab presets.
+- **Priority Pin**: If active, overlaid at bottom-right.
+- **Actions**: Always-visible navigation capsule and top-left buttons.
 
 
 

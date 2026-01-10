@@ -31,15 +31,15 @@ export const useConfigStore = create(
             setPlaylistCapsuleX: (val) => set({ playlistCapsuleX: val }),
             playlistCapsuleY: 0,
             setPlaylistCapsuleY: (val) => set({ playlistCapsuleY: val }),
-            playlistCapsuleWidth: 150,
+            playlistCapsuleWidth: 74,
             setPlaylistCapsuleWidth: (val) => set({ playlistCapsuleWidth: val }),
-            playlistCapsuleHeight: 40,
+            playlistCapsuleHeight: 32,
             setPlaylistCapsuleHeight: (val) => set({ playlistCapsuleHeight: val }),
-            playlistChevronLeftX: -20,
+            playlistChevronLeftX: 0,
             setPlaylistChevronLeftX: (val) => set({ playlistChevronLeftX: val }),
             playlistPlayCircleX: 0,
             setPlaylistPlayCircleX: (val) => set({ playlistPlayCircleX: val }),
-            playlistChevronRightX: 20,
+            playlistChevronRightX: 0,
             setPlaylistChevronRightX: (val) => set({ playlistChevronRightX: val }),
 
             // Orb Image Tuning
@@ -78,18 +78,18 @@ export const useConfigStore = create(
             videoChevronRightX: -92, // Right of Grid
             setVideoChevronRightX: (val) => set({ videoChevronRightX: val }),
 
-            // Right Side Group (Pushing right to make space)
-            starButtonX: 0, // Center
+            // Right Side Group (Shifted left by 60px)
+            starButtonX: -60, // Was 0
             setStarButtonX: (val) => set({ starButtonX: val }),
-            shuffleButtonX: 40, // Right of Star
+            shuffleButtonX: -20, // Was 40
             setShuffleButtonX: (val) => set({ shuffleButtonX: val }),
 
             // Right Flank (Existing)
-            pinFirstButtonX: 80,
+            pinFirstButtonX: 20, // Was 80
             setPinFirstButtonX: (val) => set({ pinFirstButtonX: val }),
-            likeButtonX: 120,
+            likeButtonX: 60, // Was 120
             setLikeButtonX: (val) => set({ likeButtonX: val }),
-            menuButtonX: 152,
+            menuButtonX: 92, // Was 152
             setMenuButtonX: (val) => set({ menuButtonX: val }),
 
             // Custom Banner Image
@@ -110,11 +110,11 @@ export const useConfigStore = create(
             dotSize: 32,
             setDotSize: (val) => set({ dotSize: val }),
 
-            playlistHandleSize: 40,
+            playlistHandleSize: 26,
             setPlaylistHandleSize: (val) => set({ playlistHandleSize: val }),
-            playlistPlayIconSize: 20,
+            playlistPlayIconSize: 14,
             setPlaylistPlayIconSize: (val) => set({ playlistPlayIconSize: val }),
-            playlistChevronIconSize: 20,
+            playlistChevronIconSize: 14,
             setPlaylistChevronIconSize: (val) => set({ playlistChevronIconSize: val }),
 
             bottomBarHeight: 40,

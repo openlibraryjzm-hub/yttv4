@@ -147,11 +147,11 @@ Users see a 3-column grid of playlist cards. For detailed description of playlis
   - 3-dot menu with expand/export/add-to-tab/delete options
 
 - **Header Actions**: Top of page shows:
-- **Header Actions**: Top of page shows:
-  - **Folder toggle button**: Toggles inline folder display
-  - **Bulk import button**: Opens bulk import modal
-  - **Import playlist button**: Opens playlist/video import modal
-  - **Tab bar**: Below header, showing tab navigation
+- **Header Actions**: Top of page shows a compact single-row header:
+  - **Tab bar**: Integrated into the left side of the header.
+  - **Action Buttons**: Right-aligned buttons for:
+    - **Folder toggle**: Toggles inline folder display.
+    - **Add Playlist**: Opens playlist import/create modal.
 
 - **Colored Folders**: When folder toggle is on, folder cards appear in grid (see Section 2.2)
 

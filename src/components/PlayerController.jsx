@@ -1476,24 +1476,65 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                   </div>
                 </div>
 
-                {/* Hover Overlay Controls (Capsule, Tab, Shuffle) */}
-                <div className="absolute inset-0 z-30 flex items-center justify-center opacity-0 group-hover/playlist:opacity-100 transition-all duration-300">
+                {/* Hover Overlay Controls (Capsule, Tab, Shuffle) - Always Visible */}
+                <div className="absolute inset-0 z-30 pointer-events-none">
+                  {/* --- Row 1 --- */}
                   {/* Tab Button (Top Left) */}
-                  <button className="absolute top-2 left-2 text-sky-700/90 hover:text-sky-900 transition-colors bg-white/60 p-1.5 rounded-full hover:bg-white/80 hover:scale-110 active:scale-90 shadow-sm" title={getInspectTitle('Tab Menu')}>
-                    <List size={16} strokeWidth={2.5} />
+                  <button className="absolute top-1 left-1 text-sky-700/90 hover:text-sky-900 transition-colors bg-white/60 p-2 rounded-full hover:bg-white/80 hover:scale-110 active:scale-90 shadow-sm pointer-events-auto" title={getInspectTitle('Tab Menu')}>
+                    <List size={18} strokeWidth={2.5} />
                   </button>
 
-                  {/* Shuffle Button (Top Right) */}
+                  {/* Shuffle Button (Next to Tab) */}
                   <button
-                    className="absolute top-2 right-2 text-sky-700/90 hover:text-sky-900 transition-colors bg-white/60 p-1.5 rounded-full hover:bg-white/80 hover:scale-110 active:scale-90 shadow-sm"
+                    className="absolute top-1 left-11 text-sky-700/90 hover:text-sky-900 transition-colors bg-white/60 p-2 rounded-full hover:bg-white/80 hover:scale-110 active:scale-90 shadow-sm pointer-events-auto"
                     title={getInspectTitle('Shuffle to Random Playlist')}
                     onClick={() => handleShufflePlaylist()}
                   >
-                    <Shuffle size={14} strokeWidth={2.5} />
+                    <Shuffle size={16} strokeWidth={2.5} />
                   </button>
 
-                  {/* Playlist Capsule (Centered) */}
-                  <div className={`flex items-center gap-1 p-1 rounded-full shadow-2xl border border-white/20 bg-white/90 overflow-hidden transform transition-transform duration-300 scale-90 group-hover/playlist:scale-100`} style={{ width: `${playlistCapsuleWidth}px`, height: `${playlistCapsuleHeight}px` }}>
+                  {/* --- Row 2 (Placeholders) --- */}
+                  <button className="absolute top-11 left-1 text-sky-700/90 hover:text-sky-900 transition-colors bg-white/60 w-[34px] h-[34px] flex items-center justify-center rounded-full hover:bg-white/80 hover:scale-110 active:scale-90 shadow-sm pointer-events-auto" title="Placeholder">
+                    <span className="font-bold text-sm">?</span>
+                  </button>
+                  <button className="absolute top-11 left-11 text-sky-700/90 hover:text-sky-900 transition-colors bg-white/60 w-[34px] h-[34px] flex items-center justify-center rounded-full hover:bg-white/80 hover:scale-110 active:scale-90 shadow-sm pointer-events-auto" title="Placeholder">
+                    <span className="font-bold text-sm">?</span>
+                  </button>
+
+
+
+                  {/* Priority Pin (Above Capsule) */}
+                  {(() => {
+                    const priorityPinData = pins.find(pin => isPriorityPin(pin.video.id));
+                    if (!priorityPinData) return null;
+                    const thumbnailUrl = getThumbnailUrl(priorityPinData.video.video_id, 'default');
+                    return (
+                      <div className="absolute bottom-9 right-1 pointer-events-auto group/pin z-40">
+                        <button
+                          onClick={() => handlePinClick(priorityPinData.video)}
+                          className={`rounded-lg flex items-center justify-center transition-all shadow-md overflow-hidden ${activePin === priorityPinData.id ? 'ring-2 ring-sky-400' : ''}`}
+                          style={{ width: '74px', height: '56px', border: '3px solid #fbbf24' }}
+                          title={`Priority Pin: ${priorityPinData.video.title || 'Untitled Video'}`}
+                        >
+                          {thumbnailUrl ? (
+                            <img src={thumbnailUrl} alt={priorityPinData.video.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <Pin size={24} fill="#fbbf24" strokeWidth={2} />
+                          )}
+                        </button>
+                        <button
+                          className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/pin:opacity-100 transition-opacity shadow-sm border border-white z-20"
+                          onClick={(e) => handleUnpin(e, priorityPinData.video)}
+                          title="Unpin video"
+                        >
+                          <X size={10} strokeWidth={4} />
+                        </button>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Playlist Capsule (Bottom Right) */}
+                  <div className={`absolute bottom-1 right-0.5 pointer-events-auto flex items-center gap-1 p-1 rounded-full shadow-2xl border border-white/20 bg-white/90 overflow-hidden transition-transform duration-300`} style={{ width: `${playlistCapsuleWidth}px`, height: `${playlistCapsuleHeight}px` }}>
                     <button onClick={() => navigatePlaylist('down')} className="flex-grow flex items-center justify-center text-sky-400 active:scale-90" style={{ transform: `translateX(${playlistChevronLeftX}px)` }} title={getInspectTitle('Previous playlist')}><ChevronLeft size={playlistChevronIconSize} strokeWidth={4} /></button>
                     <button onClick={handlePlaylistsGrid} className={`rounded-full flex items-center justify-center shadow-sm shrink-0 transition-transform ${theme.accentBg}`} style={{ width: `${playlistHandleSize}px`, height: `${playlistHandleSize}px`, transform: `translateX(${playlistPlayCircleX}px)` }} title={getInspectTitle('View playlists grid')}><Library size={playlistPlayIconSize} fill="white" color="white" /></button>
                     <button onClick={() => navigatePlaylist('up')} className="flex-grow flex items-center justify-center text-sky-400 active:scale-90" style={{ transform: `translateX(${playlistChevronRightX}px)` }} title={getInspectTitle('Next playlist')}><ChevronRight size={playlistChevronIconSize} strokeWidth={4} /></button>
@@ -1557,10 +1598,10 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                 <div className="absolute top-0 left-0 w-full flex items-center -translate-y-1/2 z-40 px-2 pointer-events-none h-0">
                   {/* Eye toggle button removed */}
                   {showPins && !showColorPicker && (
-                    <div className="absolute flex items-center justify-start transition-all overflow-hidden" style={{ left: `${pinAnchorX}px`, top: `${pinAnchorY}px`, width: `${trackWidth}px`, height: `${pinHeight + 10}px` }}>
-                      <div className="flex items-center gap-1.5 w-full h-full px-1 pointer-events-auto flex-nowrap">
-                        <div className="flex gap-1.5 shrink-0">
-                          {pins.map((pin, idx) => {
+                    <div className="absolute flex items-center justify-center transition-all overflow-visible" style={{ left: 0, top: '100%', width: '100%', marginTop: '8px' }}>
+                      <div className="flex items-center gap-2 w-full pointer-events-auto flex-wrap justify-center">
+                        <div className="flex gap-1.5 flex-wrap justify-center">
+                          {pins.filter(pin => !isPriorityPin(pin.video.id)).map((pin, idx) => {
                             const IconComp = pin.icon;
                             const thumbnailUrl = pin.video ? getThumbnailUrl(pin.video.video_id, 'default') : null;
                             const isPriority = isPriorityPin(pin.video.id);
