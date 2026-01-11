@@ -1573,12 +1573,8 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
               </div>
 
               {/* Adjuster Border Guide */}
-              {isAdjustingImage && (
-                <div className="absolute inset-0 border-4 border-dashed border-sky-400/50 rounded-full animate-pulse z-50 pointer-events-none shadow-[0_0_20px_rgba(56,189,248,0.5)]" />
-              )}
-
               {/* GLASS INTERLAY */}
-              <div className="absolute inset-0 z-10 overflow-hidden rounded-full border-4 border-sky-100/50 pointer-events-none"><div className="absolute inset-0 bg-sky-200/10" /></div>
+              <div className="absolute inset-0 z-10 overflow-hidden rounded-full pointer-events-none"><div className="absolute inset-0 bg-sky-200/10" /></div>
               <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-transparent opacity-60 z-10 pointer-events-none rounded-full" />
 
               <input type="file" ref={fileInputRef} onChange={handleOrbImageUpload} accept="image/*" className="hidden" />
