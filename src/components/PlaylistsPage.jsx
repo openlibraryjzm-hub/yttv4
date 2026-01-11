@@ -5,6 +5,7 @@ import { usePlaylistStore } from '../store/playlistStore';
 import { Eye } from 'lucide-react';
 import { useFolderStore } from '../store/folderStore';
 import { useTabStore } from '../store/tabStore';
+import { useTabPresetStore } from '../store/tabPresetStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { useNavigationStore } from '../store/navigationStore';
 import { getFolderColorById } from '../utils/folderColors';
@@ -15,6 +16,8 @@ import LocalVideoUploader from './LocalVideoUploader';
 import CardMenu from './CardMenu';
 import TabBar from './TabBar';
 import CardThumbnail from './CardThumbnail';
+import PageBanner from './PageBanner';
+import TabPresetsDropdown from './TabPresetsDropdown';
 
 const PlaylistsPage = ({ onVideoSelect }) => {
   const [playlists, setPlaylists] = useState([]);
@@ -36,6 +39,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
   const { setPlaylistItems, currentPlaylistItems, setCurrentFolder, setPreviewPlaylist } = usePlaylistStore();
   const { showColoredFolders, setShowColoredFolders } = useFolderStore();
   const { tabs, activeTabId, addPlaylistToTab, removePlaylistFromTab } = useTabStore();
+  const { activePresetId, presets } = useTabPresetStore();
   const { setViewMode, viewMode, inspectMode } = useLayoutStore();
   const { setCurrentPage } = useNavigationStore();
 
@@ -495,13 +499,10 @@ const PlaylistsPage = ({ onVideoSelect }) => {
         </div>
       ) : (
         <>
-          {/* Header with Tabs, Upload Button and Folder Toggle - Compact Mode */}
-          <div className="flex items-center gap-2 px-2 py-1 border-b border-slate-700">
-            {/* Tabs - Flexible width */}
-            <TabBar onAddPlaylistToTab={addPlaylistToTab} />
-
+          {/* Header with Upload Button and Folder Toggle - Compact Mode */}
+          <div className="flex items-center gap-2 px-2 py-1 border-b border-slate-700 justify-end">
             {/* Actions - Fixed width */}
-            <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {/* Folder Toggle */}
               <button
                 onClick={() => {
@@ -534,6 +535,27 @@ const PlaylistsPage = ({ onVideoSelect }) => {
 
           {/* Playlist Grid - 3 per row */}
           <div className="flex-1 overflow-y-auto p-4 bg-transparent">
+            {(() => {
+              const activePreset = presets.find(p => p.id === activePresetId);
+              const bannerTitle = activePresetId === 'all' || !activePreset
+                ? "Playlists"
+                : `Playlists - ${activePreset.name}`;
+
+              return (
+                <PageBanner
+                  title={bannerTitle}
+                  description={null}
+                  color={null}
+                  isEditable={false}
+                  childrenPosition="bottom"
+                  topRightContent={<TabPresetsDropdown align="right" />}
+                >
+                  <div className="mt-4">
+                    <TabBar onAddPlaylistToTab={addPlaylistToTab} showPresets={false} />
+                  </div>
+                </PageBanner>
+              );
+            })()}
             <div className="grid grid-cols-3 gap-4">
               {/* Colored Folders - Filtered by active tab (only show if showColoredFolders is true) */}
               {showColoredFolders && folders

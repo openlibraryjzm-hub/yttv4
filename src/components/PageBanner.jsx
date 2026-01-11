@@ -6,7 +6,7 @@ import { getThumbnailUrl } from '../utils/youtubeUtils';
 
 import { useConfigStore } from '../store/configStore';
 
-const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue, children }) => {
+const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue, children, childrenPosition = 'right', topRightContent }) => {
     const { bannerPattern, customPageBannerImage } = useConfigStore();
 
     // Find color config if folderColor is provided
@@ -61,27 +61,30 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
     const isGif = customPageBannerImage?.startsWith('data:image/gif');
 
     return (
-        <div
-            className={`w-full relative overflow-hidden rounded-2xl mb-8 p-8 animate-fade-in shadow-lg group mx-auto ${(customPageBannerImage && !isGif) ? 'animate-page-banner-scroll' : ''}`}
-            style={{
-                ...gradientStyle,
-                boxShadow: `0 10px 25px -5px ${shadowColor}50`
-            }}
-        >
-            {/* Animated Pattern Overlay - Only show if NO custom image is set, OR if we want to overlay it. 
-                Let's hide it if custom image is set to let the image shine. */}
-            {!customPageBannerImage && (
-                <div className={`absolute inset-0 pointer-events-none z-0 pattern-${bannerPattern || 'diagonal'}`} />
-            )}
+        <div className="w-full relative mb-8 animate-fade-in group mx-auto">
 
-            {/* If custom image is set, maybe add a dark overlay for text readability */}
-            {customPageBannerImage && (
-                <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none" />
-            )}
+            {/* Background Layer - Hides overflow for shapes/patterns/images */}
+            <div
+                className={`absolute inset-0 rounded-2xl overflow-hidden shadow-lg ${(customPageBannerImage && !isGif) ? 'animate-page-banner-scroll' : ''}`}
+                style={{
+                    ...gradientStyle,
+                    boxShadow: `0 10px 25px -5px ${shadowColor}50`
+                }}
+            >
+                {/* Animated Pattern Overlay */}
+                {!customPageBannerImage && (
+                    <div className={`absolute inset-0 pointer-events-none z-0 pattern-${bannerPattern || 'diagonal'}`} />
+                )}
 
-            {/* Abstract Background Shapes for Premium Feel - Keep these, they look nice over images too */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transform group-hover:scale-110 transition-transform duration-1000 ease-in-out" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none" />
+                {/* Dark Overlay for Custom Images */}
+                {customPageBannerImage && (
+                    <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none" />
+                )}
+
+                {/* Abstract Background Shapes */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transform group-hover:scale-110 transition-transform duration-1000 ease-in-out" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none" />
+            </div>
 
             {/* Edit Button - Visible on hover if onEdit is provided */}
             {onEdit && (
@@ -97,8 +100,15 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                 </button>
             )}
 
-            {/* Content Container - Flex Row for Avatar + Text */}
-            <div className="relative z-10 flex items-center h-full gap-8 w-full">
+            {/* Top Right Content */}
+            {topRightContent && (
+                <div className="absolute top-8 right-8 z-30">
+                    {topRightContent}
+                </div>
+            )}
+
+            {/* Content Container - Allow overflow for dropdowns */}
+            <div className="relative z-10 flex items-center h-full gap-8 w-full p-8">
                 {/* Avatar Section (Optional) */}
                 {avatar && (
                     <div className="shrink-0 hidden md:flex flex-col items-center gap-1 animate-in fade-in slide-in-from-left-4 duration-700">
@@ -118,8 +128,8 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                     </div>
                 )}
 
-                <div className="flex flex-col justify-center">
-                    <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight drop-shadow-md">
+                <div className="flex flex-col justify-center min-w-0">
+                    <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight drop-shadow-md truncate">
                         {title}
                     </h1>
 
@@ -147,10 +157,17 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                             {description}
                         </p>
                     )}
+
+                    {/* Bottom Content (e.g. Tabs) */}
+                    {children && childrenPosition === 'bottom' && (
+                        <div className="mt-4">
+                            {children}
+                        </div>
+                    )}
                 </div>
 
-                {/* Right Content (e.g. Graphs) */}
-                {children && (
+                {/* Right Content */}
+                {children && childrenPosition === 'right' && (
                     <div className="ml-auto pl-8">
                         {children}
                     </div>

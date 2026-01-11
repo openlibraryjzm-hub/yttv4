@@ -74,7 +74,7 @@ const TabMenu = ({ onAdd, onRename, onDelete, inspectMode }) => {
   );
 };
 
-const TabBar = ({ onAddPlaylistToTab }) => {
+const TabBar = ({ onAddPlaylistToTab, showPresets = true }) => {
   const { tabs, activeTabId, setActiveTab, createTab, deleteTab, renameTab } = useTabStore();
   const { inspectMode } = useLayoutStore();
 
@@ -149,9 +149,11 @@ const TabBar = ({ onAddPlaylistToTab }) => {
         />
       )}
       <div className="flex items-center gap-2 min-w-0">
-        <div className="flex-shrink-0 relative z-20">
-          <TabPresetsDropdown />
-        </div>
+        {showPresets && (
+          <div className="flex-shrink-0 relative z-20">
+            <TabPresetsDropdown />
+          </div>
+        )}
 
         <div className="flex items-center gap-1 overflow-x-auto flex-1 min-w-0 pb-1 no-scrollbar">
           {visibleTabs.map((tab) => (
@@ -173,8 +175,8 @@ const TabBar = ({ onAddPlaylistToTab }) => {
               ) : (
                 <div
                   className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors group relative cursor-pointer ${activeTabId === tab.id
-                      ? 'bg-sky-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                    ? 'bg-sky-600 text-white'
+                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                     }`}
                   onClick={() => setActiveTab(tab.id)}
                   onDoubleClick={() => handleStartEdit(tab)}

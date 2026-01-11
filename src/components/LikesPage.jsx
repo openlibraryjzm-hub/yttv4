@@ -173,21 +173,21 @@ const LikesPage = ({ onVideoSelect }) => {
 
     return (
         <div className="w-full h-full flex flex-col bg-transparent">
-            <PageBanner
-                title="Liked Videos"
-                description="Your collection of liked videos."
-                color={null}
-                isEditable={false}
-            >
-                {/* Graph in Banner */}
-                {distribution.length > 0 && !loading && (
-                    <div className="flex justify-center">
-                        <PieGraph data={distribution} size={160} />
-                    </div>
-                )}
-            </PageBanner>
-
             <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <PageBanner
+                    title="Liked Videos"
+                    description="Your collection of liked videos."
+                    color={null}
+                    isEditable={false}
+                >
+                    {/* Graph in Banner */}
+                    {distribution.length > 0 && !loading && (
+                        <div className="flex justify-center">
+                            <PieGraph data={distribution} size={160} />
+                        </div>
+                    )}
+                </PageBanner>
+
                 <div className="p-6 space-y-8">
 
 

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTabPresetStore } from '../store/tabPresetStore';
 import { useTabStore } from '../store/tabStore';
 
-const TabPresetsDropdown = () => {
+const TabPresetsDropdown = ({ align = 'left' }) => {
   const { presets, activePresetId, setActivePreset, createPreset, deletePreset, updatePreset } = useTabPresetStore();
   const { tabs } = useTabStore();
   const [isOpen, setIsOpen] = useState(false);
@@ -89,8 +89,8 @@ const TabPresetsDropdown = () => {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${activePresetId === 'all'
-              ? 'bg-sky-600 text-white'
-              : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            ? 'bg-sky-600 text-white'
+            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
             }`}
           title="Tab Presets"
         >
@@ -104,7 +104,7 @@ const TabPresetsDropdown = () => {
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 mt-2 w-64 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden">
+          <div className={`absolute top-full mt-2 w-64 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden ${align === 'right' ? 'right-0' : 'left-0'}`}>
             {/* Preset List */}
             <div className="max-h-64 overflow-y-auto">
               {presets.map((preset) => (
@@ -208,13 +208,13 @@ const TabPresetsDropdown = () => {
                       key={tab.id}
                       onClick={() => handleToggleTab(tab.id)}
                       className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${isSelected
-                          ? 'bg-sky-600/20 border border-sky-500'
-                          : 'bg-slate-700 hover:bg-slate-600 border border-transparent'
+                        ? 'bg-sky-600/20 border border-sky-500'
+                        : 'bg-slate-700 hover:bg-slate-600 border border-transparent'
                         }`}
                     >
                       <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${isSelected
-                          ? 'bg-sky-500 border-sky-500'
-                          : 'border-slate-500'
+                        ? 'bg-sky-500 border-sky-500'
+                        : 'border-slate-500'
                         }`}>
                         {isSelected && (
                           <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
