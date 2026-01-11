@@ -96,6 +96,16 @@ pub fn get_playlist_items(
 }
 
 #[tauri::command]
+pub fn get_playlists_for_video_ids(
+    db: State<Mutex<Database>>,
+    video_ids: Vec<String>,
+) -> Result<std::collections::HashMap<String, Vec<String>>, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.get_playlists_for_video_ids(&video_ids)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub fn remove_video_from_playlist(
     db: State<Mutex<Database>>,
     playlist_id: i64,

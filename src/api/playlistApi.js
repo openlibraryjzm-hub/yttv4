@@ -66,6 +66,17 @@ export const getPlaylistItems = async (playlistId) => {
   }
 };
 
+export const getPlaylistsForVideoIds = async (videoIds) => {
+  try {
+    const result = await invoke('get_playlists_for_video_ids', { videoIds });
+    console.log('getPlaylistsForVideoIds API result:', result);
+    return result || {};
+  } catch (error) {
+    console.error('Error in getPlaylistsForVideoIds API:', error);
+    throw error;
+  }
+};
+
 export const removeVideoFromPlaylist = async (playlistId, itemId) => {
   return await invoke('remove_video_from_playlist', {
     playlistId,

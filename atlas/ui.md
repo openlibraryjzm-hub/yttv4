@@ -10,7 +10,7 @@ The UI system provides a consistent layout shell with a side menu that displays 
 - **Playlists**: See `playlist&tab.md` Section 2.1 for playlist grid details
 - **Videos**: See `playlist&tab.md` Section 2.2 for video grid and folder filtering
 - **History**: See `history.md` for history page details
-- **Settings**: See [Section 4.1.7](#417-settings-page) for customization options
+- **Settings**: See [Section 4.1.8](#418-settings-page) for customization options
 
 ---
 
@@ -889,31 +889,61 @@ Users see a modal dialog when selecting "Move to Playlist" or "Copy to Playlist"
    - Closes modal and clears state
 
 
-#### ### 4.1.5 Likes Page
+#### ### 4.1.6 Likes Page
 
 **1: User-Perspective Description**
 
 Access specific videos that have been marked as "Liked". This page aggregates all videos from the special "Likes" playlist.
 
-- **Grid View**: Displays video cards in a standard grid.
+- **Playlist Distribution Graph**: 
+  - A dynamic **Pie Chart** at the top of the page visualizes how the liked videos on the *current page* are distributed across your other playlists.
+  - Hovering over slices shows the playlist name and percentage.
+  - "Uncategorized" slice represents liked videos that are not in any other playlist.
+  - Powered by a custom SVG + Framer Motion component with animations.
+
+- **Grid View with Pagination**: 
+  - Displays video cards in a standard grid layout.
+  - **Paginated**: Videos are displayed in pages of 24 items to improve performance and navigation.
+  - **Controls**: Pagination controls (Page X of Y, Prev/Next, Page Numbers) are available at both the top and bottom of the list.
+
 - **Auto-Generated**: The "Likes" playlist is automatically created if it does not exist.
 - **Navigation**: Accessible via the "Like" (Heart) icon in the top navigation.
 
 **2: File Manifest**
 
 **UI/Components:**
-- `src/components/LikesPage.jsx`: Page component fetching and rendering liked videos.
+- `src/components/LikesPage.jsx`: Page component fetching data and managing pagination state.
+- `src/components/PieGraph.jsx`: Reusable SVG pie/donut chart component with animations.
+
+**API/Bridge:**
+- `src/api/playlistApi.js`:
+  - `getPlaylistsForVideoIds(videoIds)` - New command to fetch playlist distribution for a batch of videos.
+
+**Backend:**
+- `src-tauri/src/database.rs`: 
+  - `get_playlists_for_video_ids`: Optimized query to find playlist memberships for given video IDs.
 
 **3: The Logic & State Chain**
 
-**Initialization:**
-- On mount, fetches all playlists to find one named "Likes".
-- If missing, creates it.
-- Fetches items from that playlist ID.
+**Initialization & Pagination:**
+- Component mounts → Fetches "Likes" playlist items.
+- Sets up pagination (24 items/page).
+- Derives `currentItems` based on `currentPage`.
+
+**Distribution Calculation:**
+- When `currentItems` changes (page change):
+  - Extracts `video_id`s from the current page.
+  - Calls `getPlaylistsForVideoIds(videoIds)`.
+  - Backend performs a single SQL query to find all playlists containing these videos.
+  - Frontend aggregates the results:
+    - Counts occurrences per playlist (excluding "Likes").
+    - Identifies "Uncategorized" videos.
+    - Sorts by count and assigns colors.
+  - Renders `PieGraph` with the processed data.
 
 ---
 
-#### ### 4.1.6 Pins Page
+#### ### 4.1.7 Pins Page
 
 **1: User-Perspective Description**
 
@@ -937,7 +967,7 @@ Access videos that have been temporarily pinned during the current session.
 
 ---
 
-#### ### 4.1.7 Settings Page
+#### ### 4.1.8 Settings Page
 
 **1: User-Perspective Description**
 
@@ -1028,7 +1058,7 @@ Users access the configuration area via the "Config" (Settings icon) button on t
 
 ---
 
-#### ### 4.1.8 Support Page
+#### ### 4.1.9 Support Page
 
 **1: User-Perspective Description**
 

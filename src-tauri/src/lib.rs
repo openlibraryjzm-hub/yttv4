@@ -1,8 +1,8 @@
+mod audio_capture;
 mod commands;
 mod database;
 mod models;
 mod streaming_server;
-mod audio_capture;
 
 use database::Database;
 use std::sync::{Arc, Mutex};
@@ -54,6 +54,7 @@ pub fn run() {
             commands::delete_playlist_by_name,
             commands::add_video_to_playlist,
             commands::get_playlist_items,
+            commands::get_playlists_for_video_ids,
             commands::remove_video_from_playlist,
             commands::reorder_playlist_item,
             commands::assign_video_to_folder,

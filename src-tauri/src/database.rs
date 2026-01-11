@@ -1,6 +1,7 @@
 use crate::models::{Playlist, PlaylistItem, VideoProgress, WatchHistory};
 use chrono::Utc;
 use rusqlite::{params, Connection, Result};
+use std::collections::HashMap;
 
 pub struct Database {
     conn: Connection,
@@ -799,16 +800,15 @@ impl Database {
                 "DELETE FROM stuck_folders WHERE playlist_id = ?1 AND folder_color = ?2",
                 params![playlist_id, folder_color],
             )?;
-            Ok(false)
-        } else {
-            // Stick: add to stuck_folders
-            let now = Utc::now().to_rfc3339();
-            self.conn.execute(
-                "INSERT INTO stuck_folders (playlist_id, folder_color, created_at) VALUES (?1, ?2, ?3)",
-                params![playlist_id, folder_color, now],
-            )?;
-            Ok(true)
         }
+
+        // Stick: insert into stuck_folders
+        self.conn.execute(
+            "INSERT INTO stuck_folders (playlist_id, folder_color, created_at) VALUES (?1, ?2, ?3)",
+            params![playlist_id, folder_color, Utc::now().to_rfc3339()],
+        )?;
+
+        Ok(true)
     }
 
     pub fn is_folder_stuck(&self, playlist_id: i64, folder_color: &str) -> Result<bool> {
@@ -821,22 +821,148 @@ impl Database {
 
     pub fn get_all_stuck_folders(&self) -> Result<Vec<(i64, String)>> {
         let mut stmt = self.conn.prepare(
-            "SELECT playlist_id, folder_color FROM stuck_folders ORDER BY created_at DESC",
+            "SELECT playlist_id, folder_color FROM stuck_folders"
         )?;
 
-        let rows = stmt.query_map([], |row| {
-            Ok((
-                row.get::<_, i64>(0)?,    // playlist_id
-                row.get::<_, String>(1)?, // folder_color
-            ))
+        let folder_iter = stmt.query_map([], |row| {
+            Ok((row.get(0)?, row.get(1)?))
         })?;
 
-        let mut stuck_folders = Vec::new();
-        for row_result in rows {
-            stuck_folders.push(row_result?);
-        }
-        Ok(stuck_folders)
+        folder_iter.collect()
     }
+
+    // Folder Metadata operations
+    pub fn get_folder_metadata(
+        &self,
+        playlist_id: i64,
+        folder_color: &str,
+    ) -> Result<Option<(String, String, Option<String>)>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT custom_name, description, custom_ascii FROM folder_metadata WHERE playlist_id = ?1 AND folder_color = ?2"
+        )?;
+
+        match stmt.query_row(params![playlist_id, folder_color], |row| {
+            Ok((row.get(0)?, row.get(1)?, row.get(2)?))
+        }) {
+            Ok(data) => Ok(Some(data)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn set_folder_metadata(
+        &self,
+        playlist_id: i64,
+        folder_color: &str,
+        name: Option<&str>,
+        description: Option<&str>,
+        custom_ascii: Option<&str>,
+    ) -> Result<bool> {
+        let now = Utc::now().to_rfc3339();
+
+        // Check if exists
+        let exists: bool = self.conn.query_row(
+            "SELECT EXISTS(SELECT 1 FROM folder_metadata WHERE playlist_id = ?1 AND folder_color = ?2)",
+            params![playlist_id, folder_color],
+            |row| row.get(0),
+        )?;
+
+        if exists {
+            let mut query = "UPDATE folder_metadata SET updated_at = ?1".to_string();
+            let mut params: Vec<Box<dyn rusqlite::ToSql>> = vec![Box::new(now.clone())];
+            let mut idx = 2;
+
+            if let Some(n) = name {
+                query.push_str(&format!(", custom_name = ?{}", idx));
+                params.push(Box::new(n));
+                idx += 1;
+            }
+
+            if let Some(d) = description {
+                query.push_str(&format!(", description = ?{}", idx));
+                params.push(Box::new(d));
+                idx += 1;
+            }
+
+            if let Some(a) = custom_ascii {
+                query.push_str(&format!(", custom_ascii = ?{}", idx));
+                params.push(Box::new(a));
+                idx += 1;
+            }
+
+            query.push_str(&format!(" WHERE playlist_id = ?{} AND folder_color = ?{}", idx, idx + 1));
+            params.push(Box::new(playlist_id));
+            params.push(Box::new(folder_color));
+
+             let params_refs: Vec<&dyn rusqlite::ToSql> =
+                params.iter().map(|p| p.as_ref()).collect();
+            
+            let rows = self.conn.execute(&query, params_refs.as_slice())?;
+            Ok(rows > 0)
+        } else {
+            self.conn.execute(
+                "INSERT INTO folder_metadata (playlist_id, folder_color, custom_name, description, custom_ascii, created_at, updated_at) 
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                params![
+                    playlist_id, 
+                    folder_color, 
+                    name, 
+                    description, 
+                    custom_ascii,
+                    now, 
+                    now
+                ],
+            )?;
+            Ok(true)
+        }
+    }
+
+    // Video distribution operation
+    pub fn get_playlists_for_video_ids(
+        &self,
+        video_ids: &[String],
+    ) -> Result<HashMap<String, Vec<String>>> {
+        if video_ids.is_empty() {
+            return Ok(HashMap::new());
+        }
+
+        // Build the query dynamically based on the number of IDs
+        let placeholders: Vec<String> = video_ids.iter().map(|_| "?".to_string()).collect();
+        let query = format!(
+            "SELECT pi.video_id, p.name 
+             FROM playlist_items pi
+             INNER JOIN playlists p ON pi.playlist_id = p.id
+             WHERE pi.video_id IN ({})",
+            placeholders.join(",")
+        );
+
+        let mut stmt = self.conn.prepare(&query)?;
+        
+        // Bind parameters
+        let params: Vec<&dyn rusqlite::ToSql> = video_ids.iter().map(|id| id as &dyn rusqlite::ToSql).collect();
+        
+        // Execute and group results
+        let mut result = HashMap::new();
+        let rows = stmt.query_map(&*params, |row| {
+             Ok((
+                row.get::<_, String>(0)?, // video_id
+                row.get::<_, String>(1)?, // playlist_name
+             ))
+        })?;
+
+        for row_result in rows {
+            let (video_id, playlist_name) = row_result?;
+            result
+                .entry(video_id)
+                .or_insert_with(Vec::new)
+                .push(playlist_name);
+        }
+
+        Ok(result)
+    }
+
+
+
 
     pub fn get_watch_history(&self, limit: i32) -> Result<Vec<WatchHistory>> {
         let mut stmt = self.conn.prepare(
@@ -880,58 +1006,7 @@ impl Database {
         Ok(video_ids)
     }
 
-    // Folder Metadata operations
-    pub fn get_folder_metadata(
-        &self,
-        playlist_id: i64,
-        folder_color: &str,
-    ) -> Result<Option<(String, String, Option<String>)>> {
-        let mut stmt = self.conn.prepare(
-            "SELECT custom_name, description, custom_ascii FROM folder_metadata WHERE playlist_id = ?1 AND folder_color = ?2",
-        )?;
 
-        match stmt.query_row(params![playlist_id, folder_color], |row| {
-            Ok((
-                row.get::<_, Option<String>>(0)?.unwrap_or_default(),
-                row.get::<_, Option<String>>(1)?.unwrap_or_default(),
-                row.get::<_, Option<String>>(2)?,
-            ))
-        }) {
-            Ok((name, desc, ascii)) => {
-                if name.is_empty() && desc.is_empty() && ascii.is_none() {
-                    Ok(None)
-                } else {
-                    Ok(Some((name, desc, ascii)))
-                }
-            }
-            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-            Err(e) => Err(e),
-        }
-    }
-
-    pub fn set_folder_metadata(
-        &self,
-        playlist_id: i64,
-        folder_color: &str,
-        name: Option<&str>,
-        description: Option<&str>,
-        custom_ascii: Option<&str>,
-    ) -> Result<bool> {
-        let now = Utc::now().to_rfc3339();
-
-        let rows = self.conn.execute(
-            "INSERT INTO folder_metadata (playlist_id, folder_color, custom_name, description, custom_ascii, created_at, updated_at) 
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?6)
-             ON CONFLICT(playlist_id, folder_color) DO UPDATE SET
-             custom_name = excluded.custom_name,
-             description = excluded.description,
-             custom_ascii = excluded.custom_ascii,
-             updated_at = excluded.updated_at",
-            params![playlist_id, folder_color, name, description, custom_ascii, now],
-        )?;
-
-        Ok(rows > 0)
-    }
 
     // Video progress operations
     pub fn update_video_progress(
