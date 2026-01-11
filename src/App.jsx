@@ -16,6 +16,7 @@ import NativeVideoPlayer from './components/NativeVideoPlayer';
 import { useLayoutStore } from './store/layoutStore';
 import { usePlaylistStore } from './store/playlistStore';
 import { useNavigationStore } from './store/navigationStore';
+import { usePinStore } from './store/pinStore';
 import { initializeTestData } from './utils/initDatabase';
 import { addToWatchHistory, getWatchHistory, getAllPlaylists, getPlaylistItems } from './api/playlistApi';
 import { extractVideoId } from './utils/youtubeUtils';
@@ -43,6 +44,17 @@ function App() {
   const [secondPlayerPlaylistItems, setSecondPlayerPlaylistItems] = useState([]); // Track second player's playlist items
   const [activePlayer, setActivePlayer] = useState(1); // 1 = main player, 2 = mode 2 (alternative video in main player)
   const [currentThemeId, setCurrentThemeId] = useState('blue'); // Theme state lifted from PlayerController
+
+  // Pin expiration check
+  const { checkExpiration } = usePinStore();
+  useEffect(() => {
+    // Check on mount
+    checkExpiration();
+
+    // Check every minute
+    const interval = setInterval(checkExpiration, 60000);
+    return () => clearInterval(interval);
+  }, [checkExpiration]);
 
   // Mode 1 checkpoint - saves state before entering mode 2
   const [mode1Checkpoint, setMode1Checkpoint] = useState(null); // { videoUrl, playlistId, videoIndex, playlistItems }

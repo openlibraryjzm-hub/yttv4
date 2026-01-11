@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const StickyVideoCarousel = ({ children }) => {
+const StickyVideoCarousel = ({ children, title = "Stickied Videos" }) => {
     const scrollContainerRef = useRef(null);
     const [showControls, setShowControls] = useState(false);
 
@@ -21,7 +21,7 @@ const StickyVideoCarousel = ({ children }) => {
             <div className="w-full mb-8 animate-fade-in px-8"> {/* Added padding to match carousel visual width if needed, or just container padding */}
                 <div className="flex items-center gap-2 mb-3">
                     <SplatterIcon className="w-5 h-5 text-amber-500" />
-                    <h3 className="text-lg font-bold text-[#052F4A]">Stickied Videos</h3>
+                    <h3 className="text-lg font-bold text-[#052F4A]">{title}</h3>
                 </div>
                 <div className="grid grid-cols-3 gap-6">
                     {children}
@@ -101,7 +101,7 @@ const StickyVideoCarousel = ({ children }) => {
         >
             <div className="flex items-center gap-2 mb-3">
                 <SplatterIcon className="w-5 h-5 text-amber-500" />
-                <h3 className="text-lg font-bold text-[#052F4A]">Stickied Videos</h3>
+                <h3 className="text-lg font-bold text-[#052F4A]">{title}</h3>
                 <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
                     Scroll to view {count} items
                 </span>
