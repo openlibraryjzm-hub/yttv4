@@ -29,7 +29,7 @@ The application has three main pages:
 - **Likes Page** (`currentPage === 'likes'`) - Grid of liked video cards
 - **Pins Page** (`currentPage === 'pins'`) - Grid of pinned video cards
 - **Settings Page** (`currentPage === 'settings'`) - Configuration and theming
-- **Support Page** (`currentPage === 'support'`) - Radial support hub
+- **Support Page** (`currentPage === 'support'`) - Tabbed support hub
 
 ### Navigation Flow
 
@@ -270,7 +270,7 @@ When navigating playlists:
 ### Entry Point 2: Support Hub Navigation
 
 **Flow (Promo/Resources Links):**
-1. User clicks radial segment (promo/resources) → `navigateToPlaylist(keyword)` (SupportPage.jsx)
+1. User clicks content link (Future Plans / Resources) → `navigateToPlaylist(keyword)` (SupportPage.jsx)
 2. Searches loaded playlists for name match
 3. Calls `getPlaylistItems(playlistId)` → Gets videos
 4. Calls `setPlaylistItems(items, playlistId)` → Updates store

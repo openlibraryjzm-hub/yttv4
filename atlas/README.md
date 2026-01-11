@@ -83,7 +83,7 @@ yttv2/
 │   │   ├── PageBanner.jsx              # Banner with metadata and animated diagonal pattern
 │   │   ├── EditPlaylistModal.jsx       # Modal for editing playlist/folder metadata
 │   │   ├── SettingsPage.jsx            # Application configuration (Appearance, Visualizer, Orb, Profile)
-│   │   ├── SupportPage.jsx             # Radial Support Hub (Code, Dev, Community, Resources)
+│   │   ├── SupportPage.jsx             # Tabbed Support Hub (Code, Dev, Community, Resources)
 │   │   └── DebugRuler.jsx              # Ruler overlay component (non-functional - see debug.md)
 │   ├── store/                    # Zustand state management
 │   │   ├── configStore.js        # Theme and Profile configuration

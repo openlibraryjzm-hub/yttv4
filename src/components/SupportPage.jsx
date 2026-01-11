@@ -93,22 +93,13 @@ export default function SupportPage({ onVideoSelect }) {
         }
     ];
 
-    // State to track the last hovered item for the banner display
-    const [displayIndex, setDisplayIndex] = useState(null);
+    // State to track the last hovered item for the banner display (Defaults to 0 = Source Code)
+    const [displayIndex, setDisplayIndex] = useState(0);
 
-    // Derived active item: either currently hovered, or the last hovered (displayIndex), or default
-    const activeItem = (hoveredIndex !== null)
+    // Derived active item: either currently hovered, or the last hovered (displayIndex), or default to first item
+    const activeItem = (hoveredIndex !== null && items[hoveredIndex])
         ? items[hoveredIndex]
-        : (displayIndex !== null ? items[displayIndex] : {
-            id: 'default',
-            label: 'Support Hub',
-            sublabel: 'Explore Options',
-            icon: Heart,
-            color: 'from-slate-800 to-slate-900',
-            textColor: 'text-rose-500',
-            description: 'Hover over any section to preview details. Click to navigate to the selected resource.',
-            isDefault: true
-        });
+        : (items[displayIndex] || items[0]);
 
     // State for random thumbnails
     const [thumbnails, setThumbnails] = useState([]);
@@ -133,6 +124,8 @@ export default function SupportPage({ onVideoSelect }) {
 
     const activeIndex = (hoveredIndex !== null) ? hoveredIndex : (displayIndex !== null ? displayIndex : -1);
     const currentThumbnail = (activeIndex >= 0 && thumbnails[activeIndex]) ? thumbnails[activeIndex] : (thumbnails[0] || null);
+
+    const isSocial = ['code', 'twitter', 'discord'].includes(activeItem.id);
 
     return (
         <div className="w-full h-full flex flex-col items-center justify-start pt-4 bg-transparent relative overflow-hidden p-8 gap-0">
@@ -162,9 +155,9 @@ export default function SupportPage({ onVideoSelect }) {
             </div>
 
             {/* Top Banner - Horizontal - Clickable to Activate */}
+            {/* Top Banner - Horizontal - Static (No Interaction) */}
             <div
-                onClick={() => activeItem.action()}
-                className={`w-full max-w-4xl h-32 rounded-2xl relative overflow-hidden transition-all duration-300 shadow-xl group shrink-0 z-20 cursor-pointer hover:scale-[1.02] active:scale-[0.98] border border-white/10 hover:border-white/30`}
+                className={`w-full max-w-4xl h-32 rounded-2xl relative overflow-hidden transition-all duration-300 shadow-xl group shrink-0 z-20 border border-white/10`}
             >
                 {/* Background Layer - Animated */}
                 <AnimatePresence mode="popLayout" initial={false}>
@@ -223,41 +216,75 @@ export default function SupportPage({ onVideoSelect }) {
             <div className="relative w-full max-w-7xl h-[400px] px-8 pb-12 z-10 flex gap-8 items-center mt-12">
 
                 {/* Left Side: Video Preview - Kept at smaller "current" size (approx 500x300) */}
-                <div className="w-[500px] h-[300px] shrink-0 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/10 bg-slate-900 group relative">
-                    <AnimatePresence mode="popLayout" initial={false}>
-                        {currentThumbnail && (
+                <div
+                    onClick={() => activeItem.action()}
+                    className="w-[500px] h-[300px] shrink-0 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/10 bg-slate-900 group relative flex items-center justify-center cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-transform duration-300 hover:border-white/30"
+                >
+                    <AnimatePresence mode="popLayout">
+                        {isSocial ? (
                             <motion.div
                                 key={activeItem.id}
-                                initial={{ opacity: 0, scale: 1.05 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.5 }}
-                                className="absolute inset-0 w-full h-full"
+                                initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
+                                transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                                className="absolute inset-0 w-full h-full flex flex-col items-center justify-center gap-4"
                             >
-                                <img
-                                    src={currentThumbnail}
-                                    alt="Preview"
-                                    className="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity duration-700"
-                                />
-                                {/* Overlay info */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-wrap content-end p-8">
-                                    <div className="w-full">
-                                        <span className="text-xs font-bold text-white/70 tracking-widest uppercase mb-2 block">Featured Content</span>
-                                        <h3 className="text-white font-black text-2xl leading-tight drop-shadow-xl mb-3">
-                                            {activeItem.sublabel}
-                                        </h3>
-                                        <p className="text-white/60 text-sm line-clamp-2">
-                                            Check out this featured video.
-                                        </p>
-                                    </div>
+                                <div className={`absolute inset-0 opacity-20 bg-gradient-to-br ${activeItem.color} blur-3xl rounded-full scale-150 animate-pulse`}></div>
+
+                                {React.createElement(activeItem.icon, {
+                                    size: 100,
+                                    className: "text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] relative z-10",
+                                    strokeWidth: 1.5
+                                })}
+
+                                <div className="relative z-10 text-center">
+                                    <h3 className="text-2xl font-black text-white tracking-tight uppercase drop-shadow-lg">{activeItem.label}</h3>
+                                    <p className={`text-sm font-bold opacity-80 ${activeItem.textColor}`}>{activeItem.sublabel}</p>
                                 </div>
-                                {/* Play Button Overlay */}
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 backdrop-blur-[2px]">
-                                    <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center pl-2 border border-white/40 shadow-2xl hover:scale-110 transition-transform cursor-pointer">
-                                        <Video size={40} className="text-white fill-white" />
+
+                                {/* External Link Indicator - Bottom Right */}
+                                <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                                    <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 text-white shadow-lg">
+                                        <ExternalLink size={24} />
                                     </div>
                                 </div>
                             </motion.div>
+                        ) : (
+                            currentThumbnail && (
+                                <motion.div
+                                    key={activeItem.id}
+                                    initial={{ opacity: 0, scale: 1.05 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="absolute inset-0 w-full h-full"
+                                >
+                                    <img
+                                        src={currentThumbnail}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity duration-700"
+                                    />
+                                    {/* Overlay info */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-wrap content-end p-8">
+                                        <div className="w-full">
+                                            <span className="text-xs font-bold text-white/70 tracking-widest uppercase mb-2 block">Featured Content</span>
+                                            <h3 className="text-white font-black text-2xl leading-tight drop-shadow-xl mb-3">
+                                                {activeItem.sublabel}
+                                            </h3>
+                                            <p className="text-white/60 text-sm line-clamp-2">
+                                                Check out this featured video.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {/* Play Button Overlay */}
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 backdrop-blur-[2px]">
+                                        <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center pl-2 border border-white/40 shadow-2xl hover:scale-110 transition-transform cursor-pointer">
+                                            <Video size={40} className="text-white fill-white" />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )
                         )}
                     </AnimatePresence>
                 </div>

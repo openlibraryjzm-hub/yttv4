@@ -1032,92 +1032,47 @@ Users access the configuration area via the "Config" (Settings icon) button on t
 
 **1: User-Perspective Description**
 
-The Support Page acts as a central hub for community engagement, resources, and developer connection. It features a unique **Radial Ring UI** that is distinct from the rest of the grid-based interface.
+The Support Page acts as a central hub for community engagement, resources, and developer connection. It features a modern **Tabbed Split-View Interface**.
 
-  - **Radial Ring Layout**:
-  - A central hub featuring 5 interactive segments arranged in a circle.
-  - **Dual Banner System**:
-    - **Top Banner**: Displays the active segment's title, subtitle, and icon with a rich gradient background.
-    - **Bottom Banner**: Displays the active segment's description and interaction prompt.
-  - **Segments**:
-    1.  **Code**: Links to the open-source GitHub repository.
-    2.  **Developer**: Links to the head developer's X (Twitter) profile.
-    3.  **Community**: Links to the Discord community server.
-    4.  **Future Plans**: Navigates to a "Promo" playlist within the app detailing future projects.
-    5.  **Resources**: Navigates to a "Resources" playlist helping users get started.
-  - **Interactions**:
-    - Hovering a segment expands it and updates the Dual Banner system (Top Banner for identity, Bottom Banner for details).
-    - Clicking an external link segment opens the URL in the system browser.
-    - Clicking an internal link segment (Future Plans, Resources) navigates to the respective playlist in the Videos view.
+- **Tabbed Interface**:
+  - **Default State**: Opens directly to the **Source Code** tab, immediately playing the spinning Github logo animation.
+  - **Tabs**: Source Code, Developer, Community, Future Plans, Resources.
 
-- **Visual Design**:
-  - Features a custom SVG implementation for the segmented ring.
-  - Includes complex gradients and hover animations (scale, opacity, drop shadow).
-  - Background includes a subtle dot matrix pattern with a radial mask.
+- **Active Content Banner**:
+  - A large, animated banner displaying the active section's title, subtitle, and description.
+  - The background gradient and abstract shapes animate when switching sections.
+
+- **Split View Content**:
+  - **Left Side (Dynamic Interaction)**:
+    - **Social Sections** (Source Code, Developer, Community): Displays a large, **spinning 3D logo** of the respective platform (Github, X/Twitter, Discord). The animation "spins into place" on activation.
+    - **Content Sections** (Future Plans, Resources): Displays a **video preview thumbnail** with a "Featured Content" overlay and play button, maintaining the classic video toggle behavior.
+  - **Right Side (AI Showcase)**:
+    - Displays a looped promotional GIF (Grok AI) showcasing the project's advanced capabilities.
 
 **2: File Manifest**
 
 **UI/Components:**
-- `src/components/SupportPage.jsx`: Standalone page component implementing the custom radial UI.
-- `src/components/TopNavigation.jsx`: Updated to include "Support" tab.
+- `src/components/SupportPage.jsx`: Main hub component using Framer Motion for animations.
+- `src/components/TopNavigation.jsx`: Navigation tab entry.
 
 **State Management:**
-- `src/store/navigationStore.js`: Handles routing to `support` page.
-- `src/store/playlistStore.js`: Handles searching for and setting active playlists for internal navigation links.
+- `src/components/SupportPage.jsx` (local state):
+  - `activeItem`: Currently selected section (Code, Dev, Community, etc.).
+  - `isSocial`: Boolean derived from `activeItem` to toggle between Spinning Logo and Video Preview.
 
 **3: The Logic & State Chain**
 
-**Internal Navigation Flow (Promo/Resources):**
-1. User clicks "Future Plans" or "Resources" segment.
-2. `navigateToPlaylist(keyword)` function is triggered.
-3. Searches loaded playlists for name match (case-insensitive).
-4. If found:
-   - Fetches playlist items via `getPlaylistItems()`.
-   - Updates `playlistStore` with new items.
-   - Sets `navigationStore.currentPage` to `'videos'`.
-5. If not found:
-   - Displays alert to user.
-#### ### 4.1.5 Settings Page
+**Interactivity Flow:**
+1. **Tab Selection**:
+   - User clicks a tab (e.g., "Developer").
+   - `displayIndex` updates → `activeItem` changes.
+   - `AnimatePresence` triggers exit/enter animations for the banner and left-side content.
 
-**1: User-Perspective Description**
+2. **Dynamic Content Rendering**:
+   - Component checks if `activeItem` is a social link (`code`, `twitter`, `discord`).
+   - **If Social**: Renders `motion.div` with spinning logo animation (`rotate: -180` to `0`, `scale: 0.5` to `1`).
+   - **If Content**: Renders `motion.div` with video thumbnail image.
 
-The Settings Page allows users to customize the application's appearance, behavior, and user identity. It is organized into 4 main tabs:
-
-- **Appearance Tab**:
-  - **Color Palette**: Choose between themes (e.g., Cool Blue, Midnight).
-  - **App Banner**: 
-    - View active banner (/public/banner.PNG).
-    - Select from presets (Default, Cosmic, Nature, Industrial) - *Note: Currently Mock*.
-    - Upload custom banner - *Note: Currently Mock*.
-  - **Page Banner**: 
-    - Customize the background pattern for video page headers.
-    - Options: Diagonal, Dots, Mesh (Diamond Grid), Solid.
-    - **Live Preview**: Shows a real-time preview of the selected pattern.
-  - **Player Borders**: Mock options for customizing the video player border style.
-
-- **Visualizer Tab**:
-  - **Style**: Mock options for visualizer patterns (Frequency Bars, Digital Wave, etc.).
-  - **Color Mode**: Mock options for visualizer colors.
-
-- **Orb Tab**:
-  - **Custom Image**: Upload a custom image for the central orb.
-  - **Spill**: Enable/disable spill effect (image breaking out of the circle).
-  - **Spill Quadrants**: Toggle spill for individual corners (TL, TR, BL, BR).
-  - **Scale**: Adjust image zoom level (0.5x - 3.0x).
-
-- **Signature Tab**:
-  - **Pseudonym**: Set the display name used in banners.
-  - **Avatar**: Select from ASCII art presets or enter a custom ASCII avatar (multi-line supported).
-
-**2: File Manifest**
-
-- src/components/SettingsPage.jsx: Main settings component.
-- src/store/configStore.js: State management for all settings.
-- src/App.css: CSS animations for Page Banner patterns (.pattern-mesh, .pattern-dots, etc.).
-
-**3: Logic & State**
-
-- **Page Banner Logic**:
-  - Selecting a pattern updates configStore.bannerPattern.
-  - PageBanner.jsx watches this value and applies the corresponding CSS class (pattern-{name}).
-  - CSS animations in App.css handle the visual movement.
+3. **Navigation**:
+   - **Social Links**: Clicking the banner trigger `openUrl()` to external sites.
+   - **Internal Content**: Clicking "Future Plans" or "Resources" triggers `navigateToPlaylist()`, switching the view to the `VideosPage` with the target playlist loaded.
