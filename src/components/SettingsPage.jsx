@@ -51,7 +51,9 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
         isSpillEnabled, setIsSpillEnabled,
         orbSpill, setOrbSpill,
         orbImageScale, setOrbImageScale,
-        bannerPattern, setBannerPattern
+        bannerPattern, setBannerPattern,
+        customBannerImage, setCustomBannerImage,
+        customPageBannerImage, setCustomPageBannerImage
     } = useConfigStore();
     const [customAvatar, setCustomAvatar] = useState('');
     const [copied, setCopied] = useState(false);
@@ -85,6 +87,29 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setCustomOrbImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleBannerUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setCustomBannerImage(reader.result);
+                setMockAppBanner('uploaded');
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handlePageBannerUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setCustomPageBannerImage(reader.result);
             };
             reader.readAsDataURL(file);
         }
@@ -169,14 +194,29 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                                 </div>
                                 <div className="w-full h-32 rounded-xl overflow-hidden shadow-sm border-2 border-slate-100 relative group bg-slate-50">
                                     <img
-                                        src="/banner.PNG"
+                                        src={customBannerImage || "/banner.PNG"}
                                         alt="Current Banner"
                                         className="w-full h-full object-cover"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+                                    {!customBannerImage && (
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+                                    )}
                                     <div className="absolute bottom-3 left-3 text-white text-xs font-bold drop-shadow-md">
-                                        /public/banner.PNG
+                                        {customBannerImage ? "Custom Upload" : "/public/banner.PNG"}
                                     </div>
+                                    {customBannerImage && (
+                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <button
+                                                onClick={() => {
+                                                    setCustomBannerImage(null);
+                                                    setMockAppBanner('default');
+                                                }}
+                                                className="px-4 py-2 bg-red-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-600 transition-colors shadow-lg"
+                                            >
+                                                Remove Custom Banner
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -189,7 +229,13 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                                         return (
                                             <button
                                                 key={id}
-                                                onClick={() => setMockAppBanner(id)}
+                                                onClick={() => {
+                                                    setMockAppBanner(id);
+                                                    if (id === 'default') {
+                                                        setCustomBannerImage(null);
+                                                    }
+                                                    // Future: Set other presets if we have assets
+                                                }}
                                                 className={`p-2 rounded-xl text-xs font-bold uppercase transition-all border-2 flex flex-col gap-2 items-center ${mockAppBanner === id
                                                     ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md'
                                                     : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600'
@@ -212,12 +258,18 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
 
                             {/* Upload Action */}
                             <div className="pt-2 border-t border-slate-100">
-                                <button className="w-full py-3 bg-white border-2 border-dashed border-slate-300 rounded-xl text-xs font-bold uppercase text-slate-500 hover:bg-sky-50 hover:border-sky-400 hover:text-sky-600 hover:shadow-sm transition-all flex items-center justify-center gap-2 group">
+                                <label className="w-full py-3 bg-white border-2 border-dashed border-slate-300 rounded-xl text-xs font-bold uppercase text-slate-500 hover:bg-sky-50 hover:border-sky-400 hover:text-sky-600 hover:shadow-sm transition-all flex items-center justify-center gap-2 group cursor-pointer relative overflow-hidden">
                                     <div className="p-1 bg-slate-100 rounded-md group-hover:bg-white transition-colors">
                                         <Image size={14} />
                                     </div>
                                     Upload Custom Banner
-                                </button>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleBannerUpload}
+                                        className="hidden"
+                                    />
+                                </label>
                                 <p className="text-[10px] text-slate-400 text-center mt-2">
                                     Supports PNG, JPG, WEBP. Recommended size: 1920x200px.
                                 </p>
@@ -228,11 +280,34 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                             {/* Live Preview */}
                             <div className="mb-4 space-y-2">
                                 <label className="text-xs font-bold uppercase text-slate-400 ml-1">Live Preview</label>
-                                <div className="w-full h-24 bg-gradient-to-r from-sky-400 to-blue-600 rounded-xl overflow-hidden relative shadow-inner border-2 border-slate-100 flex items-center justify-center">
-                                    <div className={`absolute inset-0 pattern-${bannerPattern || 'diagonal'}`}></div>
-                                    <span className="relative z-10 text-white font-black text-2xl tracking-widest drop-shadow-md uppercase opacity-90">
-                                        {bannerPattern === 'waves' ? 'MESH' : bannerPattern || 'DIAGONAL'}
-                                    </span>
+                                <div className="w-full h-24 bg-gradient-to-r from-sky-400 to-blue-600 rounded-xl overflow-hidden relative shadow-inner border-2 border-slate-100 flex items-center justify-center group">
+                                    {customPageBannerImage ? (
+                                        <>
+                                            <div
+                                                className="absolute inset-0 bg-cover bg-center"
+                                                style={{ backgroundImage: `url(${customPageBannerImage})` }}
+                                            />
+                                            <div className="absolute inset-0 bg-black/40"></div>
+                                            <span className="relative z-10 text-white font-black text-2xl tracking-widest drop-shadow-md uppercase opacity-90">
+                                                CUSTOM
+                                            </span>
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity z-20">
+                                                <button
+                                                    onClick={() => setCustomPageBannerImage(null)}
+                                                    className="px-4 py-2 bg-red-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-red-600 transition-colors shadow-lg"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className={`absolute inset-0 pattern-${bannerPattern || 'diagonal'}`}></div>
+                                            <span className="relative z-10 text-white font-black text-2xl tracking-widest drop-shadow-md uppercase opacity-90">
+                                                {bannerPattern === 'waves' ? 'MESH' : bannerPattern || 'DIAGONAL'}
+                                            </span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -244,19 +319,41 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                                     return (
                                         <button
                                             key={id}
-                                            onClick={() => setBannerPattern(id)}
-                                            className={`p-2 rounded-xl text-xs font-bold uppercase transition-all border-2 flex flex-col gap-2 items-center ${bannerPattern === id
+                                            onClick={() => {
+                                                setBannerPattern(id);
+                                                setCustomPageBannerImage(null); // Clear custom image when selecting a pattern
+                                            }}
+                                            className={`p-2 rounded-xl text-xs font-bold uppercase transition-all border-2 flex flex-col gap-2 items-center ${bannerPattern === id && !customPageBannerImage
                                                 ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md'
                                                 : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600'
                                                 }`}
                                         >
-                                            <div className="w-full h-12 bg-sky-400 rounded-lg overflow-hidden relative opacity-80">
+                                            <div className="w-full h-12 bg-gradient-to-r from-sky-400 to-blue-600 rounded-lg overflow-hidden relative shadow-inner">
                                                 <div className={`absolute inset-0 pattern-${id}`}></div>
                                             </div>
                                             <span>{name}</span>
                                         </button>
                                     );
                                 })}
+                            </div>
+
+                            {/* Upload Action */}
+                            <div className="pt-2 border-t border-slate-100 mt-2">
+                                <label className="w-full py-3 bg-white border-2 border-dashed border-slate-300 rounded-xl text-xs font-bold uppercase text-slate-500 hover:bg-sky-50 hover:border-sky-400 hover:text-sky-600 hover:shadow-sm transition-all flex items-center justify-center gap-2 group cursor-pointer relative overflow-hidden">
+                                    <div className="p-1 bg-slate-100 rounded-md group-hover:bg-white transition-colors">
+                                        <Image size={14} />
+                                    </div>
+                                    Upload Custom Pattern
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handlePageBannerUpload}
+                                        className="hidden"
+                                    />
+                                </label>
+                                <p className="text-[10px] text-slate-400 text-center mt-2">
+                                    RECOMMENDED: Seamless textures or wide banners.
+                                </p>
                             </div>
                         </ConfigSection>
 

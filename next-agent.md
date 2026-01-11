@@ -7,8 +7,8 @@ We are in the process of expanding the **Settings Page** to offer deep customiza
 ### What has been built (Functional):
 1.  **Tabbed Interface**: Streamlined layout with tabs in the header (Configuration title removed). Organized into Appearance, Visualizer, Orb, and Signature tabs.
 2.  **Page Banner Patterns**:
-    *   **Functional**: Users can select "Diagonal", "Dots", "Mesh" (Diamond Grid), or "Solid" patterns for the page banners (Videos Page / Folders).
-    *   **Live Preview**: A box in Settings shows the currently selected animated pattern.
+    *   **Functional**: Users can select "Diagonal", "Dots", "Mesh", "Solid" patterns, OR upload a custom image.
+    *   **Live Preview**: A box in Settings shows the currently selected pattern or custom uploaded image.
     *   **State**: Managed via `configStore.bannerPattern`.
     *   **CSS**: Animations defined in `src/App.css`.
 3.  **Orb Customization**:
@@ -17,13 +17,13 @@ We are in the process of expanding the **Settings Page** to offer deep customiza
     *   Scale slider.
 4.  **Profile**:
     *   Pseudonym and ASCII avatar customization.
+5.  **App Banner (Top of Window)**:
+    *   **Functional**: Users can upload a custom banner image which overrides the default `/banner.PNG`.
+    *   **Persistence**: Custom banner choice is saved to `configStore` (localStorage).
+    *   **Animation**: The infinite scroll animation applies to the custom banner as well.
 
 ### What is Mocked / Needs Implementation:
-1.  **App Banner (Top of Window)**:
-    *   **Current status**: Displays current `/public/banner.PNG`.
-    *   **Mocked**: The preset buttons (Cosmic, Nature, etc.) and "Upload Custom Banner" button update a local mock state and **do not** actually change the banner file.
-    *   **Goal**: Implement logic to swap the active banner image.
-2.  **Visualizer**:
+1.  **Visualizer**:
     *   **Current status**: Mock buttons for "Style" and "Color Mode" exist but do nothing.
     *   **Goal**: Connect these to the actual `AudioVisualizer` component properties.
 3.  **Player Borders**:

@@ -7,7 +7,7 @@ import { getThumbnailUrl } from '../utils/youtubeUtils';
 import { useConfigStore } from '../store/configStore';
 
 const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue }) => {
-    const { bannerPattern } = useConfigStore();
+    const { bannerPattern, customPageBannerImage } = useConfigStore();
 
     // Find color config if folderColor is provided
     // If folderColor is 'unsorted', distinct gray style
@@ -21,7 +21,15 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
     let gradientStyle;
     let shadowColor;
 
-    if (isUnsorted) {
+    if (customPageBannerImage) {
+        gradientStyle = {
+            backgroundImage: `url(${customPageBannerImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+        };
+        // Use a neutral or dominant color for shadow if possible, or fallback
+        shadowColor = colorConfig?.hex || '#3b82f6';
+    } else if (isUnsorted) {
         gradientStyle = {
             background: 'linear-gradient(135deg, #64748b 0%, #475569 100%)' // Slate/Gray
         };
@@ -39,6 +47,15 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
         shadowColor = '#3b82f6';
     }
 
+    // Define animation for custom banner if needed (e.g., slow pan)
+    // For now, we'll keep it static or rely on the pattern overlay if the user wants both.
+    // If custom image is set, we might want to hide the pattern overlay to avoid clutter,
+    // OR show it if the user explicitly wants texture. 
+    // Let's hide the pattern by default if custom image is there, unless we want to support both.
+    // Given the UI in Settings uses "Banner Pattern" buttons, maybe custom image is a separate mode?
+    // In Settings, we will probably have "Upload" and "Presets". 
+    // If "Upload" is active (customPageBannerImage != null), we use it.
+
     return (
         <div
             className="w-full relative overflow-hidden rounded-2xl mb-8 p-8 animate-fade-in shadow-lg group mx-auto"
@@ -47,10 +64,18 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                 boxShadow: `0 10px 25px -5px ${shadowColor}50`
             }}
         >
-            {/* Animated Pattern Overlay */}
-            <div className={`absolute inset-0 pointer-events-none z-0 pattern-${bannerPattern || 'diagonal'}`} />
+            {/* Animated Pattern Overlay - Only show if NO custom image is set, OR if we want to overlay it. 
+                Let's hide it if custom image is set to let the image shine. */}
+            {!customPageBannerImage && (
+                <div className={`absolute inset-0 pointer-events-none z-0 pattern-${bannerPattern || 'diagonal'}`} />
+            )}
 
-            {/* Abstract Background Shapes for Premium Feel */}
+            {/* If custom image is set, maybe add a dark overlay for text readability */}
+            {customPageBannerImage && (
+                <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none" />
+            )}
+
+            {/* Abstract Background Shapes for Premium Feel - Keep these, they look nice over images too */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transform group-hover:scale-110 transition-transform duration-1000 ease-in-out" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none" />
 
