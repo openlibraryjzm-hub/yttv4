@@ -4,7 +4,11 @@ import { Pen, Play } from 'lucide-react';
 import { getThumbnailUrl } from '../utils/youtubeUtils';
 
 
+import { useConfigStore } from '../store/configStore';
+
 const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue }) => {
+    const { bannerPattern } = useConfigStore();
+
     // Find color config if folderColor is provided
     // If folderColor is 'unsorted', distinct gray style
     const isUnsorted = folderColor === 'unsorted';
@@ -43,14 +47,8 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                 boxShadow: `0 10px 25px -5px ${shadowColor}50`
             }}
         >
-            {/* Animated Diagonal Pattern */}
-            <div
-                className="absolute inset-0 pointer-events-none z-0 animate-diagonal-pattern"
-                style={{
-                    backgroundImage: 'linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.05) 75%, transparent 75%, transparent)',
-                    backgroundSize: '50px 50px'
-                }}
-            />
+            {/* Animated Pattern Overlay */}
+            <div className={`absolute inset-0 pointer-events-none z-0 pattern-${bannerPattern || 'diagonal'}`} />
 
             {/* Abstract Background Shapes for Premium Feel */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transform group-hover:scale-110 transition-transform duration-1000 ease-in-out" />

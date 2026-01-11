@@ -562,8 +562,8 @@ Users see video cards built using the Card component system with video-specific 
   - `bulkTagMode`: Boolean for bulk tagging mode
   - `bulkTagSelections`: Map of video ID to Set of folder colors
 - `src/store/pinStore.js`:
-  - `pinnedVideos`: Array of pinned videos (session-only)
-  - `priorityPinId`: ID of priority pin (null if none)
+  - `pinnedVideos`: Array of pinned videos (persisted)
+  - `priorityPinIds`: Array of priority pin IDs
   - `isPinned(videoId)`: Checks if video is pinned
   - `isPriorityPin(videoId)`: Checks if video is priority pin
   - `togglePin(video)`: Toggles pin status (normal pin)
@@ -645,7 +645,7 @@ Users see video cards built using the Card component system with video-specific 
    - User clicks pin icon → `handlePinClick()` (line 151)
    - Calls `togglePin(video)` → Updates `pinStore.pinnedVideos`
    - Pin icon updates → Amber if pinned, gray if not
-   - Session-only → Not persisted, cleared on app restart
+   - Persisted → Normal pins expire after 24 hours
 
 5. **Priority Pin Click Flow:**
    - User clicks priority pin button in hover overlay → `handlePriorityPinClick()` (line 170)
@@ -771,9 +771,61 @@ Users see a vertical list of history cards showing the last 100 watched videos:
 **State Dependencies:**
 - When component mounts → History loaded → Grid displays cards
 - When video played → New entry added to watch history → History page would update on next load
+
 ---
 
-#### ### 4.1.4 Playlist Selection Modal
+#### ### 4.1.4 Pins Page
+
+**1: User-Perspective Description**
+
+Users see a dedicated page for pinned videos, separating "Priority Pins" from "Regular Pins":
+
+- **Priority Pins Carousel**: The top section displays priority pins (videos pinned via the yellow star/pin button).
+  - Presented in a horizontal carousel (StickyVideoCarousel).
+  - These pins **do not expire**.
+  - Always sorted by most recently pinned first (left to right).
+
+- **Regular Pins Grid**: The main section displays normal pins (videos pinned via the standard pin button).
+  - Presented in a standard 3-column grid.
+  - **Expiration Timer**: Each video card displays a prominent countdown timer (e.g., "23h 59m 59s") centered over the thumbnail.
+  - **24-Hour Expiration**: Regular pins expire and disappear 24 hours after being pinned.
+  - Sorted by **most recently pinned** (newest first).
+
+- **Visuals**:
+  - Uses the standard `PageBanner` "Pinned Videos" header.
+  - `VideoCard` components are reused but with specific props (e.g., `showTimer={true}` for regular pins).
+
+**2: File Manifest**
+
+**UI/Components:**
+- `src/components/PinsPage.jsx`: Main pins page component
+- `src/components/StickyVideoCarousel.jsx`: Carousel for priority pins
+- `src/components/VideoCard.jsx`: Video card component (handles timer display)
+
+**State Management:**
+- `src/store/pinStore.js`:
+  - `pinnedVideos`: Array of all pins (includes timestamp)
+  - `priorityPinIds`: Array of priority pin IDs
+  - `checkExpiration()`: Removes expired pins
+
+**3: The Logic & State Chain**
+
+1. **Rendering Flow:**
+   - Component gets `pinnedVideos` and `priorityPinIds` from store.
+   - Filters videos into `priorityVideos` and `regularVideos`.
+   - Sorts `priorityVideos` by index in `priorityPinIds`.
+   - Sorts `regularVideos` by `pinnedAt` descending (newest first).
+   - Renders Carousel for priority, Grid for regular.
+
+2. **Timer Flow:**
+   - Regular `VideoCard` receives `showTimer={true}`.
+   - `VideoCard` calculates time remaining (`24h - (now - pinnedAt)`).
+   - Updates every second.
+   - Displays formatted "HHh MMm SSs" overlay.
+
+---
+
+#### ### 4.1.5 Playlist Selection Modal
 
 **1: User-Perspective Description**
 

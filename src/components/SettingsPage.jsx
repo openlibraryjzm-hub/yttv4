@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Palette, User, Smile, ExternalLink, Copy, Check } from 'lucide-react';
+import { Palette, User, Smile, ExternalLink, Copy, Check, Image, Layout, Music, Box, Volume2 } from 'lucide-react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { useConfigStore } from '../store/configStore';
 import { THEMES } from '../utils/themes';
@@ -44,15 +44,24 @@ const AVATARS = [
 
 export default function SettingsPage({ currentThemeId, onThemeChange }) {
     const [activeTab, setActiveTab] = useState('theme');
+    // Actual Store State
     const {
         userName, setUserName, userAvatar, setUserAvatar,
         customOrbImage, setCustomOrbImage,
         isSpillEnabled, setIsSpillEnabled,
         orbSpill, setOrbSpill,
-        orbImageScale, setOrbImageScale
+        orbImageScale, setOrbImageScale,
+        bannerPattern, setBannerPattern
     } = useConfigStore();
     const [customAvatar, setCustomAvatar] = useState('');
     const [copied, setCopied] = useState(false);
+
+    // Mock State for new representative options
+    const [mockAppBanner, setMockAppBanner] = useState('default');
+    const [mockVideoBanner, setMockVideoBanner] = useState('diagonal');
+    const [mockBorder, setMockBorder] = useState('neon');
+    const [mockVisualizer, setMockVisualizer] = useState('bars');
+    const [mockVisColor, setMockVisColor] = useState('theme');
 
     const promptText = 'maintain style as much as possible. dont change anything about original image. im looking for a "zoom out" so that I can [insert desired changes]. reference the single primary color markings which mark out how I want things expanded. remove single primary color markings from final image.';
 
@@ -92,27 +101,28 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
             <div className="flex items-center gap-3 border-b border-sky-50 pb-4">
                 <div className="p-2 bg-sky-50 rounded-lg">
                     {activeTab === 'theme' ? <Palette className="text-sky-600" size={24} /> :
-                        activeTab === 'orb' ? <Smile className="text-sky-600" size={24} /> :
-                            <User className="text-sky-600" size={24} />}
+                        activeTab === 'visualizer' ? <Music className="text-sky-600" size={24} /> :
+                            activeTab === 'orb' ? <Smile className="text-sky-600" size={24} /> :
+                                <User className="text-sky-600" size={24} />}
                 </div>
                 <h1 className="text-xl font-black uppercase tracking-widest text-sky-600">Configuration</h1>
             </div>
 
             {/* Tabs */}
-            <div className="flex p-1 bg-slate-100 rounded-xl w-fit">
+            <div className="flex p-1 bg-slate-100 rounded-xl w-fit flex-wrap gap-1">
                 <button
                     onClick={() => setActiveTab('theme')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'theme' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
                         }`}
                 >
-                    <Palette size={16} /> Theme
+                    <Palette size={16} /> Appearance
                 </button>
                 <button
-                    onClick={() => setActiveTab('profile')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'profile' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                    onClick={() => setActiveTab('visualizer')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'visualizer' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
                         }`}
                 >
-                    <User size={16} /> Signature
+                    <Music size={16} /> Visualizer
                 </button>
                 <button
                     onClick={() => setActiveTab('orb')}
@@ -121,27 +131,224 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                 >
                     <Smile size={16} /> Orb
                 </button>
+                <button
+                    onClick={() => setActiveTab('profile')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'profile' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                >
+                    <User size={16} /> Signature
+                </button>
             </div>
 
             <div className="space-y-8 pb-20">
                 {activeTab === 'theme' ? (
-                    <ConfigSection title="Theme Selection" icon={Palette}>
-                        <div className="grid grid-cols-2 gap-3">
-                            {Object.entries(THEMES).map(([id, theme]) => (
-                                <button
-                                    key={id}
-                                    onClick={() => onThemeChange && onThemeChange(id)}
-                                    className={`p-3 rounded-xl text-xs font-bold uppercase transition-all border-2 text-left flex flex-col gap-2 ${currentThemeId === id
-                                        ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md ring-2 ring-sky-200'
-                                        : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600 hover:shadow-sm'
-                                        }`}
-                                >
-                                    <div className={`w-full h-12 rounded-lg bg-gradient-to-br ${theme.bg.replace('from-', 'from-').replace('via-', 'via-').replace('to-', 'to-')} shadow-inner`}></div>
-                                    <span className="px-1">{theme.name}</span>
+                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <ConfigSection title="Color Palette" icon={Palette}>
+                            <div className="grid grid-cols-2 gap-3">
+                                {Object.entries(THEMES).map(([id, theme]) => (
+                                    <button
+                                        key={id}
+                                        onClick={() => onThemeChange && onThemeChange(id)}
+                                        className={`p-3 rounded-xl text-xs font-bold uppercase transition-all border-2 text-left flex flex-col gap-2 ${currentThemeId === id
+                                            ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md ring-2 ring-sky-200'
+                                            : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600 hover:shadow-sm'
+                                            }`}
+                                    >
+                                        <div className={`w-full h-12 rounded-lg bg-gradient-to-br ${theme.bg.replace('from-', 'from-').replace('via-', 'via-').replace('to-', 'to-')} shadow-inner`}></div>
+                                        <span className="px-1">{theme.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </ConfigSection>
+
+                        <ConfigSection title="App Banner" icon={Image}>
+                            {/* Current Banner Display */}
+                            <div className="space-y-3 pb-4 border-b border-slate-100">
+                                <div className="flex justify-between items-center px-1">
+                                    <label className="text-xs font-bold uppercase text-slate-400">Current App Banner</label>
+                                    <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Active</span>
+                                </div>
+                                <div className="w-full h-32 rounded-xl overflow-hidden shadow-sm border-2 border-slate-100 relative group bg-slate-50">
+                                    <img
+                                        src="/banner.PNG"
+                                        alt="Current Banner"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+                                    <div className="absolute bottom-3 left-3 text-white text-xs font-bold drop-shadow-md">
+                                        /public/banner.PNG
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Presets */}
+                            <div className="space-y-3 pt-2">
+                                <label className="text-xs font-bold uppercase text-slate-400 ml-1">Presets</label>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    {['Default', 'Cosmic', 'Nature', 'Industrial'].map((name) => {
+                                        const id = name.toLowerCase();
+                                        return (
+                                            <button
+                                                key={id}
+                                                onClick={() => setMockAppBanner(id)}
+                                                className={`p-2 rounded-xl text-xs font-bold uppercase transition-all border-2 flex flex-col gap-2 items-center ${mockAppBanner === id
+                                                    ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md'
+                                                    : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600'
+                                                    }`}
+                                            >
+                                                <div className="w-full h-16 bg-slate-100 rounded-lg overflow-hidden relative">
+                                                    {/* Representational placeholder visuals */}
+                                                    {id === 'default' && <div className="absolute inset-0 bg-gradient-to-r from-sky-400 to-blue-600 opacity-50" />}
+                                                    {id === 'cosmic' && <div className="absolute inset-0 bg-gradient-to-tr from-purple-800 via-indigo-900 to-black opacity-80" />}
+                                                    {id === 'nature' && <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-800 opacity-60" />}
+                                                    {id === 'industrial' && <div className="absolute inset-0 bg-gradient-to-bl from-slate-600 to-zinc-900 opacity-70" />}
+                                                    <span className="absolute inset-0 flex items-center justify-center text-[10px] text-white/50">IMG</span>
+                                                </div>
+                                                <span>{name}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Upload Action */}
+                            <div className="pt-2 border-t border-slate-100">
+                                <button className="w-full py-3 bg-white border-2 border-dashed border-slate-300 rounded-xl text-xs font-bold uppercase text-slate-500 hover:bg-sky-50 hover:border-sky-400 hover:text-sky-600 hover:shadow-sm transition-all flex items-center justify-center gap-2 group">
+                                    <div className="p-1 bg-slate-100 rounded-md group-hover:bg-white transition-colors">
+                                        <Image size={14} />
+                                    </div>
+                                    Upload Custom Banner
                                 </button>
-                            ))}
+                                <p className="text-[10px] text-slate-400 text-center mt-2">
+                                    Supports PNG, JPG, WEBP. Recommended size: 1920x200px.
+                                </p>
+                            </div>
+                        </ConfigSection>
+
+                        <ConfigSection title="Page Banner" icon={Layout}>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                {['Diagonal', 'Dots', 'Mesh', 'Solid'].map((name) => {
+                                    // Map 'Mesh' to the 'waves' ID for compatibility with existing CSS
+                                    const id = name === 'Mesh' ? 'waves' : name.toLowerCase();
+
+                                    return (
+                                        <button
+                                            key={id}
+                                            onClick={() => setBannerPattern(id)}
+                                            className={`p-2 rounded-xl text-xs font-bold uppercase transition-all border-2 flex flex-col gap-2 items-center ${bannerPattern === id
+                                                ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md'
+                                                : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600'
+                                                }`}
+                                        >
+                                            <div className="w-full h-12 bg-sky-400 rounded-lg overflow-hidden relative opacity-80">
+                                                <div className={`absolute inset-0 pattern-${id}`}></div>
+                                            </div>
+                                            <span>{name}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </ConfigSection>
+
+                        <ConfigSection title="Player Borders" icon={Box}>
+                            <div className="grid grid-cols-2 gap-3">
+                                {['Neon Glow', 'Glass', 'Solid Minimal', 'Brushed Metal'].map((name) => {
+                                    const id = name.toLowerCase().replace(' ', '_');
+                                    return (
+                                        <button
+                                            key={id}
+                                            onClick={() => setMockBorder(id)}
+                                            className={`p-3 rounded-xl text-xs font-bold uppercase transition-all border-2 text-left flex items-center justify-between ${mockBorder === id
+                                                ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md'
+                                                : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600'
+                                                }`}
+                                        >
+                                            <span>{name}</span>
+                                            {mockBorder === id && <Check size={14} />}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </ConfigSection>
+                    </div>
+
+                ) : activeTab === 'visualizer' ? (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <ConfigSection title="Visualizer Style" icon={Volume2}>
+                            <div className="grid grid-cols-2 gap-4">
+                                {['Frequency Bars', 'Digital Wave', 'Particle Storm', 'Retro Lines'].map((name) => {
+                                    const id = name.toLowerCase().split(' ')[0];
+                                    return (
+                                        <button
+                                            key={id}
+                                            onClick={() => setMockVisualizer(id)}
+                                            className={`p-4 rounded-xl text-xs font-bold uppercase transition-all border-2 flex flex-col gap-3 relative overflow-hidden group ${mockVisualizer === id
+                                                ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md'
+                                                : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600'
+                                                }`}
+                                        >
+                                            <div className="w-full h-24 bg-slate-900 rounded-lg relative overflow-hidden flex items-center justify-center">
+                                                {/* Visualizer Mocks */}
+                                                {id === 'frequency' && (
+                                                    <div className="flex items-end gap-1 h-12">
+                                                        {[...Array(10)].map((_, i) => (
+                                                            <div key={i} className="w-2 bg-sky-400 rounded-t-sm animate-pulse" style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.1}s` }}></div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {id === 'digital' && (
+                                                    <svg viewBox="0 0 100 40" className="w-full h-full stroke-sky-400 fill-none stroke-2 opacity-80">
+                                                        <path d="M0 20 Q 25 5, 50 20 T 100 20" />
+                                                    </svg>
+                                                )}
+                                                {id === 'particle' && (
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <div className="w-2 h-2 bg-sky-400 rounded-full shadow-[0_0_10px_rgba(56,189,248,0.8)] animate-ping"></div>
+                                                    </div>
+                                                )}
+                                                {id === 'retro' && (
+                                                    <div className="w-full h-full border-b-2 border-sky-400 flex items-end justify-between px-4 pb-2">
+                                                        <div className="text-[10px] font-mono text-sky-400">L</div>
+                                                        <div className="text-[10px] font-mono text-sky-400">R</div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center justify-between w-full">
+                                                <span>{name}</span>
+                                                {mockVisualizer === id && <Check size={14} className="text-sky-500" />}
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </ConfigSection>
+
+                        <ConfigSection title="Color Mode" icon={Palette}>
+                            <div className="grid grid-cols-3 gap-3">
+                                {['Theme Match', 'Rainbow', 'Custom'].map((name) => {
+                                    const id = name.toLowerCase().split(' ')[0];
+                                    return (
+                                        <button
+                                            key={id}
+                                            onClick={() => setMockVisColor(id)}
+                                            className={`p-3 rounded-xl text-xs font-bold uppercase transition-all border-2 ${mockVisColor === id
+                                                ? 'border-sky-500 bg-sky-50 text-sky-700'
+                                                : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200'
+                                                }`}
+                                        >
+                                            {name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </ConfigSection>
+
+                        <div className="p-4 bg-sky-50 rounded-xl border border-sky-100 text-sky-800 text-xs font-medium leading-relaxed">
+                            <h4 className="font-bold flex items-center gap-2 mb-1"><Box size={14} /> Border Integration</h4>
+                            The selected visualizer will automatically integrate with the "Border Style" chosen in the Appearance tab, overflowing onto the video player when "Spill" is enabled in Orb settings.
                         </div>
-                    </ConfigSection>
+                    </div>
+
                 ) : activeTab === 'orb' ? (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <ConfigSection title="Orb Configuration" icon={Smile}>

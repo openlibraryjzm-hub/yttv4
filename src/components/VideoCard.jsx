@@ -38,6 +38,7 @@ const VideoCard = ({
   progress = 0,
   isWatched = false,
   isStickied = false,
+  showTimer = false, // New prop to control timer visibility
 }) => {
   const { inspectMode } = useLayoutStore();
   const { quickAssignFolder } = useFolderStore();
@@ -54,8 +55,6 @@ const VideoCard = ({
   const { togglePin, togglePriorityPin } = usePinStore();
 
   // FIX: Split selectors to prevent "Maximum update depth exceeded" error
-  // The previous implementation returned a new object { ... } on every store update check, 
-  // which React's strict equality check (===) saw as "different", triggering infinite re-renders.
   const isPinnedVideo = usePinStore(state =>
     state.pinnedVideos.some(v => v.id === video.id) && !state.priorityPinIds.includes(video.id)
   );
@@ -71,7 +70,8 @@ const VideoCard = ({
   const [timeRemaining, setTimeRemaining] = useState('');
 
   React.useEffect(() => {
-    if (!isPinnedVideo || !pinnedAt) {
+    // Only run timer if explicitly enabled and relevant
+    if (!showTimer || !isPinnedVideo || !pinnedAt) {
       if (timeRemaining) setTimeRemaining('');
       return;
     }
@@ -88,18 +88,20 @@ const VideoCard = ({
 
       const hours = Math.floor(diff / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      if (hours > 0) {
-        setTimeRemaining(`${hours}h ${minutes}m`);
-      } else {
-        setTimeRemaining(`${minutes}m`);
-      }
+      const parts = [];
+      if (hours > 0) parts.push(`${hours}h`);
+      if (minutes > 0 || hours > 0) parts.push(`${minutes}m`);
+      parts.push(`${seconds}s`);
+
+      setTimeRemaining(parts.join(' '));
     };
 
     updateTimer(); // Initial call
-    const interval = setInterval(updateTimer, 60000); // Update every minute
+    const interval = setInterval(updateTimer, 1000); // Update every second
     return () => clearInterval(interval);
-  }, [isPinnedVideo, pinnedAt]);
+  }, [isPinnedVideo, pinnedAt, showTimer]);
 
   // Flattened splatter icon path for re-use
   const splatterPath = "M47.5,12.2c0,0-2.3,16.2-7.8,19.3c-5.5,3.1-17.7-6.2-17.7-6.2s3.8,11.2-1.7,16.5c-5.5,5.3-20.2-2.1-20.2-2.1 s12.5,9.6,9.2,16.5c-3.3,6.9-10.7,5.5-10.7,5.5s12.9,5.7,12.5,14.7c-0.4,9-10.6,15.6-10.6,15.6s15.3-1.6,20.2,4.2 c4.9,5.8-0.9,13.8-0.9,13.8s9.4-9,16.9-5.3c7.5,3.7,5.9,14.6,5.9,14.6s5.9-11.8,13.6-10.6c7.7,1.2,13.6,9.5,13.6,9.5 s-1.8-13.6,5.3-16.7c7.1-3.1,16.5,2.7,16.5,2.7s-8.1-13.6-1.5-18.9c6.6-5.3,18.8,0.7,18.8,0.7s-13.2-8.1-11.1-16.7 C99.2,40.4,100,28.8,100,28.8s-12,8.8-17.7,3.1c-5.7-5.7-1.3-18.8-1.3-18.8s-9,11.6-16.5,9.4c-7.5-2.2-11.1-12.2-11.1-12.2 S50.4,14.5,47.5,12.2z";
@@ -258,18 +260,6 @@ const VideoCard = ({
       ),
       position: 'top-left',
     },
-    // Timer Badge (only for Normal Pins)
-    isPinnedVideo && timeRemaining && {
-      component: (
-        <div className="bg-amber-500/90 text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-amber-700 tracking-wide shadow-md flex items-center gap-1">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          {timeRemaining}
-        </div>
-      ),
-      position: 'top-left', // Badge stacking depends on CardThumbnail implementation
-    },
     {
       component: (
         <div className="bg-black/70 text-white text-xs font-medium px-2 py-1 rounded">
@@ -411,14 +401,24 @@ const VideoCard = ({
       <div
         onMouseEnter={() => bulkTagMode && setIsHovered(true)}
         onMouseLeave={() => bulkTagMode && setIsHovered(false)}
-        className="relative group rounded-lg overflow-hidden" // Added rounded-lg overflow-hidden here to round the image
+        className="relative group rounded-lg overflow-visible" // CHANGED overflow-hidden to overflow-visible to allow floating timer above
       >
+        {/* Large Timer Floating Above Thumbnail */}
+        {showTimer && isPinnedVideo && timeRemaining && (
+          <div className="absolute -top-10 left-0 w-full p-0 pointer-events-none z-40 flex justify-center">
+            <div className="bg-black/80 backdrop-blur-md text-white font-mono text-lg font-bold px-4 py-1.5 rounded-lg border border-white/20 shadow-2xl tracking-wider transform translate-y-2">
+              {timeRemaining}
+            </div>
+          </div>
+        )}
+
         <CardThumbnail
           src={thumbnailUrl}
           alt={video.title || `Video ${index + 1}`}
           overlay={playOverlay}
           badges={bulkTagMode ? badges.filter(b => b.position !== 'top-right') : badges}
           progress={progress}
+          className="rounded-lg overflow-hidden" // Rounding thumbnail specifically
         />
 
         {/* Star color picker overlay */}

@@ -123,9 +123,9 @@ The Top Video Menu is the right rectangle in the PlayerController, displaying vi
 
 Users see a centralized display of pinned videos, split between a dedicated Priority Pin and a flexible list of Normal Pins:
 
-- **Normal Pins Track**: A flexible container positioned **underneath** the Top Video Menu (absolute positioning below the card). It displays standard pinned video thumbnails (40px × 30px).
+- **Normal Pins Track**: Removed from the Video Menu (previously positioned underneath). Normal pins are now displayed exclusively on the Pins Page.
 - **Priority Pin**: The "Priority Pin" is no longer displayed in this track. It has been relocated to the **Top Playlist Menu** (see Section 1.3) to serve as a prominent visual anchor.
-- **Eye Toggle Button**: A toggle button at the left edge of the video menu controls the visibility of the normal pin track.
+- **Eye Toggle Button**: Removed.
 - **Active Pin Indicator**: The currently playing video's pin is highlighted with a ring and scale effect.
 - **Hover Preview**: On hover over a pin, after 2 seconds a preview image appears.
 - **Unpin Button**: On hover over a pin, a small X button appears in the top-right corner to unpin the video.

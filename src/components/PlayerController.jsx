@@ -1597,58 +1597,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
               <div className={`border-4 shadow-2xl flex flex-col relative overflow-visible transition-all duration-300 ${isEditMode ? 'ring-4 ring-sky-400/30' : theme.orbBorder + ' ' + theme.menuBg + ' backdrop-blur-2xl rounded-2xl'}`} style={{ width: `${menuWidth}px`, height: `${menuHeight}px` }}>
                 {showColorPicker && (<button onClick={() => { setShowColorPicker(null); setHoveredColorName(null); }} className="absolute -top-3 -right-3 w-7 h-7 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 z-50 shadow-lg border-2 border-white transition-all active:scale-90" title={getInspectTitle('Close color picker')}><X size={16} strokeWidth={3} /></button>)}
                 <div className="absolute top-0 left-0 w-full flex items-center -translate-y-1/2 z-40 px-2 pointer-events-none h-0">
-                  {/* Eye toggle button removed */}
-                  {showPins && !showColorPicker && (
-                    <div className="absolute flex items-center justify-center transition-all overflow-visible" style={{ left: 0, top: '100%', width: '100%', marginTop: '8px' }}>
-                      <div className="flex items-center gap-2 w-full pointer-events-auto flex-wrap justify-center">
-                        <div className="flex gap-1.5 flex-wrap justify-center">
-                          {pins.filter(pin => !isPriorityPin(pin.video.id)).map((pin, idx) => {
-                            const IconComp = pin.icon;
-                            const thumbnailUrl = pin.video ? getThumbnailUrl(pin.video.video_id, 'default') : null;
-                            const isPriority = isPriorityPin(pin.video.id);
-                            // Priority pins are larger (1.3x) and have yellow border
-                            const priorityScale = isPriority ? 1.3 : 1.0;
-                            const priorityWidth = pinWidth * priorityScale;
-                            const priorityHeight = pinHeight * priorityScale;
-                            return (
-                              <div key={pin.id} className="relative group/pin shrink-0">
-                                <button
-                                  onClick={() => handlePinClick(pin.video)}
-                                  onMouseEnter={() => startPreviewTimer(() => setPreviewPinIndex(idx))}
-                                  onMouseLeave={clearPreviewTimer}
-                                  className={`rounded-lg flex items-center justify-center transition-all shadow-sm overflow-hidden ${activePin === pin.id
-                                    ? theme.tabActive + ' scale-105 z-10 ring-2 ring-sky-400'
-                                    : isPriority
-                                      ? theme.tabInactive + ' scale-100'
-                                      : theme.tabInactive + ' scale-100'
-                                    }`}
-                                  style={{
-                                    width: `${priorityWidth}px`,
-                                    height: `${priorityHeight}px`,
-                                    border: isPriority ? '3px solid #fbbf24' : activePin === pin.id ? '2px solid #0ea5e9' : '1px solid rgba(148, 163, 184, 0.3)'
-                                  }}
-                                >
-                                  {thumbnailUrl ? (
-                                    <img src={thumbnailUrl} alt={pin.video.title || 'Pinned'} className="w-full h-full object-cover" />
-                                  ) : (
-                                    <IconComp size={Math.round(priorityHeight * 0.6)} fill={activePin === pin.id ? 'currentColor' : 'transparent'} />
-                                  )}
-                                </button>
-                                <button
-                                  className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/pin:opacity-100 transition-opacity shadow-sm border border-white z-20"
-                                  onClick={(e) => handleUnpin(e, pin.video)}
-                                  title="Unpin video"
-                                >
-                                  <X size={10} strokeWidth={4} />
-                                </button>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        {/* Plus button removed - pins managed elsewhere */}
-                      </div>
-                    </div>
-                  )}
+                  {/* Normal pins track removed per user request */}
                 </div>
                 {/* Header Metadata - Centered above (Mirrors Playlist Title) */}
                 {/* Header Metadata - Removed from here, moved to Playlist Menu */}

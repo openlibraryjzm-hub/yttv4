@@ -38,6 +38,13 @@ const PinsPage = ({ onVideoSelect }) => {
             return priorityIds.indexOf(a.id) - priorityIds.indexOf(b.id);
         });
 
+        // Sort regular videos by pinnedAt timestamp (newest first)
+        regular.sort((a, b) => {
+            const timeA = a.pinnedAt || 0;
+            const timeB = b.pinnedAt || 0;
+            return timeB - timeA;
+        });
+
         return { priorityVideos: priority, regularVideos: regular };
     }, [pinnedVideos, priorityPinIds]);
 
@@ -97,6 +104,8 @@ const PinsPage = ({ onVideoSelect }) => {
                                     videoFolders={[]} // Pinned view doesn't show folder context usually
                                     onVideoSelect={onVideoSelect}
                                     onVideoClick={() => onVideoSelect(video.video_url)}
+                                    // ENABLE TIMER ONLY FOR REGULAR PINS ON THIS PAGE
+                                    showTimer={true}
                                 />
                             );
                         })}

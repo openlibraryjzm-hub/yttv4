@@ -159,6 +159,10 @@ export const useConfigStore = create(
             setUserName: (val) => set({ userName: val }),
             userAvatar: '( ͡° ͜ʖ ͡°)',
             setUserAvatar: (val) => set({ userAvatar: val }),
+
+            // Visual Flair
+            bannerPattern: 'diagonal',
+            setBannerPattern: (val) => set({ bannerPattern: val }),
         }),
         {
             name: 'config-storage-v5', // name of the item in the storage (must be unique)

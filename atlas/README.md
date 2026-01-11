@@ -82,7 +82,7 @@ yttv2/
 │   │   ├── StickyVideoCarousel.jsx     # Carousel/Grid for stickied videos
 │   │   ├── PageBanner.jsx              # Banner with metadata and animated diagonal pattern
 │   │   ├── EditPlaylistModal.jsx       # Modal for editing playlist/folder metadata
-│   │   ├── SettingsPage.jsx            # Application configuration (Theme, Profile)
+│   │   ├── SettingsPage.jsx            # Application configuration (Appearance, Visualizer, Orb, Profile)
 │   │   ├── SupportPage.jsx             # Radial Support Hub (Code, Dev, Community, Resources)
 │   │   └── DebugRuler.jsx              # Ruler overlay component (non-functional - see debug.md)
 │   ├── store/                    # Zustand state management
@@ -93,7 +93,7 @@ yttv2/
 │   │   ├── folderStore.js        # Folder state, bulk tagging, show folders
 │   │   ├── tabStore.js           # Tab state management
 │   │   ├── tabPresetStore.js     # Tab preset state management
-│   │   ├── pinStore.js           # Pin state management (session-only)
+│   │   ├── pinStore.js           # Pin state management (persisted)
 │   │   └── stickyStore.js        # Sticky video state management (persisted)
 │   ├── utils/                    # Utility functions
 │   │   ├── youtubeUtils.js       # YouTube URL parsing, thumbnails, API

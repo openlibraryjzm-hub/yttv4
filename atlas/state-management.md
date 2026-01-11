@@ -215,35 +215,42 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 
 ### 7. pinStore (`src/store/pinStore.js`)
 
-**Purpose**: Manages session-only video pinning with priority pin support
+**Purpose**: Manages video pinning with 24-hour expiration for normal pins and persistent priority pins
 
 **State:**
-- `pinnedVideos`: Array - Array of pinned video objects (session-only, priority pin always first)
-- `priorityPinId`: number | null - ID of the priority pin (null if none, only one priority pin can exist)
+- `pinnedVideos`: Array - Array of pinned video objects. Each object includes `pinnedAt` timestamp.
+- `priorityPinIds`: Array - Array of video IDs that are priority pins (mutually exclusive with normal pins).
 
 **Actions:**
-- `togglePin(video)` - Toggles pin status for a video (normal pin, not priority)
-- `setFirstPin(video)` - Sets video as priority pin (replaces existing priority pin if any)
-- `isPinned(videoId)` - Checks if video is pinned
-- `isPriorityPin(videoId)` - Checks if video is the priority pin
-- `removePin(videoId)` - Removes pin by video ID (clears priority if it was the priority pin)
-- `clearAllPins()` - Clears all pins and priority state
-- `_sortPinsWithPriority(videos, priorityId)` - Helper function that ensures priority pin is always first
+- `togglePin(video)` - Toggles normal pin status. If becoming pinned, sets `pinnedAt` timestamp. Enforces exclusivity (unpins from priority if needed).
+- `setFirstPin(video)` - Sets video as priority pin. Enforces exclusivity (unpins from normal if needed).
+- `togglePriorityPin(video)` - Toggles priority pin status.
+- `isPinned(videoId)` - Checks if video is a normal pin (and NOT a priority pin).
+- `isPriorityPin(videoId)` - Checks if video is a priority pin.
+- `removePin(videoId)` - Removes pin by video ID (from both lists).
+- `clearAllPins()` - Clears all pins and priority state.
+- `checkExpiration()` - Checks `pinnedAt` timestamps and removes normal pins older than 24 hours. Priority pins do not expire.
+- `getPinInfo(videoId)` - Returns object with `{ isPinned, isPriority, pinnedAt }`.
 
-**Persistence**: None - session-only, cleared on app restart
+**Persistence**: 
+- Persisted to localStorage: `pin-storage`
+- Persists both `pinnedVideos` and `priorityPinIds`.
 
-**Priority Pin Behavior:**
-- Only one priority pin can exist at a time
-- Priority pin is always first (leftmost) in the `pinnedVideos` array
-- When `setFirstPin()` is called, any existing priority pin is replaced
-- Priority pins are visually distinct: 30% larger (1.3x scale) and have 3px solid amber border (#fbbf24)
-- Priority pin can be set via yellow pin button in PlayerController toolbar or priority pin button in video hover overlay
+**Pin Behavior:**
+- **Normal Pins**: 
+  - Expire 24 hours after being pinned. 
+  - Show a countdown timer on the Pins Page.
+- **Priority Pins**: 
+  - Do NOT expire.
+  - Are mutually exclusive with normal pins (a video cannot be both).
+  - Typically displayed in a separate "Priority" section (e.g., carousel).
+  - The store supports multiple priority pins via `priorityPinIds` array, though UI may treat the first one specially.
 
 **Dependencies:**
 - When video pinned → VideoCard pin icon updates → Amber if pinned, gray if not
-- When `pinnedVideos` changes → PlayerController pins display updates → Pinned videos shown (priority pin always first)
-- When `priorityPinId` changes → Priority pin visual styling updates → Larger size and amber border applied
-- When priority pin set → Priority pin button icons update → Filled if priority, outline if not
+- When `pinnedVideos` changes → PinsPage re-renders → Shows normal pins in grid
+- When `priorityPinIds` changes → PinsPage re-renders → Shows priority pins in carousel
+- When app mounts or interval triggers → `checkExpiration()` runs → Expired normal pins removed
 
 ---
 
@@ -293,6 +300,7 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 - `setCurrentThemeId(id)` - Sets the active application theme
 - `setUserName(name)` - Sets the user's display name
 - `setUserAvatar(avatar)` - Sets the user's ASCII avatar (supports multi-line)
+- `setBannerPattern(pattern)` - Sets the video page banner pattern ('diagonal' | 'dots' | 'waves' | 'solid')
 
 **Persistence:**
 - Persisted to localStorage: `config-storage`
