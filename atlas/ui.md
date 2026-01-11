@@ -896,7 +896,7 @@ Users see a modal dialog when selecting "Move to Playlist" or "Copy to Playlist"
 Access specific videos that have been marked as "Liked". This page aggregates all videos from the special "Likes" playlist.
 
 - **Playlist Distribution Graph**: 
-  - A dynamic **Pie Chart** at the top of the page visualizes how the liked videos on the *current page* are distributed across your other playlists.
+  - A dynamic **Pie Chart** integrated into the **Page Banner** (right side) visualizes how the liked videos on the *current page* are distributed across your other playlists.
   - Hovering over slices shows the playlist name and percentage.
   - "Uncategorized" slice represents liked videos that are not in any other playlist.
   - Powered by a custom SVG + Framer Motion component with animations.

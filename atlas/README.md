@@ -84,6 +84,8 @@ yttv2/
 │   │   ├── EditPlaylistModal.jsx       # Modal for editing playlist/folder metadata
 │   │   ├── SettingsPage.jsx            # Application configuration (Appearance, Visualizer, Orb, Profile)
 │   │   ├── SupportPage.jsx             # Tabbed Support Hub (Code, Dev, Community, Resources)
+│   │   ├── LikesPage.jsx               # Liked videos with distribution graph and pagination
+│   │   ├── PieGraph.jsx                # Animated SVG pie chart for likes distribution
 │   │   └── DebugRuler.jsx              # Ruler overlay component (non-functional - see debug.md)
 │   ├── store/                    # Zustand state management
 │   │   ├── configStore.js        # Theme and Profile configuration

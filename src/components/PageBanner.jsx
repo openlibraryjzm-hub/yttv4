@@ -6,7 +6,7 @@ import { getThumbnailUrl } from '../utils/youtubeUtils';
 
 import { useConfigStore } from '../store/configStore';
 
-const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue }) => {
+const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue, children }) => {
     const { bannerPattern, customPageBannerImage } = useConfigStore();
 
     // Find color config if folderColor is provided
@@ -98,7 +98,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
             )}
 
             {/* Content Container - Flex Row for Avatar + Text */}
-            <div className="relative z-10 flex items-center h-full gap-8">
+            <div className="relative z-10 flex items-center h-full gap-8 w-full">
                 {/* Avatar Section (Optional) */}
                 {avatar && (
                     <div className="shrink-0 hidden md:flex flex-col items-center gap-1 animate-in fade-in slide-in-from-left-4 duration-700">
@@ -148,6 +148,13 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                         </p>
                     )}
                 </div>
+
+                {/* Right Content (e.g. Graphs) */}
+                {children && (
+                    <div className="ml-auto pl-8">
+                        {children}
+                    </div>
+                )}
             </div>
 
             {/* Continue Section - Bottom Right */}

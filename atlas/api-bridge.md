@@ -141,6 +141,7 @@ await invoke('add_video_to_playlist', {
 - `get_video_folder_assignments(playlist_id, item_id)` → Returns `Array<String>` (folder colors)
 - `get_folders_for_playlist(playlist_id)` → Returns `Array<String>` (folder colors)
 - `get_all_folders_with_videos()` → Returns `Array<FolderWithVideos>`
+- `get_playlists_for_video_ids(video_ids)` → Returns `Map<String, Array<String>>` (video_id -> playlist_names)
 
 **API Functions**:
 - `assignVideoToFolder(playlistId, itemId, folderColor)`
@@ -149,6 +150,7 @@ await invoke('add_video_to_playlist', {
 - `getVideoFolderAssignments(playlistId, itemId)`
 - `getFoldersForPlaylist(playlistId)`
 - `getAllFoldersWithVideos()`
+- `getPlaylistsForVideoIds(videoIds)`
 
 **Folder Colors**: Valid values are the 16 folder color IDs (see `folderColors.js`)
 

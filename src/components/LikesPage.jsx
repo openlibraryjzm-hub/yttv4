@@ -178,17 +178,19 @@ const LikesPage = ({ onVideoSelect }) => {
                 description="Your collection of liked videos."
                 color={null}
                 isEditable={false}
-            />
+            >
+                {/* Graph in Banner */}
+                {distribution.length > 0 && !loading && (
+                    <div className="flex justify-center">
+                        <PieGraph data={distribution} size={160} />
+                    </div>
+                )}
+            </PageBanner>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar">
                 <div className="p-6 space-y-8">
 
-                    {/* Graph Section */}
-                    {distribution.length > 0 && !loading && (
-                        <div className="flex justify-center">
-                            <PieGraph data={distribution} />
-                        </div>
-                    )}
+
 
                     {/* Pagination Controls (Top) */}
                     {totalPages > 1 && (
@@ -248,8 +250,8 @@ const LikesPage = ({ onVideoSelect }) => {
                                                 key={pageNum}
                                                 onClick={() => setCurrentPage(pageNum)}
                                                 className={`w-8 h-8 rounded-full text-xs font-medium transition-all ${currentPage === pageNum
-                                                        ? 'bg-blue-500 text-white shadow-lg scale-110'
-                                                        : 'text-slate-400 hover:bg-white/10 hover:text-white'
+                                                    ? 'bg-blue-500 text-white shadow-lg scale-110'
+                                                    : 'text-slate-400 hover:bg-white/10 hover:text-white'
                                                     }`}
                                             >
                                                 {pageNum}
