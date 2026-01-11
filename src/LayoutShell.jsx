@@ -24,6 +24,8 @@ const LayoutShell = ({
     }
   }, [viewMode, showDebugBounds]);
 
+  const isBannerGif = customBannerImage?.startsWith('data:image/gif');
+
   return (
     <div className={`layout-shell layout-shell--${viewMode} ${menuQuarterMode ? 'layout-shell--menu-quarter' : ''} ${showDebugBounds ? 'layout-shell--debug' : ''}`}>
       {/* Fixed Player Controller - Always at top */}
@@ -32,7 +34,10 @@ const LayoutShell = ({
         className={`layout-shell__top-controller ${showDebugBounds ? 'debug-bounds debug-bounds--top-controller' : ''}`}
         data-debug-label="Top Controller"
         data-tauri-drag-region
-        style={customBannerImage ? { backgroundImage: `url(${customBannerImage})` } : undefined}
+        style={{
+          ...(customBannerImage ? { backgroundImage: `url(${customBannerImage})` } : {}),
+          ...(isBannerGif ? { animation: 'none' } : {})
+        }}
       >
         <WindowControls />
         {!showDebugBounds && (

@@ -10,7 +10,7 @@ The UI system provides a consistent layout shell with a side menu that displays 
 - **Playlists**: See `playlist&tab.md` Section 2.1 for playlist grid details
 - **Videos**: See `playlist&tab.md` Section 2.2 for video grid and folder filtering
 - **History**: See `history.md` for history page details
-- **Settings**: See [Section 4.1.5](#415-settings-page) for customization options
+- **Settings**: See [Section 4.1.7](#417-settings-page) for customization options
 
 ---
 
@@ -38,12 +38,17 @@ The application employs a high-contrast, structured design with distinct borders
 - **Top Banner ("App Banner")**:
   - Displays a custom image (`/public/banner.PNG`) spanning the full width of the controller.
   - **Infinite Scroll**: The banner image animates continuously from left to right in a 60-second seamless loop.
-  - **Customizable**: Can be changed via the Settings Page (Appearance tab).
+  - **Customizable**: Supports custom image uploads (PNG/JPG/WEBP/GIF) via Settings.
+    - **Static Images**: Scroll indefinitely.
+    - **GIFs**: Play natively without scrolling (to avoid motion issues).
   - Features a "bleed" effect at the bottom: a gradient fading from the image into the dark blue border color.
 
 - **Page Banner ("Videos Banner")**:
   - Located on the Videos Page and Colored Folders views.
   - **Dynamic Patterns**: Features selectable animated background patterns (Diagonal, Dots, Mesh, Solid) configurable in Settings.
+  - **Custom Uploads**: Supports changing the background to a custom uploaded image.
+    - **Static Images**: Scroll slowly to the right (infinite loop).
+    - **GIFs**: Play natively without scrolling.
   - **Customizable Identity**: Displays user avatar (ASCII art) and name.
 
 - **Video Player**:
@@ -938,10 +943,19 @@ Access videos that have been temporarily pinned during the current session.
 
 Users access the configuration area via the "Config" (Settings icon) button on the main Player Controller orb. The Settings Page provides a tabbed interface for application-wide customization:
 
-- **Theme Tab**:
-  - Allows selection of the global visual theme (e.g., Blue, Rose, Amber, etc.).
-  - Displays preview cards for each theme.
-  - Changes apply immediately to the entire application.
+- **Appearance Tab**:
+  - **Color Palette**:
+    - Allows selection of the global visual theme (e.g., Blue, Rose, Amber, etc.).
+    - Displays preview cards for each theme.
+    - Changes apply immediately to the entire application.
+  - **App Banner**:
+    - **Presets**: Quick toggles for mock presets (Default, Cosmic, etc.) - "Default" resets to standard.
+    - **Custom Upload**: Upload button for App Banner images (supports GIF for native animation).
+    - **Preview**: Live preview of the active banner image.
+  - **Page Banner**:
+    - **Patterns**: Toggles for CSS-based animated patterns (Diagonal, Dots, Mesh, Solid).
+    - **Custom Upload**: Button to upload a custom Page Banner texture/image.
+    - **Preview**: Shows the currently selected pattern or uploaded image.
 
 - **Signature Tab**:
   - **Pseudonym**: Text input to set the username shown on banners.

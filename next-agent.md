@@ -9,6 +9,7 @@ We are in the process of expanding the **Settings Page** to offer deep customiza
 2.  **Page Banner Patterns**:
     *   **Functional**: Users can select "Diagonal", "Dots", "Mesh", "Solid" patterns, OR upload a custom image.
     *   **Live Preview**: A box in Settings shows the currently selected pattern or custom uploaded image.
+    *   **Animation**: Custom uploaded images scroll horizontally. GIFs do not scroll.
     *   **State**: Managed via `configStore.bannerPattern`.
     *   **CSS**: Animations defined in `src/App.css`.
 3.  **Orb Customization**:
@@ -20,7 +21,7 @@ We are in the process of expanding the **Settings Page** to offer deep customiza
 5.  **App Banner (Top of Window)**:
     *   **Functional**: Users can upload a custom banner image which overrides the default `/banner.PNG`.
     *   **Persistence**: Custom banner choice is saved to `configStore` (localStorage).
-    *   **Animation**: The infinite scroll animation applies to the custom banner as well.
+    *   **Animation**: The infinite scroll animation applies to static images. GIFs are detected and do not scroll.
 
 ### What is Mocked / Needs Implementation:
 1.  **Visualizer**:

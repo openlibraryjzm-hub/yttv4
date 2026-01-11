@@ -24,8 +24,9 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
     if (customPageBannerImage) {
         gradientStyle = {
             backgroundImage: `url(${customPageBannerImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundSize: 'auto 100%',
+            backgroundRepeat: 'repeat-x',
+            backgroundPosition: 'left center',
         };
         // Use a neutral or dominant color for shadow if possible, or fallback
         shadowColor = colorConfig?.hex || '#3b82f6';
@@ -56,9 +57,12 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
     // In Settings, we will probably have "Upload" and "Presets". 
     // If "Upload" is active (customPageBannerImage != null), we use it.
 
+    // Check if custom image is a GIF
+    const isGif = customPageBannerImage?.startsWith('data:image/gif');
+
     return (
         <div
-            className="w-full relative overflow-hidden rounded-2xl mb-8 p-8 animate-fade-in shadow-lg group mx-auto"
+            className={`w-full relative overflow-hidden rounded-2xl mb-8 p-8 animate-fade-in shadow-lg group mx-auto ${(customPageBannerImage && !isGif) ? 'animate-page-banner-scroll' : ''}`}
             style={{
                 ...gradientStyle,
                 boxShadow: `0 10px 25px -5px ${shadowColor}50`

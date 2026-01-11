@@ -142,6 +142,21 @@ html,
   }
 }
 
+
+@keyframes page-banner-scroll {
+  from {
+    background-position-x: 0px;
+  }
+
+  to {
+    background-position-x: 10000px;
+  }
+}
+
+.animate-page-banner-scroll {
+  animation: page-banner-scroll 360s linear infinite;
+}
+
 .animate-diagonal-pattern {
   animation: diagonal-move 3s linear infinite;
 }

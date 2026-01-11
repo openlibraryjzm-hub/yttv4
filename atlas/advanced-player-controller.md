@@ -21,9 +21,11 @@ The Advanced Player Controller is a comprehensive UI component positioned at the
 
 #### ### 1.1 Central Orb
 **NOTE: Banner Feature Status**
-The Top Banner now supports an infinite horizontal scroll animation for seamless looping backgrounds. 
-*   **Infinite Scroll**: The banner image (`/public/banner.PNG`) automatically scrolls from left to right in an infinite loop (60s duration).
-*   **Upload Feature (Pending)**: A "Change Banner" button was added to the 3-dot menu, but the feature is currently non-functional (upload appears to have no effect). It is marked for future debugging.
+The Top Banner supports an infinite horizontal scroll animation for seamless looping backgrounds. 
+*   **Infinite Scroll**: The banner image automatically scrolls from left to right in an infinite loop (60s duration).
+*   **Upload Feature**: A "Change Banner" button in the Settings Page allows users to upload a custom image (PNG/JPG/WEBP/GIF).
+    *   **Static Images**: Scroll infinitely.
+    *   **GIFs**: Play natively without scrolling.
 
 **1: User-Perspective Description**
 

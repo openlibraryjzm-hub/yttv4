@@ -290,6 +290,8 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 - `userName`: string - User's display name for banners (default: 'Boss')
 - `userAvatar`: string - User's ASCII art avatar (default: '( ͡° ͜ʖ ͡°)')
 - `customOrbImage`: string | null - Base64 encoded custom orb image
+- `customBannerImage`: string | null - Base64 encoded custom app banner image
+- `customPageBannerImage`: string | null - Base64 encoded custom page banner image
 - `isSpillEnabled`: boolean - Master toggle for orb spill effect
 - `orbSpill`: Object - Quadrant spill flags ({ tl, tr, bl, br })
 - `orbImageScale`: number - Orb image zoom level (0.5 - 3.0)
@@ -301,6 +303,8 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 - `setUserName(name)` - Sets the user's display name
 - `setUserAvatar(avatar)` - Sets the user's ASCII avatar (supports multi-line)
 - `setBannerPattern(pattern)` - Sets the video page banner pattern ('diagonal' | 'dots' | 'waves' | 'solid')
+- `setCustomBannerImage(dataUrl)` - Sets the app-wide top banner custom image
+- `setCustomPageBannerImage(dataUrl)` - Sets the page banner custom image (Videos Page/Folders)
 
 **Persistence:**
 - Persisted to localStorage: `config-storage`
