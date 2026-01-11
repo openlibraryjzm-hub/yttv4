@@ -97,7 +97,7 @@ Users see a 3-column grid of playlist cards in the Playlists page:
 - `src-tauri/src/commands.rs`: Tauri command handlers
 - `src-tauri/src/database.rs`: SQLite operations
 - Database tables:
-  - `playlists`: Playlist metadata (id, name, description, created_at, updated_at)
+  - `playlists`: Playlist metadata (id, name, description, created_at, updated_at, custom_ascii)
   - `playlist_items`: Videos in playlists (id, playlist_id, video_url, video_id, title, thumbnail_url, position, added_at)
   - `stuck_folders`: Stuck folder assignments (id, playlist_id, folder_color, created_at)
 
@@ -183,6 +183,7 @@ Users see colored folders as a way to organize videos within playlists:
     - Colored left border (2px) matching folder color
     - Folder thumbnail (first video in folder)
     - Folder name (default "Red Folder" or custom name from `folder_metadata`)
+    - Custom ASCII Banner (if configured in `folder_metadata`)
     - Parent playlist name
     - Video count
     - Stuck folders are excluded from global display (shown in playlist section instead)
@@ -249,7 +250,7 @@ Users see colored folders as a way to organize videos within playlists:
 - Database tables:
   - `video_folder_assignments`: Folder assignments (id, playlist_id, item_id, folder_color, created_at)
   - `stuck_folders`: Stuck folder assignments (id, playlist_id, folder_color, created_at)
-  - `folder_metadata`: Custom folder names/descriptions (id, playlist_id, folder_color, custom_name, description, created_at, updated_at)
+  - `folder_metadata`: Custom folder names/descriptions/banners (id, playlist_id, folder_color, custom_name, description, custom_ascii, created_at, updated_at)
 
 **3: The Logic & State Chain**
 

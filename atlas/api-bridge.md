@@ -92,7 +92,7 @@ await invoke('add_video_to_playlist', {
 - `create_playlist(name, description?)` → Returns `playlist_id` (i64)
 - `get_all_playlists()` → Returns `Array<Playlist>`
 - `get_playlist(id)` → Returns `Playlist | null`
-- `update_playlist(id, name?, description?)` → Returns `boolean`
+- `update_playlist(id, name?, description?, custom_ascii?)` → Returns `boolean`
 - `delete_playlist(id)` → Returns `boolean`
 - `delete_playlist_by_name(name)` → Returns `boolean`
 
@@ -100,7 +100,7 @@ await invoke('add_video_to_playlist', {
 - `createPlaylist(name, description)`
 - `getAllPlaylists()`
 - `getPlaylist(id)`
-- `updatePlaylist(id, name, description)`
+- `updatePlaylist(id, name, description, customAscii)`
 - `deletePlaylist(id)`
 - `deletePlaylistByName(name)`
 
@@ -162,11 +162,15 @@ await invoke('add_video_to_playlist', {
 - `toggle_stuck_folder(playlist_id, folder_color)` → Returns `boolean` (new stuck status)
 - `is_folder_stuck(playlist_id, folder_color)` → Returns `boolean`
 - `get_all_stuck_folders()` → Returns `Array<[playlist_id, folder_color]>`
+- `set_folder_metadata(playlist_id, folder_color, name?, description?, custom_ascii?)` → Returns `boolean`
+- `get_folder_metadata(playlist_id, folder_color)` → Returns `Option<(String, String, Option<String>)>`
 
 **API Functions**:
 - `toggleStuckFolder(playlistId, folderColor)`
 - `isFolderStuck(playlistId, folderColor)`
 - `getAllStuckFolders()`
+- `setFolderMetadata(playlistId, folderColor, name, description, customAscii)`
+- `getFolderMetadata(playlistId, folderColor)`
 
 **Toggle Behavior**: If folder is stuck, unsticks it. If not stuck, sticks it.
 

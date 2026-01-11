@@ -193,7 +193,7 @@ yttv2/
 **Cross-References**: See `api-bridge.md` for import commands, `database-schema.md` for data structure
 
 #### `ui.md`
-**Covers**: Side menu, page layouts, card components, grid systems, star color picker menu, **Support Hub**, **Custom Player Borders**
+**Covers**: Side menu, page layouts, card components, grid systems, star color picker menu, **Support Hub**, **Custom Player Borders**, **Custom ASCII Banners**
 **Key Topics**: PlaylistsPage, VideosPage, **HistoryPage (List Layout)**, **SupportPage (Radial UI)**, Card architecture, folder selector
 **Cross-References**: See `state-management.md` for page routing, `navigation-routing.md` for navigation flows
 

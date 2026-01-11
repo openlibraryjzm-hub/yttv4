@@ -33,8 +33,10 @@ CREATE TABLE IF NOT EXISTS playlists (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     description TEXT,
+    description TEXT,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    custom_ascii TEXT
 )
 ```
 
@@ -43,7 +45,9 @@ CREATE TABLE IF NOT EXISTS playlists (
 - `name` (TEXT NOT NULL) - Playlist name (required)
 - `description` (TEXT) - Optional playlist description
 - `created_at` (TEXT NOT NULL) - ISO 8601 timestamp (RFC3339 format)
+- `created_at` (TEXT NOT NULL) - ISO 8601 timestamp (RFC3339 format)
 - `updated_at` (TEXT NOT NULL) - ISO 8601 timestamp (RFC3339 format)
+- `custom_ascii` (TEXT) - Optional custom ASCII art banner for the playlist
 
 **Indexes**: None (primary key is automatically indexed)
 
@@ -269,7 +273,9 @@ CREATE TABLE IF NOT EXISTS folder_metadata (
     custom_name TEXT,
     description TEXT,
     created_at TEXT NOT NULL,
+    created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
+    custom_ascii TEXT,
     FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
     UNIQUE(playlist_id, folder_color)
 )
@@ -281,6 +287,7 @@ CREATE TABLE IF NOT EXISTS folder_metadata (
 - `folder_color` (TEXT NOT NULL) - Folder color ID (e.g., "red", "blue")
 - `custom_name` (TEXT) - User-defined name for the folder
 - `description` (TEXT) - User-defined description for the folder
+- `custom_ascii` (TEXT) - Optional custom ASCII art banner for the folder
 - `created_at` (TEXT NOT NULL) - ISO 8601 timestamp (RFC3339 format)
 - `updated_at` (TEXT NOT NULL) - ISO 8601 timestamp (RFC3339 format)
 

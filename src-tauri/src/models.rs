@@ -5,6 +5,7 @@ pub struct Playlist {
     pub id: i64,
     pub name: String,
     pub description: Option<String>,
+    pub custom_ascii: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }

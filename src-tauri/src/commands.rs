@@ -1,6 +1,6 @@
+use crate::audio_capture::AudioCapture;
 use crate::database::Database;
 use crate::models::*;
-use crate::audio_capture::AudioCapture;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager, State};
 
@@ -34,10 +34,16 @@ pub fn update_playlist(
     id: i64,
     name: Option<String>,
     description: Option<String>,
+    custom_ascii: Option<String>,
 ) -> Result<bool, String> {
     let db = db.lock().map_err(|e| e.to_string())?;
-    db.update_playlist(id, name.as_deref(), description.as_deref())
-        .map_err(|e| e.to_string())
+    db.update_playlist(
+        id,
+        name.as_deref(),
+        description.as_deref(),
+        custom_ascii.as_deref(),
+    )
+    .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -212,7 +218,7 @@ pub fn get_folder_metadata(
     db: State<Mutex<Database>>,
     playlist_id: i64,
     folder_color: String,
-) -> Result<Option<(String, String)>, String> {
+) -> Result<Option<(String, String, Option<String>)>, String> {
     let db = db.lock().map_err(|e| e.to_string())?;
     db.get_folder_metadata(playlist_id, &folder_color)
         .map_err(|e| e.to_string())
@@ -225,6 +231,7 @@ pub fn set_folder_metadata(
     folder_color: String,
     name: Option<String>,
     description: Option<String>,
+    custom_ascii: Option<String>,
 ) -> Result<bool, String> {
     let db = db.lock().map_err(|e| e.to_string())?;
     db.set_folder_metadata(
@@ -232,6 +239,7 @@ pub fn set_folder_metadata(
         &folder_color,
         name.as_deref(),
         description.as_deref(),
+        custom_ascii.as_deref(),
     )
     .map_err(|e| e.to_string())
 }
@@ -377,38 +385,44 @@ pub fn test_audio_command() -> String {
 #[tauri::command]
 pub fn start_audio_capture(app: AppHandle) -> Result<(), String> {
     eprintln!("[Commands] start_audio_capture called!");
-    let mut capture = AUDIO_CAPTURE.lock().map_err(|e| format!("Lock error: {}", e))?;
-    
+    let mut capture = AUDIO_CAPTURE
+        .lock()
+        .map_err(|e| format!("Lock error: {}", e))?;
+
     if capture.is_none() {
         eprintln!("[Commands] Creating new AudioCapture instance");
         *capture = Some(AudioCapture::new());
     } else {
         eprintln!("[Commands] AudioCapture instance already exists");
     }
-    
+
     eprintln!("[Commands] Starting audio capture...");
     let result = capture
         .as_mut()
         .ok_or("Failed to create audio capture")?
         .start(app)
         .map_err(|e| format!("Failed to start audio capture: {}", e));
-    
+
     match &result {
         Ok(_) => eprintln!("[Commands] start_audio_capture succeeded"),
         Err(e) => eprintln!("[Commands] start_audio_capture failed: {}", e),
     }
-    
+
     result
 }
 
 #[tauri::command]
 pub fn stop_audio_capture() -> Result<(), String> {
     eprintln!("[Commands] stop_audio_capture called!");
-    let mut capture = AUDIO_CAPTURE.lock().map_err(|e| format!("Lock error: {}", e))?;
-    
+    let mut capture = AUDIO_CAPTURE
+        .lock()
+        .map_err(|e| format!("Lock error: {}", e))?;
+
     if let Some(ref mut cap) = capture.as_mut() {
         eprintln!("[Commands] Stopping audio capture...");
-        let result = cap.stop().map_err(|e| format!("Failed to stop audio capture: {}", e));
+        let result = cap
+            .stop()
+            .map_err(|e| format!("Failed to stop audio capture: {}", e));
         match &result {
             Ok(_) => eprintln!("[Commands] stop_audio_capture succeeded"),
             Err(e) => eprintln!("[Commands] stop_audio_capture failed: {}", e),

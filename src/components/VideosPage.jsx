@@ -626,7 +626,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
 
           if (metadata) {
             // Destructure carefully if it's array
-            setFolderMetadataState({ name: metadata[0], description: metadata[1] });
+            setFolderMetadataState({ name: metadata[0], description: metadata[1], customAscii: metadata[2] });
           } else {
             setFolderMetadataState(null);
           }
@@ -649,12 +649,12 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     try {
       if (selectedFolder && selectedFolder !== 'unsorted') {
         // Update Folder Metadata
-        await setFolderMetadata(activePlaylistId, selectedFolder, data.name, data.description);
+        await setFolderMetadata(activePlaylistId, selectedFolder, data.name, data.description, data.customAscii);
         // Refresh local state
-        setFolderMetadataState({ name: data.name, description: data.description });
+        setFolderMetadataState({ name: data.name, description: data.description, customAscii: data.customAscii });
       } else {
         // Update Playlist Metadata
-        await updatePlaylist(activePlaylistId, data.name, data.description);
+        await updatePlaylist(activePlaylistId, data.name, data.description, data.customAscii);
 
         // Update global state store by reloading all playlists
         const playlists = await getAllPlaylists();
@@ -767,6 +767,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     let description = '';
     let color = null;
     let isEditable = true;
+    let customAscii = null;
 
     if (selectedFolder) {
       if (selectedFolder === 'unsorted') {
@@ -782,6 +783,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
         if (activeObject) { // activeObject here refers to folderMetadataState
           title = activeObject.name || (colorInfo ? `${colorInfo.name} Folder` : 'Folder');
           description = activeObject.description || '';
+          customAscii = activeObject.customAscii;
         } else {
           // Fallback to default names if no metadata
           title = colorInfo ? `${colorInfo.name} Folder` : 'Folder';
@@ -793,11 +795,13 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
       // Playlist View
       title = activeObject ? activeObject.name : '';
       description = activeObject ? activeObject.description : '';
+      // Playlist object from Rust uses snake_case
+      customAscii = activeObject ? activeObject.custom_ascii : null;
       color = null;
       isEditable = true;
     }
 
-    return { title, description, color, isEditable };
+    return { title, description, color, isEditable, customAscii };
   }, [activeObject, selectedFolder, activePlaylistId, allPlaylists]);
 
   // Determine initial data for modal
@@ -809,13 +813,15 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
 
       return {
         name: activeObject?.name || defaultName,
-        description: activeObject?.description || ''
+        description: activeObject?.description || '',
+        customAscii: activeObject?.customAscii || ''
       };
     } else {
       // Playlist edit
       return {
         name: activeObject?.name || '',
-        description: activeObject?.description || ''
+        description: activeObject?.description || '',
+        customAscii: activeObject?.custom_ascii || ''
       };
     }
   }, [activeObject, selectedFolder]);
@@ -972,7 +978,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
               videoCount={videosToDisplay.length}
               creationYear="2026"
               author={userName}
-              avatar={userAvatar}
+              avatar={bannerInfo.customAscii || userAvatar}
               continueVideo={continueVideo}
               onContinue={() => {
                 if (continueVideo && onVideoSelect) {

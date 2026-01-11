@@ -24,8 +24,8 @@ export const getPlaylist = async (id) => {
   return await invoke('get_playlist', { id });
 };
 
-export const updatePlaylist = async (id, name = null, description = null) => {
-  return await invoke('update_playlist', { id, name, description });
+export const updatePlaylist = async (id, name = null, description = null, customAscii = null) => {
+  return await invoke('update_playlist', { id, name, description, customAscii });
 };
 
 export const deletePlaylist = async (id) => {
@@ -156,9 +156,9 @@ export const getFolderMetadata = async (playlistId, folderColor) => {
   }
 };
 
-export const setFolderMetadata = async (playlistId, folderColor, name, description) => {
+export const setFolderMetadata = async (playlistId, folderColor, name, description, customAscii) => {
   try {
-    return await invoke('set_folder_metadata', { playlistId, folderColor, name, description });
+    return await invoke('set_folder_metadata', { playlistId, folderColor, name, description, customAscii });
   } catch (error) {
     console.error('Error in setFolderMetadata API:', error);
     throw error;

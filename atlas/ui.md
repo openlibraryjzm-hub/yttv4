@@ -336,12 +336,14 @@ Users see a 3-column grid of video cards showing videos from the current playlis
   - **Location**: Displayed at the top of the scrollable content area, above the Sticky Video Carousel.
   - **Content**: Shows the title (Playlist Name, "{Color} Folder", custom folder name, or "Unsorted Videos") and description text.
   - **Metadata**: Displays video count, creation year (hardcoded 2026), and **Author Identity**:
-    - Shows the user's configured **Display Name** and **ASCII Avatar** (from Settings).
+    - Shows the user's configured **Display Name** and **ASCII Avatar**.
+    - **Custom ASCII Banner**: Users can set a custom ASCII art banner for each playlist or folder via the Edit Modal.
+    - **Fallback**: If no custom ASCII is set, it falls back to the globally configured ASCII Signature (from Settings).
     - **Single-line Avatar**: Rendered large (text-3xl) as a watermark.
     - **Multi-line Avatar**: Rendered in a compact monospace block (text-[4px]) below the name.
   - **Styling**: Uses vibrant gradients (matching folder color) and glassmorphism effects for a premium look.
   - **Background Pattern**: Features a smooth, continuously moving diagonal stripe pattern overlay (`animate-diagonal-pattern`) that adapts to any background color.
-  - **Edit Button**: Small pen icon in the top-left corner (on hover) allows renaming the playlist or colored folder and updating its description via `EditPlaylistModal`. Custom folder names persist in `folder_metadata`. (Not available for Unsorted Videos).
+  - **Edit Button**: Small pen icon in the top-left corner (on hover) allows renaming the playlist or colored folder, updating its description, and **setting a Custom ASCII Banner** via `EditPlaylistModal`. Custom folder names and banners persist in `folder_metadata`. (Not available for Unsorted Videos).
   - **Continue Watching**: A "CONTINUE?" section appears in the bottom-right corner if the playlist/folder has a recently watched video.
     - Displays "CONTINUE?" text and the video thumbnail.
     - Hovering reveals a Play icon.

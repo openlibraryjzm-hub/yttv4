@@ -4,12 +4,14 @@ import { X, Save } from 'lucide-react';
 const EditPlaylistModal = ({ isOpen, onClose, onSave, initialData }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [customAscii, setCustomAscii] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (isOpen && initialData) {
             setName(initialData.name || '');
             setDescription(initialData.description || '');
+            setCustomAscii(initialData.customAscii || '');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
@@ -20,7 +22,7 @@ const EditPlaylistModal = ({ isOpen, onClose, onSave, initialData }) => {
 
         setIsSaving(true);
         try {
-            await onSave({ name, description });
+            await onSave({ name, description, customAscii });
             onClose();
         } catch (error) {
             console.error('Failed to update playlist:', error);
@@ -68,6 +70,18 @@ const EditPlaylistModal = ({ isOpen, onClose, onSave, initialData }) => {
                             onChange={(e) => setDescription(e.target.value)}
                             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 h-32 resize-none"
                             placeholder="Add a description..."
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Custom ASCII Banner
+                        </label>
+                        <textarea
+                            value={customAscii}
+                            onChange={(e) => setCustomAscii(e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 h-32 resize-none font-mono text-xs whitespace-pre leading-tight"
+                            placeholder="Paste ASCII art here to override default signature..."
                         />
                     </div>
 

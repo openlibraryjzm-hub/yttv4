@@ -203,6 +203,30 @@ impl Database {
                 .execute("ALTER TABLE video_progress ADD COLUMN has_fully_watched INTEGER NOT NULL DEFAULT 0", [])?;
         }
 
+        // Migration: Add custom_ascii to playlists
+        let mut pl_stmt = self.conn.prepare("PRAGMA table_info(playlists)")?;
+        let pl_columns: Vec<String> = pl_stmt
+            .query_map([], |row| Ok(row.get::<_, String>(1)?))?
+            .collect::<Result<Vec<_>, _>>()?;
+
+        if !pl_columns.contains(&"custom_ascii".to_string()) {
+            self.conn
+                .execute("ALTER TABLE playlists ADD COLUMN custom_ascii TEXT", [])?;
+        }
+
+        // Migration: Add custom_ascii to folder_metadata
+        let mut fm_stmt = self.conn.prepare("PRAGMA table_info(folder_metadata)")?;
+        let fm_columns: Vec<String> = fm_stmt
+            .query_map([], |row| Ok(row.get::<_, String>(1)?))?
+            .collect::<Result<Vec<_>, _>>()?;
+
+        if !fm_columns.contains(&"custom_ascii".to_string()) {
+            self.conn.execute(
+                "ALTER TABLE folder_metadata ADD COLUMN custom_ascii TEXT",
+                [],
+            )?;
+        }
+
         Ok(())
     }
 
@@ -218,7 +242,7 @@ impl Database {
 
     pub fn get_all_playlists(&self) -> Result<Vec<Playlist>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, name, description, created_at, updated_at FROM playlists ORDER BY created_at DESC"
+            "SELECT id, name, description, created_at, updated_at, custom_ascii FROM playlists ORDER BY created_at DESC"
         )?;
 
         let playlists = stmt
@@ -229,6 +253,7 @@ impl Database {
                     description: row.get(2)?,
                     created_at: row.get(3)?,
                     updated_at: row.get(4)?,
+                    custom_ascii: row.get(5)?,
                 })
             })?
             .collect::<Result<Vec<_>, _>>()?;
@@ -238,7 +263,7 @@ impl Database {
 
     pub fn get_playlist(&self, id: i64) -> Result<Option<Playlist>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, name, description, created_at, updated_at FROM playlists WHERE id = ?1",
+            "SELECT id, name, description, created_at, updated_at, custom_ascii FROM playlists WHERE id = ?1",
         )?;
 
         match stmt.query_row(params![id], |row| {
@@ -248,6 +273,7 @@ impl Database {
                 description: row.get(2)?,
                 created_at: row.get(3)?,
                 updated_at: row.get(4)?,
+                custom_ascii: row.get(5)?,
             })
         }) {
             Ok(playlist) => Ok(Some(playlist)),
@@ -261,27 +287,60 @@ impl Database {
         id: i64,
         name: Option<&str>,
         description: Option<&str>,
+        custom_ascii: Option<&str>,
     ) -> Result<bool> {
         let now = Utc::now().to_rfc3339();
 
         if let Some(name) = name {
+            let mut query = "UPDATE playlists SET name = ?1, updated_at = ?2".to_string();
+            let mut params: Vec<Box<dyn rusqlite::ToSql>> =
+                vec![Box::new(name), Box::new(now.clone())];
+            let mut idx = 3;
+
             if let Some(desc) = description {
-                let rows = self.conn.execute(
-                    "UPDATE playlists SET name = ?1, description = ?2, updated_at = ?3 WHERE id = ?4",
-                    params![name, desc, now, id],
-                )?;
-                return Ok(rows > 0);
-            } else {
-                let rows = self.conn.execute(
-                    "UPDATE playlists SET name = ?1, updated_at = ?2 WHERE id = ?3",
-                    params![name, now, id],
-                )?;
-                return Ok(rows > 0);
+                query.push_str(&format!(", description = ?{}", idx));
+                params.push(Box::new(desc));
+                idx += 1;
             }
+
+            if let Some(ascii) = custom_ascii {
+                query.push_str(&format!(", custom_ascii = ?{}", idx));
+                params.push(Box::new(ascii));
+                idx += 1;
+            }
+
+            query.push_str(&format!(" WHERE id = ?{}", idx));
+            params.push(Box::new(id));
+
+            // Execute dynamic query. Use as_ref() to convert params to &[&dyn ToSql]
+            let params_refs: Vec<&dyn rusqlite::ToSql> =
+                params.iter().map(|p| p.as_ref()).collect();
+            let rows = self.conn.execute(&query, params_refs.as_slice())?;
+            return Ok(rows > 0);
         } else if let Some(desc) = description {
+            // Update only description (legacy support, though less likely used with new signature)
+            let mut query = "UPDATE playlists SET description = ?1, updated_at = ?2".to_string();
+            let mut params: Vec<Box<dyn rusqlite::ToSql>> =
+                vec![Box::new(desc), Box::new(now.clone())];
+            let mut idx = 3;
+
+            if let Some(ascii) = custom_ascii {
+                query.push_str(&format!(", custom_ascii = ?{}", idx));
+                params.push(Box::new(ascii));
+                idx += 1;
+            }
+
+            query.push_str(&format!(" WHERE id = ?{}", idx));
+            params.push(Box::new(id));
+
+            let params_refs: Vec<&dyn rusqlite::ToSql> =
+                params.iter().map(|p| p.as_ref()).collect();
+            let rows = self.conn.execute(&query, params_refs.as_slice())?;
+            return Ok(rows > 0);
+        } else if let Some(ascii) = custom_ascii {
             let rows = self.conn.execute(
-                "UPDATE playlists SET description = ?1, updated_at = ?2 WHERE id = ?3",
-                params![desc, now, id],
+                "UPDATE playlists SET custom_ascii = ?1, updated_at = ?2 WHERE id = ?3",
+                params![ascii, now, id],
             )?;
             return Ok(rows > 0);
         }
@@ -826,22 +885,23 @@ impl Database {
         &self,
         playlist_id: i64,
         folder_color: &str,
-    ) -> Result<Option<(String, String)>> {
+    ) -> Result<Option<(String, String, Option<String>)>> {
         let mut stmt = self.conn.prepare(
-            "SELECT custom_name, description FROM folder_metadata WHERE playlist_id = ?1 AND folder_color = ?2",
+            "SELECT custom_name, description, custom_ascii FROM folder_metadata WHERE playlist_id = ?1 AND folder_color = ?2",
         )?;
 
         match stmt.query_row(params![playlist_id, folder_color], |row| {
             Ok((
                 row.get::<_, Option<String>>(0)?.unwrap_or_default(),
                 row.get::<_, Option<String>>(1)?.unwrap_or_default(),
+                row.get::<_, Option<String>>(2)?,
             ))
         }) {
-            Ok((name, desc)) => {
-                if name.is_empty() && desc.is_empty() {
+            Ok((name, desc, ascii)) => {
+                if name.is_empty() && desc.is_empty() && ascii.is_none() {
                     Ok(None)
                 } else {
-                    Ok(Some((name, desc)))
+                    Ok(Some((name, desc, ascii)))
                 }
             }
             Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
@@ -855,17 +915,19 @@ impl Database {
         folder_color: &str,
         name: Option<&str>,
         description: Option<&str>,
+        custom_ascii: Option<&str>,
     ) -> Result<bool> {
         let now = Utc::now().to_rfc3339();
 
         let rows = self.conn.execute(
-            "INSERT INTO folder_metadata (playlist_id, folder_color, custom_name, description, created_at, updated_at) 
-             VALUES (?1, ?2, ?3, ?4, ?5, ?5)
+            "INSERT INTO folder_metadata (playlist_id, folder_color, custom_name, description, custom_ascii, created_at, updated_at) 
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?6)
              ON CONFLICT(playlist_id, folder_color) DO UPDATE SET
              custom_name = excluded.custom_name,
              description = excluded.description,
+             custom_ascii = excluded.custom_ascii,
              updated_at = excluded.updated_at",
-            params![playlist_id, folder_color, name, description, now],
+            params![playlist_id, folder_color, name, description, custom_ascii, now],
         )?;
 
         Ok(rows > 0)
