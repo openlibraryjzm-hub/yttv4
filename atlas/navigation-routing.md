@@ -26,6 +26,10 @@ The application has three main pages:
 - **Playlists Page** (`currentPage === 'playlists'`) - Grid of playlist cards
 - **Videos Page** (`currentPage === 'videos'`) - Grid of video cards from current playlist
 - **History Page** (`currentPage === 'history'`) - Grid of watch history cards
+- **Likes Page** (`currentPage === 'likes'`) - Grid of liked video cards
+- **Pins Page** (`currentPage === 'pins'`) - Grid of pinned video cards
+- **Settings Page** (`currentPage === 'settings'`) - Configuration and theming
+- **Support Page** (`currentPage === 'support'`) - Radial support hub
 
 ### Navigation Flow
 
@@ -40,6 +44,10 @@ The application has three main pages:
    {currentPage === 'playlists' && <PlaylistsPage />}
    {currentPage === 'videos' && <VideosPage />}
    {currentPage === 'history' && <HistoryPage />}
+   {currentPage === 'likes' && <LikesPage />}
+   {currentPage === 'pins' && <PinsPage />}
+   {currentPage === 'settings' && <SettingsPage />}
+   {currentPage === 'support' && <SupportPage />}
    ```
 5. Page component mounts → Loads data, displays grid
 

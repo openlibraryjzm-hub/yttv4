@@ -56,7 +56,9 @@ Users see a side menu panel that appears on the right side of the screen when in
 
 - **Top Navigation Bar**: Horizontal bar at the top of the side menu containing:
   - **Back Button**: Chevron left button (visible when history exists), navigates to previous page.
-  - **Tabs**: Three tabs ("Playlists", "Videos", "History") to switch page content. Blue when active.
+  - **Tabs**: 
+    - Text-based tabs: "Playlists", "Videos".
+    - Icon-only tabs: "History" (Clock), "Likes" (Heart), "Pins" (Pin), "Settings" (Gear), "Support" (Cat).
   - **Close Side Menu Button**: "Close Side Menu" button (X) aligned to the right. Clicking it returns to full-screen mode (hides side menu).
 
 - **Folder Selector** (Videos page only): Below the tabs, a row of 17 colored dots:
@@ -823,55 +825,56 @@ Users see a modal dialog when selecting "Move to Playlist" or "Copy to Playlist"
      - Updates UI (removes video from grid if moved)
    - Closes modal and clears state
 
----
 
-#### ### 4.1.5 Explorer Page
+#### ### 4.1.5 Likes Page
 
 **1: User-Perspective Description**
 
-The Explorer Page offers an alternative, focused way to browse content using a tag-based filtering system. It bypasses the standard grid hierarchy to allow rapid drilling down into specific content subsets.
+Access specific videos that have been marked as "Liked". This page aggregates all videos from the special "Likes" playlist.
 
-- **Dual View Modes**:
-  - **Playlists View**: Displays a clean list of playlists matching the current filters.
-  - **Colored Folders View**: Displays an aggregated list of folders from matching playlists, ideal for finding specific categorized content across multiple playlists.
-
-- **Tag-Based Filtering System**:
-  - **Presets (Context)**: A row of colored tags representing Tab Presets.
-    - **Single Selection**: Decreed enforced. One preset must always be active (defaults to "All"). Clicking another preset switches context immediately.
-    - **Visuals**: Active preset glows with its assigned color.
-  - **Tabs (Drill-Down)**: A row of neutral tags representing Tabs available within the active Preset.
-    - **Dynamic List**: Only shows tabs derived from the currently active Preset.
-    - **Multi-Selection**: Users can toggle multiple tabs to create a union filter (e.g., "Show me Playlists from 'Gaming' AND 'Music' tabs").
-  - **Logic**:
-    - **Preset Only**: Shows EVERYTHING in that preset.
-    - **Preset + Tabs**: Shows ONLY content belonging to the selected tabs.
-  - **Reset Filters**: A button capable of resetting the entire state back to the default "All" preset appears when any filter is active.
+- **Grid View**: Displays video cards in a standard grid.
+- **Auto-Generated**: The "Likes" playlist is automatically created if it does not exist.
+- **Navigation**: Accessible via the "Like" (Heart) icon in the top navigation.
 
 **2: File Manifest**
 
 **UI/Components:**
-- `src/components/ExplorerPage.jsx`: Top-level component managing the view, state, and rendering cards.
-
-**State Management:**
-- Local state in `ExplorerPage`:
-  - `activeTab`: 'playlists' | 'folders'
-  - `activeFilters`: Array of filter objects `{ id, type, name }`
-  - `playlistThumbnails`: Aggregated thumbnails map
-  - `playlistFolders`: Cache for playlist folder data
+- `src/components/LikesPage.jsx`: Page component fetching and rendering liked videos.
 
 **3: The Logic & State Chain**
 
-**Filtering Priority logic:**
-1. **Playlist Filters** (Most Specific): If present (via code/edge case), wins.
-2. **Tab Filters** (Specific): If user selects specific tabs, show only content from those tabs.
-3. **Preset Filter** (Broad): If no tabs selected, show all content from the active preset tags.
-
-**Aggregation Logic:**
-- **Thumbnails**: The Explorer page aggressively pre-fetches `first_video` for all displayed folders/playlists to ensuring rich visual thumbnails are always present, avoiding "empty" card states.
+**Initialization:**
+- On mount, fetches all playlists to find one named "Likes".
+- If missing, creates it.
+- Fetches items from that playlist ID.
 
 ---
 
-#### ### 4.1.6 Settings Page
+#### ### 4.1.6 Pins Page
+
+**1: User-Perspective Description**
+
+Access videos that have been temporarily pinned during the current session.
+
+- **Session-Based**: Pins are ephemeral and cleared when the application closes (unlike Likes which are persistent).
+- **Grid View**: Displays pinned video cards.
+- **Pinning**: Videos can be pinned from any video card using the pin icon.
+- **Navigation**: Accessible via the "Pins" (Pin) icon in the top navigation.
+
+**2: File Manifest**
+
+**UI/Components:**
+- `src/components/PinsPage.jsx`: Page component rendering pinned videos.
+- `src/store/pinStore.js`: State management for pinned videos.
+
+**3: The Logic & State Chain**
+
+**Source of Truth:**
+- `usePinStore.pinnedVideos`: Array of video objects pinned in memory.
+
+---
+
+#### ### 4.1.7 Settings Page
 
 **1: User-Perspective Description**
 
@@ -946,7 +949,7 @@ Users access the configuration area via the "Config" (Settings icon) button on t
 
 ---
 
-#### ### 4.1.7 Support Page
+#### ### 4.1.8 Support Page
 
 **1: User-Perspective Description**
 

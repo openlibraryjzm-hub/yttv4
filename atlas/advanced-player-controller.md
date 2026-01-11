@@ -41,6 +41,8 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
   - **Config** (Settings icon) - [Functional] Opens the full Settings Page, which includes the **Orb Tab** for advanced customization (Image, Spill, Scale).
   - **History** (Clock icon) - Navigates to History page
   - **Clipping** (Circle/Minimize2 icon) - Toggles spill/clipping mode (same as Spill)
+  - **Likes** (Heart icon) - Navigates to Likes page (Icon updated)
+  - **Support** (Cat icon) - Navigates to Support page (Icon updated)
 - **Spill Toggle**: When enabled, the orb image can extend beyond the circular boundary. Users can configure which quadrants allow spill via the **Settings Page > Orb** tab. The spill state is persisted to localStorage (`isSpillEnabled`).
 - **Config Panel & Orb Settings**: When Config button is clicked, users are navigated to the Settings Page.
   - **Orb Tab**: A comprehensive configuration suite for the central element:

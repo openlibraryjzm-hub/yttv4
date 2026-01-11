@@ -54,9 +54,11 @@ yttv2/
 │   │   ├── LocalVideoPlayer.jsx  # HTML5 fallback player (browser-compatible formats)
 │   │   ├── TopNavigation.jsx     # Navigation tabs (Playlists/Videos/History)
 │   │   ├── PlaylistsPage.jsx     # Main playlists grid view
-│   │   ├── ExplorerPage.jsx      # Alternate view for browsing content via presets/tabs
+
 │   │   ├── VideosPage.jsx        # Videos grid view for current playlist
 │   │   ├── HistoryPage.jsx       # Watch history display (last 100 videos)
+│   │   ├── LikesPage.jsx         # Liked videos grid view
+│   │   ├── PinsPage.jsx          # Pinned videos grid view
 │   │   ├── PlaylistList.jsx      # Sidebar playlist list component
 │   │   ├── PlaylistView.jsx      # Individual playlist video grid
 │   │   ├── PlaylistUploader.jsx  # Config Playlist Modal (Unified Add/Import/JSON)

@@ -3,7 +3,7 @@ import { useNavigationStore } from '../store/navigationStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { usePlaylistStore } from '../store/playlistStore';
 import FolderSelector from './FolderSelector';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Heart, Pin, Settings, Clock, Cat } from 'lucide-react';
 
 const TopNavigation = () => {
   const { currentPage, setCurrentPage, history, goBack } = useNavigationStore();
@@ -16,16 +16,17 @@ const TopNavigation = () => {
   const tabs = [
     { id: 'playlists', label: 'Playlists' },
     { id: 'videos', label: 'Videos' },
-    { id: 'history', label: 'History' },
-    { id: 'explorer', label: 'Explorer' },
-    { id: 'settings', label: 'Settings' },
-    { id: 'support', label: 'Support' },
+    { id: 'history', label: 'History', icon: <Clock size={18} /> },
+    { id: 'likes', label: 'Likes', icon: <Heart size={18} /> },
+    { id: 'pins', label: 'Pins', icon: <Pin size={18} /> },
+    { id: 'settings', label: 'Settings', icon: <Settings size={18} /> },
+    { id: 'support', label: 'Support', icon: <Cat size={18} /> },
   ];
 
   const handleTabClick = (tabId) => {
     setCurrentPage(tabId);
     // Auto-switch to half mode when clicking tabs if in full mode
-    const isNavigationTab = ['playlists', 'videos', 'history', 'explorer', 'settings', 'support'].includes(tabId);
+    const isNavigationTab = ['playlists', 'videos', 'history', 'likes', 'pins', 'settings', 'support'].includes(tabId);
     if (isNavigationTab && viewMode === 'full') {
       setViewMode('half');
     }
@@ -46,7 +47,7 @@ const TopNavigation = () => {
                 }`}
               title={getInspectTitle(`${tab.label} tab`)}
             >
-              {tab.label}
+              {tab.icon ? tab.icon : tab.label}
             </button>
           ))}
         </div>
