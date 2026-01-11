@@ -10,6 +10,7 @@ The UI system provides a consistent layout shell with a side menu that displays 
 - **Playlists**: See `playlist&tab.md` Section 2.1 for playlist grid details
 - **Videos**: See `playlist&tab.md` Section 2.2 for video grid and folder filtering
 - **History**: See `history.md` for history page details
+- **Settings**: See [Section 4.1.5](#415-settings-page) for customization options
 
 ---
 
@@ -34,11 +35,16 @@ The application employs a high-contrast, structured design with distinct borders
   - The Audio Visualizer acts as the dynamic border for the central Orb, replacing static borders.
   - It uses `overflow: visible` to bleed onto the Video Player area below (approx 52px overlap), creating a layered, immersive effect.
 
-- **Top Banner**:
+- **Top Banner ("App Banner")**:
   - Displays a custom image (`/public/banner.PNG`) spanning the full width of the controller.
   - **Infinite Scroll**: The banner image animates continuously from left to right in a 60-second seamless loop.
-  - Features a "bleed" effect at the bottom: a gradient fading from the image into the dark blue border color, ensuring a seamless visual transition to the content area.
-  - If no custom image is provided, it falls back to a subtle blue gradient.
+  - **Customizable**: Can be changed via the Settings Page (Appearance tab).
+  - Features a "bleed" effect at the bottom: a gradient fading from the image into the dark blue border color.
+
+- **Page Banner ("Videos Banner")**:
+  - Located on the Videos Page and Colored Folders views.
+  - **Dynamic Patterns**: Features selectable animated background patterns (Diagonal, Dots, Mesh, Solid) configurable in Settings.
+  - **Customizable Identity**: Displays user avatar (ASCII art) and name.
 
 - **Video Player**:
   - Wrapped in a `.layout-shell__player` container.
@@ -1047,3 +1053,47 @@ The Support Page acts as a central hub for community engagement, resources, and 
    - Sets `navigationStore.currentPage` to `'videos'`.
 5. If not found:
    - Displays alert to user.
+#### ### 4.1.5 Settings Page
+
+**1: User-Perspective Description**
+
+The Settings Page allows users to customize the application's appearance, behavior, and user identity. It is organized into 4 main tabs:
+
+- **Appearance Tab**:
+  - **Color Palette**: Choose between themes (e.g., Cool Blue, Midnight).
+  - **App Banner**: 
+    - View active banner (/public/banner.PNG).
+    - Select from presets (Default, Cosmic, Nature, Industrial) - *Note: Currently Mock*.
+    - Upload custom banner - *Note: Currently Mock*.
+  - **Page Banner**: 
+    - Customize the background pattern for video page headers.
+    - Options: Diagonal, Dots, Mesh (Diamond Grid), Solid.
+    - **Live Preview**: Shows a real-time preview of the selected pattern.
+  - **Player Borders**: Mock options for customizing the video player border style.
+
+- **Visualizer Tab**:
+  - **Style**: Mock options for visualizer patterns (Frequency Bars, Digital Wave, etc.).
+  - **Color Mode**: Mock options for visualizer colors.
+
+- **Orb Tab**:
+  - **Custom Image**: Upload a custom image for the central orb.
+  - **Spill**: Enable/disable spill effect (image breaking out of the circle).
+  - **Spill Quadrants**: Toggle spill for individual corners (TL, TR, BL, BR).
+  - **Scale**: Adjust image zoom level (0.5x - 3.0x).
+
+- **Signature Tab**:
+  - **Pseudonym**: Set the display name used in banners.
+  - **Avatar**: Select from ASCII art presets or enter a custom ASCII avatar (multi-line supported).
+
+**2: File Manifest**
+
+- src/components/SettingsPage.jsx: Main settings component.
+- src/store/configStore.js: State management for all settings.
+- src/App.css: CSS animations for Page Banner patterns (.pattern-mesh, .pattern-dots, etc.).
+
+**3: Logic & State**
+
+- **Page Banner Logic**:
+  - Selecting a pattern updates configStore.bannerPattern.
+  - PageBanner.jsx watches this value and applies the corresponding CSS class (pattern-{name}).
+  - CSS animations in App.css handle the visual movement.

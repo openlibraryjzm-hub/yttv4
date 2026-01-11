@@ -105,39 +105,38 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                             activeTab === 'orb' ? <Smile className="text-sky-600" size={24} /> :
                                 <User className="text-sky-600" size={24} />}
                 </div>
-                <h1 className="text-xl font-black uppercase tracking-widest text-sky-600">Configuration</h1>
-            </div>
 
-            {/* Tabs */}
-            <div className="flex p-1 bg-slate-100 rounded-xl w-fit flex-wrap gap-1">
-                <button
-                    onClick={() => setActiveTab('theme')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'theme' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                        }`}
-                >
-                    <Palette size={16} /> Appearance
-                </button>
-                <button
-                    onClick={() => setActiveTab('visualizer')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'visualizer' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                        }`}
-                >
-                    <Music size={16} /> Visualizer
-                </button>
-                <button
-                    onClick={() => setActiveTab('orb')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'orb' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                        }`}
-                >
-                    <Smile size={16} /> Orb
-                </button>
-                <button
-                    onClick={() => setActiveTab('profile')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'profile' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                        }`}
-                >
-                    <User size={16} /> Signature
-                </button>
+                {/* Tabs */}
+                <div className="flex p-1 bg-slate-100 rounded-xl w-fit flex-wrap gap-1">
+                    <button
+                        onClick={() => setActiveTab('theme')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'theme' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                    >
+                        <Palette size={16} /> Appearance
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('visualizer')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'visualizer' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                    >
+                        <Music size={16} /> Visualizer
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('orb')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'orb' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                    >
+                        <Smile size={16} /> Orb
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('profile')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'profile' ? 'bg-white text-sky-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                    >
+                        <User size={16} /> Signature
+                    </button>
+                </div>
             </div>
 
             <div className="space-y-8 pb-20">
@@ -226,6 +225,17 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                         </ConfigSection>
 
                         <ConfigSection title="Page Banner" icon={Layout}>
+                            {/* Live Preview */}
+                            <div className="mb-4 space-y-2">
+                                <label className="text-xs font-bold uppercase text-slate-400 ml-1">Live Preview</label>
+                                <div className="w-full h-24 bg-gradient-to-r from-sky-400 to-blue-600 rounded-xl overflow-hidden relative shadow-inner border-2 border-slate-100 flex items-center justify-center">
+                                    <div className={`absolute inset-0 pattern-${bannerPattern || 'diagonal'}`}></div>
+                                    <span className="relative z-10 text-white font-black text-2xl tracking-widest drop-shadow-md uppercase opacity-90">
+                                        {bannerPattern === 'waves' ? 'MESH' : bannerPattern || 'DIAGONAL'}
+                                    </span>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 {['Diagonal', 'Dots', 'Mesh', 'Solid'].map((name) => {
                                     // Map 'Mesh' to the 'waves' ID for compatibility with existing CSS
