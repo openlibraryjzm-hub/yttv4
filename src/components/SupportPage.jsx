@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Github, Twitter, MessageCircle, Video, Book, ExternalLink, ArrowRight, Heart } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Github, Twitter, MessageCircle, Video, Book, ExternalLink, ArrowRight, Heart, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { usePlaylistStore } from '../store/playlistStore';
 import { getAllPlaylists, getPlaylistItems } from '../api/playlistApi';
 import { useNavigationStore } from '../store/navigationStore';
+
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function SupportPage({ onVideoSelect }) {
     const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -91,225 +93,184 @@ export default function SupportPage({ onVideoSelect }) {
         }
     ];
 
-    // Radial calculation
-    const radius = 180;
-    const innerRadius = 80;
-    const center = 250;
-    const totalSlices = items.length;
-    const anglePerSlice = 360 / totalSlices;
+    // State to track the last hovered item for the banner display
+    const [displayIndex, setDisplayIndex] = useState(null);
 
-    const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
-        const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-        return {
-            x: centerX + (radius * Math.cos(angleInRadians)),
-            y: centerY + (radius * Math.sin(angleInRadians))
+    // Derived active item: either currently hovered, or the last hovered (displayIndex), or default
+    const activeItem = (hoveredIndex !== null)
+        ? items[hoveredIndex]
+        : (displayIndex !== null ? items[displayIndex] : {
+            id: 'default',
+            label: 'Support Hub',
+            sublabel: 'Explore Options',
+            icon: Heart,
+            color: 'from-slate-800 to-slate-900',
+            textColor: 'text-rose-500',
+            description: 'Hover over any section to preview details. Click to navigate to the selected resource.',
+            isDefault: true
+        });
+
+    // State for random thumbnails
+    const [thumbnails, setThumbnails] = useState([]);
+
+    useEffect(() => {
+        const fetchThumbnails = async () => {
+            try {
+                const all = await getAllPlaylists();
+                if (all.length > 0) {
+                    const playlistId = all[0].id; // Use first playlist
+                    const items = await getPlaylistItems(playlistId);
+                    // Get 5 random items or just first 5
+                    const thumbs = items.slice(0, 5).map(i => i.thumbnail_url || `https://img.youtube.com/vi/${i.video_id}/maxresdefault.jpg`);
+                    setThumbnails(thumbs);
+                }
+            } catch (e) {
+                console.error("Failed to load thumbnails", e);
+            }
         };
-    };
+        fetchThumbnails();
+    }, []);
 
-    const describeArc = (x, y, radius, startAngle, endAngle) => {
-        const start = polarToCartesian(x, y, radius, endAngle);
-        const end = polarToCartesian(x, y, radius, startAngle);
-        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-        const d = [
-            "M", start.x, start.y,
-            "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
-        ].join(" ");
-        return d;
-    };
-
-    const createSector = (startAngle, endAngle) => {
-        const outerStart = polarToCartesian(center, center, radius, endAngle);
-        const outerEnd = polarToCartesian(center, center, radius, startAngle);
-        const innerStart = polarToCartesian(center, center, innerRadius, endAngle);
-        const innerEnd = polarToCartesian(center, center, innerRadius, startAngle);
-
-        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-
-        return [
-            "M", outerStart.x, outerStart.y,
-            "A", radius, radius, 0, largeArcFlag, 0, outerEnd.x, outerEnd.y,
-            "L", innerEnd.x, innerEnd.y,
-            "A", innerRadius, innerRadius, 0, largeArcFlag, 1, innerStart.x, innerStart.y,
-            "Z"
-        ].join(" ");
-    };
+    const activeIndex = (hoveredIndex !== null) ? hoveredIndex : (displayIndex !== null ? displayIndex : -1);
+    const currentThumbnail = (activeIndex >= 0 && thumbnails[activeIndex]) ? thumbnails[activeIndex] : (thumbnails[0] || null);
 
     return (
-        <div className="w-full h-full flex items-center justify-center bg-slate-50 relative overflow-hidden">
+        <div className="w-full h-full flex flex-col items-center justify-start pt-4 bg-transparent relative overflow-hidden p-8 gap-0">
             {/* Background Pattern */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_2px,transparent_2px),linear-gradient(90deg,rgba(0,0,0,0.02)_2px,transparent_2px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)]"></div>
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_2px,transparent_2px),linear-gradient(90deg,rgba(0,0,0,0.02)_2px,transparent_2px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)] pointer-events-none"></div>
 
-            <div className="relative flex flex-col items-center">
-                {/* Visual Ring */}
-                <div className="relative w-[500px] h-[500px]">
-                    <svg width="500" height="500" viewBox="0 0 500 500" className="drop-shadow-2xl">
-                        <defs>
-                            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                                <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-                                <feMerge>
-                                    <feMergeNode in="coloredBlur" />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                        </defs>
-                        {items.map((item, index) => {
-                            const startAngle = index * anglePerSlice;
-                            const endAngle = startAngle + anglePerSlice - 2; // -2 for gap
-                            const isHovered = hoveredIndex === index;
+            {/* Tabs Navigation - Above Banner */}
+            <div className="flex flex-wrap justify-center gap-3 mb-8 z-50 relative">
+                {items.map((item, index) => {
+                    const isSelected = activeItem.id === item.id;
+                    return (
+                        <button
+                            key={item.id}
+                            onClick={() => {
+                                setDisplayIndex(index);
+                            }}
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold tracking-wide transition-all duration-300 border backdrop-blur-md ${isSelected
+                                ? 'bg-white text-slate-900 border-white shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105'
+                                : 'bg-black/20 text-slate-400 border-white/5 hover:bg-white/10 hover:text-white hover:border-white/20'
+                                }`}
+                        >
+                            {React.createElement(item.icon, { size: 16, strokeWidth: 2.5 })}
+                            {item.label}
+                        </button>
+                    );
+                })}
+            </div>
 
-                            // Calculate icon position (midpoint of sector)
-                            const midAngle = startAngle + (anglePerSlice / 2);
-                            const iconPos = polarToCartesian(center, center, (radius + innerRadius) / 2, midAngle);
+            {/* Top Banner - Horizontal - Clickable to Activate */}
+            <div
+                onClick={() => activeItem.action()}
+                className={`w-full max-w-4xl h-32 rounded-2xl relative overflow-hidden transition-all duration-300 shadow-xl group shrink-0 z-20 cursor-pointer hover:scale-[1.02] active:scale-[0.98] border border-white/10 hover:border-white/30`}
+            >
+                {/* Background Layer - Animated */}
+                <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.div
+                        key={activeItem.id}
+                        className="absolute inset-0 w-full h-full"
+                        initial={{ x: "-100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "100%" }}
+                        transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                    >
+                        <div className={`absolute inset-0 bg-gradient-to-r ${activeItem.color}`}></div>
 
-                            // Text rotation to keep it upright-ish or radial? 
-                            // Keeping icons upright is better for readability.
+                        {/* Abstract Shapes for Texture - Inside the moving background so they move with it */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
+                    </motion.div>
+                </AnimatePresence>
 
-                            return (
-                                <g
-                                    key={item.id}
-                                    onMouseEnter={() => setHoveredIndex(index)}
-                                    onMouseLeave={() => setHoveredIndex(null)}
-                                    onClick={item.action}
-                                    className="cursor-pointer transition-all duration-300 group"
-                                    style={{ transformOrigin: 'center', transform: isHovered ? 'scale(1.05)' : 'scale(1)' }}
-                                >
-                                    <path
-                                        d={createSector(startAngle, endAngle)}
-                                        className={`fill-current transition-colors duration-300 ${isHovered ? 'opacity-100' : 'opacity-80'}`}
-                                        fill={`url(#grad-${item.id})`}
-                                    />
-                                    <defs>
-                                        <linearGradient id={`grad-${item.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" className={item.color.split(' ')[0].replace('from-', 'stop-')} style={{ stopColor: 'currentColor' }} /> {/* Tailwind extraction hack or just use hex? */}
-                                            {/* Tailwind classes for gradients within SVG defs are tricky. Let's use direct fill with classes on the path if needed, 
-                                                but path fill accepts defs. I will map colors manually or use classes on the path directly if not for gradient.
-                                                Actually, let's just use solid classes for simplicity and reliability, or css variables.
-                                                The clean way: use className with tailwind text colors and fill='currentColor'.
-                                            */}
-                                        </linearGradient>
-                                    </defs>
-
-                                    {/* Since SVG gradients are tricky with Tailwind classes dynamic, let's use a simpler approach: 
-                                        Apply the gradient class to a div overlay or just use solid colors. 
-                                        User wants "Rich Aesthetics". 
-                                        I will use the text-color trick: set text color on group, fill="currentColor".
-                                        Wait, gradients need distinct start/stops. 
-                                        Let's stick to simple fill per item or use standard colors.
-                                    */}
-                                </g>
-                            );
-                        })}
-
-                        {/* Re-render paths with proper coloring approach */}
-                        {items.map((item, index) => {
-                            const startAngle = index * anglePerSlice;
-                            const endAngle = startAngle + anglePerSlice - 2;
-                            const isHovered = hoveredIndex === index;
-
-                            // Gradients defined manually for best look
-                            const gradients = {
-                                code: ['#334155', '#0f172a'],
-                                twitter: ['#60a5fa', '#2563eb'],
-                                discord: ['#818cf8', '#4f46e5'],
-                                promo: ['#fb7185', '#e11d48'],
-                                resources: ['#34d399', '#059669']
-                            };
-
-                            return (
-                                <g
-                                    key={item.id}
-                                    onMouseEnter={() => setHoveredIndex(index)}
-                                    onMouseLeave={() => setHoveredIndex(null)}
-                                    onClick={item.action}
-                                    className="cursor-pointer"
-                                    style={{ transformOrigin: 'center center', transition: 'all 0.3s ease' }}
-                                >
-                                    <defs>
-                                        <linearGradient id={`gradient-${item.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" stopColor={gradients[item.id][0]} />
-                                            <stop offset="100%" stopColor={gradients[item.id][1]} />
-                                        </linearGradient>
-                                    </defs>
-                                    <path
-                                        d={createSector(startAngle, endAngle)}
-                                        fill={`url(#gradient-${item.id})`}
-                                        className={`transition-all duration-300 ${isHovered ? 'filter drop-shadow-lg brightness-110' : 'opacity-90'}`}
-                                        style={{ transform: isHovered ? 'scale(1.02)' : 'scale(1)', transformBox: 'fill-box', transformOrigin: 'center' }}
-                                    />
-                                </g>
-                            );
-                        })}
-
-                        {/* Icons Layer (Separate to sit on top) */}
-                        {items.map((item, index) => {
-                            const startAngle = index * anglePerSlice;
-                            const midAngle = startAngle + (anglePerSlice / 2);
-                            const iconPos = polarToCartesian(center, center, (radius + innerRadius) / 2, midAngle);
-                            const Icon = item.icon;
-                            const isHovered = hoveredIndex === index;
-
-                            return (
-                                <foreignObject
-                                    key={`icon-${index}`}
-                                    x={iconPos.x - 20}
-                                    y={iconPos.y - 20}
-                                    width="40"
-                                    height="40"
-                                    className="pointer-events-none"
-                                >
-                                    <div className={`flex items-center justify-center w-full h-full text-white transition-transform duration-300 ${isHovered ? 'scale-125' : ''}`}>
-                                        <Icon size={24} strokeWidth={2.5} />
-                                    </div>
-                                </foreignObject>
-                            );
-                        })}
-
-                        {/* Center Hole Content */}
-                        <foreignObject x={center - 70} y={center - 70} width="140" height="140">
-                            <div className="w-full h-full rounded-full bg-white shadow-inner flex items-center justify-center text-center p-2 flex-col z-10 border-4 border-slate-50 overflow-hidden relative">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 z-10 mb-1">Hub</span>
-                                <div className="relative z-10 animate-[heartbeat_1.5s_ease-in-out_infinite]">
-                                    <div className="absolute inset-0 bg-rose-400 blur-xl opacity-50 animate-[pulse_1.5s_ease-in-out_infinite]"></div>
-                                    <Heart
-                                        size={48}
-                                        className="fill-rose-500 text-rose-600 drop-shadow-md"
-                                        strokeWidth={2.5}
-                                    />
-                                </div>
-                                <h2 className="text-xs font-black text-rose-500 tracking-wider mt-2 z-10 opacity-80">SUPPORT</h2>
-
-                                {/* Subtle background glow */}
-                                <div className="absolute inset-0 bg-rose-50/50 rounded-full animate-pulse-slow"></div>
-                            </div>
-                        </foreignObject>
-                    </svg>
-                </div>
-
-                {/* Active Item Description Box - Dynamic */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] pointer-events-none opacity-0"></div>
-
-                {/* Info Card that appears on bottom of ring or dynamically changes */}
-                <div className="mt-8 h-32 w-full max-w-md flex flex-col items-center justify-center text-center space-y-2 px-6 transition-all duration-300">
-                    {hoveredIndex !== null ? (
-                        <>
-                            <div className={`p-3 rounded-full bg-gradient-to-br ${items[hoveredIndex].color} text-white shadow-lg mb-2`}>
-                                {React.createElement(items[hoveredIndex].icon, { size: 24 })}
-                            </div>
-                            <h2 className="text-2xl font-black text-slate-800 tracking-tight">{items[hoveredIndex].label}</h2>
-                            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{items[hoveredIndex].sublabel}</p>
-                            <p className="text-slate-500 text-sm max-w-xs mx-auto pt-2 leading-relaxed">
-                                {items[hoveredIndex].description}
+                {/* Content Container - Animated using Framer Motion */}
+                <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.div
+                        key={activeItem.id}
+                        initial={{ x: "-150%", opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: "150%", opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                        className="relative z-10 h-full flex items-center justify-between px-10 w-full"
+                    >
+                        <div className="flex flex-col max-w-2xl">
+                            <h1 className={`text-4xl font-black tracking-tighter text-white drop-shadow-sm`}>
+                                {activeItem.label}
+                            </h1>
+                            <p className="text-white/80 font-bold tracking-widest uppercase text-sm mt-1">
+                                {activeItem.sublabel}
                             </p>
-                        </>
-                    ) : (
-                        <div className="text-slate-300 flex flex-col items-center gap-2">
-                            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
-                                <ArrowRight className="text-slate-300" />
-                            </div>
-                            <p className="font-medium">Hover over a segment to view details</p>
+                            <p className="text-white/70 text-sm mt-2 font-medium leading-relaxed">
+                                {activeItem.description}
+                            </p>
                         </div>
-                    )}
+
+                        {/* Icon in Banner */}
+                        <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner group-hover:rotate-6 transition-transform duration-500 shrink-0 ml-4">
+                            {React.createElement(activeItem.icon, {
+                                size: 32,
+                                className: "text-white drop-shadow-md",
+                                strokeWidth: 2.5
+                            })}
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+
+
+
+            {/* Bottom: Split View - Left Video | Right GIF */}
+            <div className="relative w-full max-w-7xl h-[400px] px-8 pb-12 z-10 flex gap-8 items-center mt-12">
+
+                {/* Left Side: Video Preview - Kept at smaller "current" size (approx 500x300) */}
+                <div className="w-[500px] h-[300px] shrink-0 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/10 bg-slate-900 group relative">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                        {currentThumbnail && (
+                            <motion.div
+                                key={activeItem.id}
+                                initial={{ opacity: 0, scale: 1.05 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-0 w-full h-full"
+                            >
+                                <img
+                                    src={currentThumbnail}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity duration-700"
+                                />
+                                {/* Overlay info */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-wrap content-end p-8">
+                                    <div className="w-full">
+                                        <span className="text-xs font-bold text-white/70 tracking-widest uppercase mb-2 block">Featured Content</span>
+                                        <h3 className="text-white font-black text-2xl leading-tight drop-shadow-xl mb-3">
+                                            {activeItem.sublabel}
+                                        </h3>
+                                        <p className="text-white/60 text-sm line-clamp-2">
+                                            Check out this featured video.
+                                        </p>
+                                    </div>
+                                </div>
+                                {/* Play Button Overlay */}
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20 backdrop-blur-[2px]">
+                                    <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center pl-2 border border-white/40 shadow-2xl hover:scale-110 transition-transform cursor-pointer">
+                                        <Video size={40} className="text-white fill-white" />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
+
+                {/* Right Side: Grok GIF - Expanded to fill remaining space (Larger) */}
+                <div className="flex-1 h-full rounded-3xl overflow-hidden shadow-2xl border-4 border-white/10 bg-slate-900 group relative">
+                    <img
+                        src="/grok-video-11b464e2-7bbc-478e-876a-940b9b44db5a1-ezgif.com-video-to-gif-converter.gif" // User provided filename
+                        alt="AI Showcase"
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+                    />
+                </div>
+
             </div>
         </div>
     );

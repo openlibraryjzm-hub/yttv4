@@ -1034,8 +1034,11 @@ Users access the configuration area via the "Config" (Settings icon) button on t
 
 The Support Page acts as a central hub for community engagement, resources, and developer connection. It features a unique **Radial Ring UI** that is distinct from the rest of the grid-based interface.
 
-- **Radial Ring Layout**:
+  - **Radial Ring Layout**:
   - A central hub featuring 5 interactive segments arranged in a circle.
+  - **Dual Banner System**:
+    - **Top Banner**: Displays the active segment's title, subtitle, and icon with a rich gradient background.
+    - **Bottom Banner**: Displays the active segment's description and interaction prompt.
   - **Segments**:
     1.  **Code**: Links to the open-source GitHub repository.
     2.  **Developer**: Links to the head developer's X (Twitter) profile.
@@ -1043,7 +1046,7 @@ The Support Page acts as a central hub for community engagement, resources, and 
     4.  **Future Plans**: Navigates to a "Promo" playlist within the app detailing future projects.
     5.  **Resources**: Navigates to a "Resources" playlist helping users get started.
   - **Interactions**:
-    - Hovering a segment expands it and updates the specific information card below.
+    - Hovering a segment expands it and updates the Dual Banner system (Top Banner for identity, Bottom Banner for details).
     - Clicking an external link segment opens the URL in the system browser.
     - Clicking an internal link segment (Future Plans, Resources) navigates to the respective playlist in the Videos view.
 
