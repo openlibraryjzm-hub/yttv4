@@ -954,6 +954,12 @@ Users access the configuration area via the "Config" (Settings icon) button on t
     - **Patterns**: Toggles for CSS-based animated patterns (Diagonal, Dots, Mesh, Solid).
     - **Custom Upload**: Button to upload a custom Page Banner texture/image.
     - **Preview**: Shows the currently selected pattern or uploaded image.
+  
+- **Visualizer Tab**:
+  - **Visualizer Style**: Selection grid for visualizer types (currently "Frequency Bars" is implemented).
+  - **Visualizer Effects**:
+    - **Distance-Based Transparency**: Toggle switch to enable a gradient fade on the visualizer bars. When enabled, bars are solid near the orb and fade to transparent as they extend outward.
+  - **Color Mode**: Selection for visualizer coloring (Theme Match, Rainbow, Custom).
 
 - **Signature Tab**:
   - **Pseudonym**: Text input to set the username shown on banners.
@@ -996,6 +1002,7 @@ Users access the configuration area via the "Config" (Settings icon) button on t
   - `isSpillEnabled`: Boolean master toggle for orb spill.
   - `orbSpill`: Object `{ tl: bool, tr: bool, bl: bool, br: bool }` for quadrant control.
   - `orbImageScale`: Float (0.5 - 3.0) for image zooming.
+  - `visualizerGradient`: Boolean toggle for distance-based transparency.
   - All state is persisted to `localStorage` via Zustand persist middleware.
 
 **3: The Logic & State Chain**

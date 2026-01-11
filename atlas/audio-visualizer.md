@@ -15,6 +15,7 @@ The Audio Visualizer creates a circular, audio-reactive visualization around the
 *   **Zero-Latency Loopback**: Uses `WASAPI Loopback` via the `cpal` crate.
 *   **Overflows Controller**: Visualizer bars extend beyond the controller area, overlapping the video player for an immersive effect.
 *   **Orb Border Integration**: The visualizer radius is tightly tuned (77px) to act as the border of the 154px Orb, replacing the static CSS border.
+*   **Distance-Based Transparency**: Features a gradient opacity system where bars are solid at the base (near the Orb) and fade to transparency as they extend outward, creating a cohesive overlap with UI elements.
 *   **Toggleable**: Can be turned on/off via the User Interface.
 
 ---
@@ -84,6 +85,11 @@ If the visualizer looks too "jittery" or "weird" compared to Rainmeter, adjust t
 3.  **Sensitivity (`sensitivity`)**
     *   **Recommendation**: **`64`** (Default)
     *   **Effect**: Controls the overall height scaling after FFT processing.
+
+4.  **Visualizer Gradient (`visualizerGradient`)**
+    *   **Description**: Toggles the distance-based transparency fade.
+    *   **Setting**: Configurable in Settings -> Visualizer -> Visualizer Effects.
+    *   **Effect**: When enabled (default), bars fade from solid (at base) to transparent (at tip). When disabled, bars are solid white throughout.
 
 ---
 

@@ -296,6 +296,7 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 - `orbSpill`: Object - Quadrant spill flags ({ tl, tr, bl, br })
 - `orbImageScale`: number - Orb image zoom level (0.5 - 3.0)
 - `orbImageXOffset`/`YOffset`: number - Orb image pan offsets
+- `visualizerGradient`: boolean - Toggle for distance-based visualizer transparency (default: true)
 - Legacy layout settings (deprecated/removed from UI but present in store structure)
 
 **Actions:**
@@ -306,6 +307,7 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 - `setPlayerBorderPattern(pattern)` - Sets the top player border/separator pattern ('diagonal' | 'dots' | 'waves' | 'solid')
 - `setCustomBannerImage(dataUrl)` - Sets the app-wide top banner custom image
 - `setCustomPageBannerImage(dataUrl)` - Sets the page banner custom image (Videos Page/Folders)
+- `setVisualizerGradient(enabled)` - Toggles visualizer distance-based transparency fade
 
 **Persistence:**
 - Persisted to localStorage: `config-storage`

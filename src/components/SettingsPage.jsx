@@ -54,7 +54,8 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
         bannerPattern, setBannerPattern,
         customBannerImage, setCustomBannerImage,
         customPageBannerImage, setCustomPageBannerImage,
-        playerBorderPattern, setPlayerBorderPattern
+        playerBorderPattern, setPlayerBorderPattern,
+        visualizerGradient, setVisualizerGradient
     } = useConfigStore();
     const [customAvatar, setCustomAvatar] = useState('');
     const [copied, setCopied] = useState(false);
@@ -433,6 +434,23 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                                         </button>
                                     );
                                 })}
+                            </div>
+                        </ConfigSection>
+
+                        <ConfigSection title="Visualizer Effects" icon={Volume2}>
+                            <div className="flex items-center justify-between p-4 rounded-xl border-2 border-slate-100 bg-white">
+                                <div className="space-y-1">
+                                    <span className="text-sm font-bold text-slate-700 block">Distance-Based Transparency</span>
+                                    <p className="text-xs text-slate-400">
+                                        Bars fade out as they extend outward from the orb.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setVisualizerGradient(!visualizerGradient)}
+                                    className={`w-12 h-6 rounded-full transition-colors relative ${visualizerGradient ? 'bg-sky-500' : 'bg-slate-200'}`}
+                                >
+                                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${visualizerGradient ? 'left-7 shadow-sm' : 'left-1'}`} />
+                                </button>
                             </div>
                         </ConfigSection>
 

@@ -169,6 +169,10 @@ export const useConfigStore = create(
             // Player Border Pattern
             playerBorderPattern: 'diagonal',
             setPlayerBorderPattern: (val) => set({ playerBorderPattern: val }),
+
+            // Visualizer Gradient
+            visualizerGradient: true,
+            setVisualizerGradient: (val) => set({ visualizerGradient: val }),
         }), {
         name: 'config-storage-v5', // name of the item in the storage (must be unique)
     }

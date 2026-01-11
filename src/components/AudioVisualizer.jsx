@@ -3,6 +3,7 @@ import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { mapFrequencyToBars, smoothBarValues } from '../utils/audioProcessor';
 import { fft, util } from 'fft-js';
+import { useConfigStore } from '../store/configStore';
 
 /**
  * AudioVisualizer - Circular audio visualizer matching Rainmeter VisBubble widget
@@ -50,6 +51,7 @@ const AudioVisualizer = ({
   const processingIntervalRef = useRef(null);
   const lastProcessTimeRef = useRef(0);
   const isCapturingRef = useRef(false); // Track capture state for cleanup
+  const { visualizerGradient } = useConfigStore();
 
   // Initialize sample rate (will be updated from audio data)
   useEffect(() => {
@@ -324,12 +326,28 @@ const AudioVisualizer = ({
 
     const strokeColor = parseColor(colors);
 
+    // Parse color components for gradient
+    const getGradientColors = (colorInput) => {
+      let r = 255, g = 255, b = 255, a = 1.0;
+      if (Array.isArray(colorInput)) {
+        r = colorInput[0];
+        g = colorInput[1];
+        b = colorInput[2];
+        a = (colorInput[3] !== undefined ? colorInput[3] : 255) / 255;
+      }
+      return {
+        base: `rgba(${r},${g},${b},${a})`,
+        tip: `rgba(${r},${g},${b},0.1)` // Stronger fade at tip
+      };
+    };
+
+    const gradientColors = getGradientColors(colors);
+
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (!barValuesRef.current) {
         // Draw test pattern when no data (so visualizer is visible)
-        ctx.strokeStyle = strokeColor;
         ctx.lineWidth = barWidth;
         for (let i = 0; i < barCount; i++) {
           const barIndex = clockwise ? i : (barCount - 1 - i);
@@ -342,6 +360,22 @@ const AudioVisualizer = ({
           const endX = baseX + minBarLength * Math.cos(normalizedAngle);
           const endY = baseY + minBarLength * Math.sin(normalizedAngle);
 
+          // Apply Gradient conditionally
+          if (visualizerGradient) {
+            // Create Gradient based on MAX length (Distance Zones)
+            // This ensures transparency is a function of distance from center, not bar length
+            const fixedEndX = baseX + maxBarLength * Math.cos(normalizedAngle);
+            const fixedEndY = baseY + maxBarLength * Math.sin(normalizedAngle);
+
+            const gradient = ctx.createLinearGradient(baseX, baseY, fixedEndX, fixedEndY);
+            gradient.addColorStop(0, gradientColors.base);
+            gradient.addColorStop(0.2, gradientColors.base); // Solid up to 20% of max reach
+            gradient.addColorStop(1, gradientColors.tip);   // Fade to transparent at max reach
+
+            ctx.strokeStyle = gradient;
+          } else {
+            ctx.strokeStyle = strokeColor;
+          }
           ctx.beginPath();
           ctx.moveTo(baseX, baseY);
           ctx.lineTo(endX, endY);
@@ -375,8 +409,21 @@ const AudioVisualizer = ({
         const endX = baseX + barLength * Math.cos(normalizedAngle);
         const endY = baseY + barLength * Math.sin(normalizedAngle);
 
-        // Draw bar
-        ctx.strokeStyle = strokeColor;
+        // Apply Gradient conditionally
+        if (visualizerGradient) {
+          // Create Gradient based on MAX length (Distance Zones)
+          const fixedEndX = baseX + maxBarLength * Math.cos(normalizedAngle);
+          const fixedEndY = baseY + maxBarLength * Math.sin(normalizedAngle);
+
+          const gradient = ctx.createLinearGradient(baseX, baseY, fixedEndX, fixedEndY);
+          gradient.addColorStop(0, gradientColors.base);
+          gradient.addColorStop(0.2, gradientColors.base); // Solid up to 20% of max reach
+          gradient.addColorStop(1, gradientColors.tip);   // Fade to transparent at max reach
+
+          ctx.strokeStyle = gradient;
+        } else {
+          ctx.strokeStyle = strokeColor;
+        }
         ctx.lineWidth = barWidth;
         ctx.beginPath();
         ctx.moveTo(baseX, baseY);
@@ -395,7 +442,7 @@ const AudioVisualizer = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [enabled, barCount, barWidth, radius, radiusY, maxBarLength, minBarLength, colors, angleTotal, angleStart, clockwise]);
+  }, [enabled, barCount, barWidth, radius, radiusY, maxBarLength, minBarLength, colors, angleTotal, angleStart, clockwise, visualizerGradient]);
 
   if (!enabled) {
     return null;
