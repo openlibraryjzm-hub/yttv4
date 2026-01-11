@@ -851,112 +851,6 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex items-center justify-between px-8 py-4 bg-transparent shrink-0 z-10">
-        <div className="flex items-center gap-4">
-          {/* Sort Dropdown */}
-          <div className="relative group">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-sm hover:bg-white transition-colors appearance-none pr-8"
-              title={getInspectTitle('Sort videos')}
-            >
-              <option value="default">Default Order</option>
-              <option value="progress">Watch Progress</option>
-            </select>
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Progress Filters (Only show when Sort by Progress is active) */}
-          {sortBy === 'progress' && (
-            <div className="flex items-center gap-2 animate-fade-in">
-              <button
-                onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
-                className="p-1.5 rounded-lg bg-white/50 hover:bg-white text-slate-600 border border-slate-200"
-                title={sortDirection === 'asc' ? 'Sort Ascending' : 'Sort Descending'}
-              >
-                {sortDirection === 'asc' ? (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4 4m0 0l4 4m-4-4v12" /></svg>
-                ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4 4m0 0l4 4m-4-4v12" transform="scale(1, -1) translate(0, -24)" /></svg>
-                )}
-              </button>
-
-              <button
-                onClick={() => setIncludeUnwatched(!includeUnwatched)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${includeUnwatched
-                  ? 'bg-sky-100 border-sky-300 text-sky-700'
-                  : 'bg-white/50 border-slate-200 text-slate-500 hover:text-slate-700'
-                  }`}
-              >
-                Show Unwatched
-              </button>
-
-              <button
-                onClick={() => setShowOnlyCompleted(!showOnlyCompleted)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${showOnlyCompleted
-                  ? 'bg-green-100 border-green-300 text-green-700'
-                  : 'bg-white/50 border-slate-200 text-slate-500 hover:text-slate-700'
-                  }`}
-              >
-                Hide Watched
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Bulk Tag Controls */}
-          {bulkTagMode ? (
-            <div className="flex items-center gap-2 animate-fade-in">
-              <span className="text-sm font-medium text-slate-600 bg-white/50 px-3 py-1.5 rounded-lg border border-slate-200">
-                {bulkTagSelectionCount} selected
-              </span>
-              <button
-                onClick={handleSaveBulkTags}
-                disabled={savingBulkTags || bulkTagSelectionCount === 0}
-                className="flex items-center gap-2 px-4 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium shadow-sm transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {savingBulkTags ? 'Saving...' : 'Save Tags'}
-              </button>
-              <button
-                onClick={handleCancelBulkTags}
-                className="px-4 py-1.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-lg font-medium shadow-sm transition-all text-sm"
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setBulkTagMode(true)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-white/80 hover:bg-white text-slate-700 border border-slate-200 rounded-lg font-medium shadow-sm transition-colors text-sm backdrop-blur-sm"
-              title={getInspectTitle('Enter bulk tag mode')}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-              </svg>
-              Bulk Tag
-            </button>
-          )}
-
-          {/* Add Video Button */}
-          <button
-            onClick={() => setShowUploader(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-medium shadow-sm transition-colors text-sm"
-            title={getInspectTitle('Add videos to playlist')}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add
-          </button>
-        </div>
-      </div>
-
       {/* Video Grid - 3 per row */}
       {showUploader ? (
         <div className="flex-1 overflow-y-auto p-4 bg-transparent">
@@ -967,47 +861,255 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
           />
         </div>
       ) : (
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-8">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto bg-transparent">
           {/* Page Banner - Always visible for context */}
           {activePlaylistId && (
-            <PageBanner
-              title={bannerInfo.title}
-              description={bannerInfo.description}
-              folderColor={bannerInfo.color}
-              onEdit={bannerInfo.isEditable ? () => setShowEditModal(true) : undefined}
-              videoCount={videosToDisplay.length}
-              creationYear="2026"
-              author={userName}
-              avatar={bannerInfo.customAscii || userAvatar}
-              continueVideo={continueVideo}
-              onContinue={() => {
-                if (continueVideo && onVideoSelect) {
-                  onVideoSelect(continueVideo.video_url);
-                }
-              }}
-            />
+            <div className="px-8 pt-8">
+              <PageBanner
+                title={bannerInfo.title}
+                description={bannerInfo.description}
+                folderColor={bannerInfo.color}
+                onEdit={bannerInfo.isEditable ? () => setShowEditModal(true) : undefined}
+                videoCount={videosToDisplay.length}
+                creationYear="2026"
+                author={userName}
+                avatar={bannerInfo.customAscii || userAvatar}
+                continueVideo={continueVideo}
+                onContinue={() => {
+                  if (continueVideo && onVideoSelect) {
+                    onVideoSelect(continueVideo.video_url);
+                  }
+                }}
+              />
+            </div>
           )}
 
-          {/* Edit Playlist/Folder Modal */}
-          <EditPlaylistModal
-            isOpen={showEditModal}
-            onClose={() => setShowEditModal(false)}
-            onSave={handleUpdateMetadata}
-            initialData={modalInitialData}
-          />
+          {/* Sticky Toolbar */}
+          <div className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-xl border-y border-white/5 shadow-2xl transition-all mb-6">
+            <div className="px-8 py-4 flex flex-col gap-4">
+              {/* Folder Selection Row */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                <button
+                  onClick={() => setSelectedFolder(null)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${selectedFolder === null
+                    ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/25'
+                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                    }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setSelectedFolder('unsorted')}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${selectedFolder === 'unsorted'
+                    ? 'bg-slate-500 text-white shadow-lg shadow-slate-500/25'
+                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                    }`}
+                >
+                  Unsorted
+                </button>
+                <div className="w-px h-6 bg-slate-700 mx-1" />
+                {FOLDER_COLORS.map((color) => {
+                  const isSelected = selectedFolder === color.id;
+                  return (
+                    <button
+                      key={color.id}
+                      onClick={() => setSelectedFolder(color.id)}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isSelected
+                        ? 'ring-2 ring-offset-2 ring-offset-slate-900 ring-white scale-110'
+                        : 'hover:scale-105 hover:brightness-110'
+                        }`}
+                      style={{ backgroundColor: color.hex }}
+                      title={color.name}
+                    >
+                      {isSelected && (
+                        <div className="w-2 h-2 rounded-full bg-white/50" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
 
-          {loadingFolders ? (
-            <div className="flex items-center justify-center h-64 text-slate-400">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mr-3"></div>
-              Loading videos...
+              {/* Controls Row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  {/* Sort Dropdown */}
+                  <div className="relative group">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-sm hover:bg-slate-700 transition-colors appearance-none pr-8"
+                      title={getInspectTitle('Sort videos')}
+                    >
+                      <option value="default">Default Order</option>
+                      <option value="progress">Watch Progress</option>
+                    </select>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Progress Filters */}
+                  {sortBy === 'progress' && (
+                    <div className="flex items-center gap-2 animate-fade-in">
+                      <button
+                        onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
+                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700"
+                        title={sortDirection === 'asc' ? 'Sort Ascending' : 'Sort Descending'}
+                      >
+                        {sortDirection === 'asc' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4 4m0 0l4 4m-4-4v12" /></svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4 4m0 0l4 4m-4-4v12" transform="scale(1, -1) translate(0, -24)" /></svg>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => setIncludeUnwatched(!includeUnwatched)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${includeUnwatched
+                          ? 'bg-sky-500/10 border-sky-500/50 text-sky-400'
+                          : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-400'
+                          }`}
+                      >
+                        Show Unwatched
+                      </button>
+
+                      <button
+                        onClick={() => setShowOnlyCompleted(!showOnlyCompleted)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${showOnlyCompleted
+                          ? 'bg-green-500/10 border-green-500/50 text-green-400'
+                          : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-400'
+                          }`}
+                      >
+                        Hide Watched
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {/* Bulk Tag Controls */}
+                  {bulkTagMode ? (
+                    <div className="flex items-center gap-2 animate-fade-in">
+                      <span className="text-sm font-medium text-slate-400 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                        {bulkTagSelectionCount} selected
+                      </span>
+                      <button
+                        onClick={handleSaveBulkTags}
+                        disabled={savingBulkTags || bulkTagSelectionCount === 0}
+                        className="flex items-center gap-2 px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-lg font-medium shadow-sm transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {savingBulkTags ? 'Saving...' : 'Save Tags'}
+                      </button>
+                      <button
+                        onClick={handleCancelBulkTags}
+                        className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg font-medium shadow-sm transition-all text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setBulkTagMode(true)}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg font-medium shadow-sm transition-colors text-sm"
+                      title={getInspectTitle('Enter bulk tag mode')}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                      Bulk Tag
+                    </button>
+                  )}
+
+                  {/* Add Video Button */}
+                  <button
+                    onClick={() => setShowUploader(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-medium shadow-sm transition-colors text-sm"
+                    title={getInspectTitle('Add videos to playlist')}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add
+                  </button>
+                </div>
+              </div>
             </div>
-          ) : sortedVideos.length > 0 ? (
-            <>
-              {/* Sticky Carousel Section - Hide on Unsorted page */}
-              {stickiedVideos.length > 0 && selectedFolder !== 'unsorted' && (
-                <StickyVideoCarousel>
-                  {stickiedVideos.map((video, index) => {
+          </div>
+
+          <div className="px-8 pb-8">
+            {/* Edit Playlist/Folder Modal */}
+            <EditPlaylistModal
+              isOpen={showEditModal}
+              onClose={() => setShowEditModal(false)}
+              onSave={handleUpdateMetadata}
+              initialData={modalInitialData}
+            />
+
+            {loadingFolders ? (
+              <div className="flex items-center justify-center h-64 text-slate-400">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mr-3"></div>
+                Loading videos...
+              </div>
+            ) : sortedVideos.length > 0 ? (
+              <>
+                {/* Sticky Carousel Section - Hide on Unsorted page */}
+                {stickiedVideos.length > 0 && selectedFolder !== 'unsorted' && (
+                  <StickyVideoCarousel>
+                    {stickiedVideos.map((video, index) => {
+                      const originalIndex = activePlaylistItems.findIndex(v => v.id === video.id);
+                      return (
+                        <VideoCard
+                          key={video.id}
+                          video={video}
+                          index={index}
+                          originalIndex={originalIndex}
+                          isSelected={selectedVideoIndex === originalIndex}
+                          isCurrentlyPlaying={currentVideoIndex === originalIndex}
+                          videoFolders={videoFolderAssignments[video.id] || []}
+                          selectedFolder={selectedFolder}
+                          onVideoClick={() => handleVideoClick(video, index)}
+                          onStarClick={(e) => handleStarClick(e, video)}
+                          onStarColorLeftClick={handleStarColorLeftClick}
+                          onStarColorRightClick={handleStarColorRightClick}
+                          onMenuOptionClick={(option) => {
+                            if (option.action === 'toggleSticky') {
+                              handleToggleSticky(activePlaylistId, video.id);
+                            } else {
+                              handleMenuOptionClick(option, video);
+                            }
+                          }}
+                          onQuickAssign={handleStarClick}
+                          bulkTagMode={bulkTagMode}
+                          bulkTagSelections={bulkTagSelections[video.id] || new Set()}
+                          onBulkTagColorClick={(color) => handleBulkTagColorClick(video, color)}
+                          onPinClick={() => { }} // Handled internally in VideoCard via store
+                          isStickied={true} // It is stickied in this list
+                          progress={(() => {
+                            const videoId = extractVideoId(video.video_url) || video.video_id;
+                            const data = videoProgress.get(videoId);
+                            return data ? (typeof data === 'number' ? data : data.percentage) : 0;
+                          })()}
+                          isWatched={(() => {
+                            const videoId = extractVideoId(video.video_url) || video.video_id;
+                            return watchedVideoIds.has(videoId);
+                          })()}
+                        />
+                      );
+                    })}
+                  </StickyVideoCarousel>
+                )}
+
+                {/* Regular Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 animate-fade-in">
+                  {regularVideos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((video, index) => {
                     const originalIndex = activePlaylistItems.findIndex(v => v.id === video.id);
+                    // Check stickied status for this specific folder context
+                    const folderKey = selectedFolder === null ? 'root' : selectedFolder;
+                    const key = `${activePlaylistId}::${folderKey}`;
+                    const isContextStickied = (allStickiedVideos[key] || []).includes(video.id);
+
                     return (
                       <VideoCard
                         key={video.id}
@@ -1034,10 +1136,10 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
                         bulkTagSelections={bulkTagSelections[video.id] || new Set()}
                         onBulkTagColorClick={(color) => handleBulkTagColorClick(video, color)}
                         onPinClick={() => { }} // Handled internally in VideoCard via store
-                        isStickied={true} // It is stickied in this list
+                        isStickied={isContextStickied}
                         progress={(() => {
                           const videoId = extractVideoId(video.video_url) || video.video_id;
-                          const data = videoProgress.get(videoId);
+                          const data = videoProgress.get(video.id) || videoProgress.get(extractVideoId(video.video_url));
                           return data ? (typeof data === 'number' ? data : data.percentage) : 0;
                         })()}
                         isWatched={(() => {
@@ -1047,89 +1149,39 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
                       />
                     );
                   })}
-                </StickyVideoCarousel>
-              )}
-
-              {/* Regular Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 animate-fade-in">
-                {regularVideos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((video, index) => {
-                  const originalIndex = activePlaylistItems.findIndex(v => v.id === video.id);
-                  // Check stickied status for this specific folder context
-                  const folderKey = selectedFolder === null ? 'root' : selectedFolder;
-                  const key = `${activePlaylistId}::${folderKey}`;
-                  const isContextStickied = (allStickiedVideos[key] || []).includes(video.id);
-
-                  return (
-                    <VideoCard
-                      key={video.id}
-                      video={video}
-                      index={index}
-                      originalIndex={originalIndex}
-                      isSelected={selectedVideoIndex === originalIndex}
-                      isCurrentlyPlaying={currentVideoIndex === originalIndex}
-                      videoFolders={videoFolderAssignments[video.id] || []}
-                      selectedFolder={selectedFolder}
-                      onVideoClick={() => handleVideoClick(video, index)}
-                      onStarClick={(e) => handleStarClick(e, video)}
-                      onStarColorLeftClick={handleStarColorLeftClick}
-                      onStarColorRightClick={handleStarColorRightClick}
-                      onMenuOptionClick={(option) => {
-                        if (option.action === 'toggleSticky') {
-                          handleToggleSticky(activePlaylistId, video.id);
-                        } else {
-                          handleMenuOptionClick(option, video);
-                        }
-                      }}
-                      onQuickAssign={handleStarClick}
-                      bulkTagMode={bulkTagMode}
-                      bulkTagSelections={bulkTagSelections[video.id] || new Set()}
-                      onBulkTagColorClick={(color) => handleBulkTagColorClick(video, color)}
-                      onPinClick={() => { }} // Handled internally in VideoCard via store
-                      isStickied={isContextStickied}
-                      progress={(() => {
-                        const videoId = extractVideoId(video.video_url) || video.video_id;
-                        const data = videoProgress.get(video.id) || videoProgress.get(extractVideoId(video.video_url));
-                        return data ? (typeof data === 'number' ? data : data.percentage) : 0;
-                      })()}
-                      isWatched={(() => {
-                        const videoId = extractVideoId(video.video_url) || video.video_id;
-                        return watchedVideoIds.has(videoId);
-                      })()}
-                    />
-                  );
-                })}
+                </div>
+              </>
+            ) : (
+              <div className="text-center text-slate-400 py-8">
+                No videos found in this playlist.
               </div>
-            </>
-          ) : (
-            <div className="text-center text-slate-400 py-8">
-              No videos found in this playlist.
-            </div>
-          )}
+            )}
 
-          {/* Pagination Controls - Based on Regular Videos only, since Stickies are always shown */}
-          {regularVideos.length > itemsPerPage && (
-            <div className="flex justify-center items-center gap-4 mt-8 mb-4">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors border border-slate-600 text-sky-400 hover:text-sky-300"
-              >
-                Previous
-              </button>
+            {/* Pagination Controls - Based on Regular Videos only, since Stickies are always shown */}
+            {regularVideos.length > itemsPerPage && (
+              <div className="flex justify-center items-center gap-4 mt-8 mb-4">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors border border-slate-600 text-sky-400 hover:text-sky-300"
+                >
+                  Previous
+                </button>
 
-              <span className="text-slate-400 font-medium">
-                Page {currentPage} of {Math.ceil(regularVideos.length / itemsPerPage)}
-              </span>
+                <span className="text-slate-400 font-medium">
+                  Page {currentPage} of {Math.ceil(regularVideos.length / itemsPerPage)}
+                </span>
 
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(regularVideos.length / itemsPerPage)))}
-                disabled={currentPage >= Math.ceil(regularVideos.length / itemsPerPage)}
-                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors border border-slate-600 text-sky-400 hover:text-sky-300"
-              >
-                Next
-              </button>
-            </div>
-          )}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(regularVideos.length / itemsPerPage)))}
+                  disabled={currentPage >= Math.ceil(regularVideos.length / itemsPerPage)}
+                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors border border-slate-600 text-sky-400 hover:text-sky-300"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
         </div >
       )}
 

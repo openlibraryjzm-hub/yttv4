@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigationStore } from '../store/navigationStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { usePlaylistStore } from '../store/playlistStore';
-import FolderSelector from './FolderSelector';
+
 import { ChevronLeft, Heart, Pin, Settings, Clock, Cat } from 'lucide-react';
 
 const TopNavigation = () => {
@@ -91,13 +91,7 @@ const TopNavigation = () => {
       </div>
 
       {/* Folder selector row - only show on videos page */}
-      {
-        currentPage === 'videos' && (
-          <div className="border-t border-slate-700 pt-2">
-            <FolderSelector />
-          </div>
-        )
-      }
+
     </div >
   );
 };
