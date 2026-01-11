@@ -1,37 +1,24 @@
-# Next Agent Instructions: Settings Page Customization
 
-## Current State
+# Handover Brief: Support Page & Core Systems
 
-We are in the process of expanding the **Settings Page** to offer deep customization options.
+**Status**: 
+- **Support Page**: COMPLETE & POLISHED.
+  - **Interaction**: Tabs (Top) toggle content. Banner (Center) activates links. Mouseover tabs = Preview. Click tab = Commit.
+  - **Layout**: Split View. Left = Video Preview (Randomized). Right = AI Assistant (GIF).
+  - **Visuals**: Glassmorphism, Animated Gradients, "Push" interactions removed for smoother fading.
+- **Navigation**: "Support" is a top-level route with a Cat icon.
+- **Data**: Thumbnails on Support Page are currently randomized from the first available playlist.
 
-### What has been built (Functional):
-1.  **Tabbed Interface**: Streamlined layout with tabs in the header (Configuration title removed). Organized into Appearance, Visualizer, Orb, and Signature tabs.
-2.  **Page Banner Patterns**:
-    *   **Functional**: Users can select "Diagonal", "Dots", "Mesh", "Solid" patterns, OR upload a custom image.
-    *   **Live Preview**: A box in Settings shows the currently selected pattern or custom uploaded image.
-    *   **Animation**: Custom uploaded images scroll horizontally. GIFs do not scroll.
-    *   **State**: Managed via `configStore.bannerPattern`.
-    *   **CSS**: Animations defined in `src/App.css`.
-3.  **Orb Customization**:
-    *   Custom image upload.
-    *   Spill control (enable/disable, 4-quadrant toggles).
-    *   Scale slider.
-4.  **Profile**:
-    *   Pseudonym and ASCII avatar customization.
-5.  **App Banner (Top of Window)**:
-    *   **Functional**: Users can upload a custom banner image which overrides the default `/banner.PNG`.
-    *   **Persistence**: Custom banner choice is saved to `configStore` (localStorage).
-    *   **Animation**: The infinite scroll animation applies to static images. GIFs are detected and do not scroll.
+**Recent Changes**:
+- **Removed**: Radial Menu (replaced by Support Page).
+- **Refined**: Support Page moved from Vertical List -> Carousel (Removed) -> Tabs (Final).
+- **Refined**: Page sizing and spacing to separate navigation (top) from content (bottom).
 
-### What is Mocked / Needs Implementation:
-1.  **Visualizer**:
-    *   **Current status**: Mock buttons for "Style" and "Color Mode" exist but do nothing.
-    *   **Goal**: Connect these to the actual `AudioVisualizer` component properties.
-3.  **Player Borders**:
-    *   **Current status**: Mock buttons exist.
-    *   **Goal**: Implement CSS changes to the player border based on selection.
+**Next Steps for Agent**:
+1.  **Thumbnail Logic**: Currently `SupportPage` fetches from `getAllPlaylists()[0]`. Consider making this more smart (e.g., "Featured" playlist or strictly from the standard "All Videos" pool).
+2.  **General Polish**: Check that the `grok-video...gif` asset is properly optimized/loaded (it's currently a raw file in `public/`).
+3.  **App State**: No critical bugs known. `npm run tauri dev` is stable.
 
-## Key Files
-- `src/components/SettingsPage.jsx` (UI)
-- `src/store/configStore.js` (State)
-- `src/App.css` (Animations)
+**Key Files**:
+- `src/components/SupportPage.jsx`: The main hub for these changes.
+- `atlas/ui.md`: Documentation for the new UI.

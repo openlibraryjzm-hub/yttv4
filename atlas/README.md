@@ -194,7 +194,7 @@ yttv2/
 
 #### `ui.md`
 **Covers**: Side menu, page layouts, card components, grid systems, star color picker menu, **Support Hub**, **Custom Player Borders**, **Custom ASCII Banners**
-**Key Topics**: PlaylistsPage, VideosPage, **HistoryPage (List Layout)**, **SupportPage (Radial UI)**, Card architecture, folder selector
+**Key Topics**: PlaylistsPage, VideosPage, **HistoryPage (List Layout)**, **SupportPage (Tabs & Split View)**, Card architecture, folder selector
 **Cross-References**: See `state-management.md` for page routing, `navigation-routing.md` for navigation flows
 
 #### `history.md`
@@ -301,7 +301,7 @@ Each technical document follows this structure:
 ## Missing Documentation
 
 The following features are mentioned in `projectcontext.md` but not yet fully documented:
-- **Radial Menu**: Animated radial menu system (mentioned in projectcontext, but not in atlas)
+
 - **Layout Shell**: Detailed layout system documentation (covered in `ui.md` but could be expanded)
 
 ## Known Issues / Non-Functional Features
