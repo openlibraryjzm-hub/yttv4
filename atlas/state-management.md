@@ -303,6 +303,7 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 - `setUserName(name)` - Sets the user's display name
 - `setUserAvatar(avatar)` - Sets the user's ASCII avatar (supports multi-line)
 - `setBannerPattern(pattern)` - Sets the video page banner pattern ('diagonal' | 'dots' | 'waves' | 'solid')
+- `setPlayerBorderPattern(pattern)` - Sets the top player border/separator pattern ('diagonal' | 'dots' | 'waves' | 'solid')
 - `setCustomBannerImage(dataUrl)` - Sets the app-wide top banner custom image
 - `setCustomPageBannerImage(dataUrl)` - Sets the page banner custom image (Videos Page/Folders)
 

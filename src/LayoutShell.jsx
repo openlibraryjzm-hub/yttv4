@@ -15,7 +15,7 @@ const LayoutShell = ({
   secondPlayer
 }) => {
   const { viewMode, menuQuarterMode, showDebugBounds } = useLayoutStore();
-  const { customBannerImage } = useConfigStore();
+  const { customBannerImage, playerBorderPattern } = useConfigStore();
 
   // Debug: Log when second player should render
   React.useEffect(() => {
@@ -50,6 +50,9 @@ const LayoutShell = ({
             )}
           </div>
         )}
+
+        {/* Dynamic Pattern Separator - Acts as top border for player/menu below */}
+        <div className={`layout-shell__separator pattern-${playerBorderPattern || 'diagonal'}`} />
       </div>
 
       {/* Radial Menu - Positioned at top controller level, left side */}
@@ -126,7 +129,7 @@ const LayoutShell = ({
 
         {/* Main Player Slot */}
         <div
-          className={`layout-shell__player layout-shell__player--${viewMode} ${showDebugBounds ? 'debug-bounds debug-bounds--player' : ''}`}
+          className={`layout-shell__player layout-shell__player--${viewMode} pattern-${playerBorderPattern || 'diagonal'} ${showDebugBounds ? 'debug-bounds debug-bounds--player' : ''}`}
           data-debug-label="Main Player"
           style={{ position: 'relative', overflow: showDebugBounds ? 'visible' : undefined }}
         >

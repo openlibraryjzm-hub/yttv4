@@ -53,7 +53,8 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
         orbImageScale, setOrbImageScale,
         bannerPattern, setBannerPattern,
         customBannerImage, setCustomBannerImage,
-        customPageBannerImage, setCustomPageBannerImage
+        customPageBannerImage, setCustomPageBannerImage,
+        playerBorderPattern, setPlayerBorderPattern
     } = useConfigStore();
     const [customAvatar, setCustomAvatar] = useState('');
     const [copied, setCopied] = useState(false);
@@ -359,19 +360,24 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
 
                         <ConfigSection title="Player Borders" icon={Box}>
                             <div className="grid grid-cols-2 gap-3">
-                                {['Neon Glow', 'Glass', 'Solid Minimal', 'Brushed Metal'].map((name) => {
-                                    const id = name.toLowerCase().replace(' ', '_');
+                                {['Diagonal', 'Dots', 'Mesh', 'Solid'].map((name) => {
+                                    const id = name === 'Mesh' ? 'waves' : name.toLowerCase();
                                     return (
                                         <button
                                             key={id}
-                                            onClick={() => setMockBorder(id)}
-                                            className={`p-3 rounded-xl text-xs font-bold uppercase transition-all border-2 text-left flex items-center justify-between ${mockBorder === id
+                                            onClick={() => setPlayerBorderPattern(id)}
+                                            className={`p-3 rounded-xl text-xs font-bold uppercase transition-all border-2 text-left flex items-center justify-between ${playerBorderPattern === id
                                                 ? 'border-sky-500 bg-sky-50 text-sky-700 shadow-md'
                                                 : 'border-slate-100 bg-white text-slate-400 hover:border-sky-200 hover:text-sky-600'
                                                 }`}
                                         >
-                                            <span>{name}</span>
-                                            {mockBorder === id && <Check size={14} />}
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-[#052F4A] relative overflow-hidden shadow-sm border border-slate-200">
+                                                    <div className={`absolute inset-0 pattern-${id}`}></div>
+                                                </div>
+                                                <span>{name}</span>
+                                            </div>
+                                            {playerBorderPattern === id && <Check size={14} />}
                                         </button>
                                     );
                                 })}

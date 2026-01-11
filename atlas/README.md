@@ -153,7 +153,7 @@ yttv2/
 | Feature | Primary Document | Related Documents |
 |---------|-----------------|-------------------|
 | **Player Controller** | `advanced-player-controller.md` | `navigation-routing.md`, `state-management.md` |
-| **Settings & Signature** | `ui.md` | `state-management.md` (configStore) |
+| **Settings, Signature & Borders** | `ui.md` | `state-management.md` (configStore) |
 | **Support Hub** | `ui.md` | `navigation-routing.md`, `playlistStore.js` |
 | **Playlists & Tabs** | `playlist&tab.md` | `database-schema.md`, `api-bridge.md`, `state-management.md` |
 | **Import/Export** | `importexport.md` | `api-bridge.md`, `database-schema.md` |
@@ -193,7 +193,7 @@ yttv2/
 **Cross-References**: See `api-bridge.md` for import commands, `database-schema.md` for data structure
 
 #### `ui.md`
-**Covers**: Side menu, page layouts, card components, grid systems, star color picker menu, **Support Hub**
+**Covers**: Side menu, page layouts, card components, grid systems, star color picker menu, **Support Hub**, **Custom Player Borders**
 **Key Topics**: PlaylistsPage, VideosPage, **HistoryPage (List Layout)**, **SupportPage (Radial UI)**, Card architecture, folder selector
 **Cross-References**: See `state-management.md` for page routing, `navigation-routing.md` for navigation flows
 

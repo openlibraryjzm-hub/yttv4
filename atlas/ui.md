@@ -24,16 +24,14 @@ The application uses a modern **Borderless Window** design (`decorations: false`
 - **Dimensions**: Defaults to 1920x1030 (fullscreen width, taskbar-aware height) positioned at (0,0).
 
 **2: Visual Design System**
-The application employs a high-contrast, structured design with distinct borders:
+The application employs a high-contrast, structured design with distinct borders and patterns:
 
-- **Unified Border Color**: A deep dark blue (`rgb(4, 41, 65)`) is used for:
-  - Video Player container border (12px padding).
-  - Side Menu top border (4px solid line).
-  - Banner "bleed" gradient (bottom edge).
-
-- **Audio Visualizer Integration**:
-  - The Audio Visualizer acts as the dynamic border for the central Orb, replacing static borders.
-  - It uses `overflow: visible` to bleed onto the Video Player area below (approx 52px overlap), creating a layered, immersive effect.
+- **Unified Animated Top Border**:
+  - The static borders have been replaced by a single, dynamic **Top Border Separator** styling the application structure.
+  - This separator runs horizontally across the screen, acting as the visual "Top Border" for both the **Video Player** and the **Side Menu**.
+  - **Dynamic Patterns**: It uses the user-selected animated pattern (Diagonal, Dots, Mesh, Solid) configured in Settings -> Player Borders.
+  - **Super Transparent aesthetic**: The Video Player's side and bottom borders/padding have been completely removed. The container is now transparent, relying solely on the animated Top Border Bar for structure.
+  - **Visualizer Integration**: The Audio Visualizer bars naturally overlap this border bar, creating a cohesive, layered effect.
 
 - **Top Banner ("App Banner")**:
   - Displays a custom image (`/public/banner.PNG`) spanning the full width of the controller.
@@ -41,7 +39,7 @@ The application employs a high-contrast, structured design with distinct borders
   - **Customizable**: Supports custom image uploads (PNG/JPG/WEBP/GIF) via Settings.
     - **Static Images**: Scroll indefinitely.
     - **GIFs**: Play natively without scrolling (to avoid motion issues).
-  - Features a "bleed" effect at the bottom: a gradient fading from the image into the dark blue border color.
+  - **Separator**: Features a "Solid" separator line (12px) with the Light Blue Pattern, separating the banner from the app content.
 
 - **Page Banner ("Videos Banner")**:
   - Located on the Videos Page and Colored Folders views.
@@ -53,7 +51,7 @@ The application employs a high-contrast, structured design with distinct borders
 
 - **Video Player**:
   - Wrapped in a `.layout-shell__player` container.
-  - Has a visible 12px dark blue background padding that acts as a border.
+  - **Transparent Structure**: Features a fully transparent background with `padding: 0`. The visual "border" is provided solely by the shared Top Border Separator.
   - Scales responsively with view modes (Full/Half/Quarter).
 
 - **Floating Metadata Bubbles**:

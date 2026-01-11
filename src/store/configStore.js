@@ -165,6 +165,10 @@ export const useConfigStore = create(
             setBannerPattern: (val) => set({ bannerPattern: val }),
             customPageBannerImage: null,
             setCustomPageBannerImage: (val) => set({ customPageBannerImage: val }),
+
+            // Player Border Pattern
+            playerBorderPattern: 'diagonal',
+            setPlayerBorderPattern: (val) => set({ playerBorderPattern: val }),
         }), {
         name: 'config-storage-v5', // name of the item in the storage (must be unique)
     }
