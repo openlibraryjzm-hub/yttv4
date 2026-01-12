@@ -462,12 +462,16 @@ Users see:
    - If in presets mode → `setActivePreset(presetId)` → Updates `tabPresetStore.activePresetId` → Saves to localStorage
 
 4. **Navigation Items Loading:**
-   - On mount and when `showColoredFolders` changes → `useEffect` (line 144) loads navigation items
-   - Gets all playlists → `getAllPlaylists()`
-   - Gets stuck folders → `getAllStuckFolders()`
-   - If `showColoredFolders` is true → Gets all folders → `getAllFoldersWithVideos()`
-   - Calls `buildNavigationItems(playlists, folders)` → Creates flat array: [Playlist1, Playlist1-FolderA, Playlist1-FolderB, Playlist2, ...]
-   - Sets `navigationItems` in store → Used for next/prev navigation
+   - **Initial Load**: On mount, `PlayerController` fetches `getAllPlaylists()` once to initialize the store.
+   - **Reactive Build**: The navigation logic is now split into a dedicated `useEffect` that listens to `allPlaylists` from the global store.
+   - **Synchronization**:
+     - `PlaylistsPage` and `PlaylistList` push data to `playlistStore.setAllPlaylists()` whenever they load or modify playlists.
+     - `PlayerController` automatically reacts to these store updates.
+     - `buildNavigationItems(playlists, folders)` is called with the *latest* data from the store, ensuring the top navigation menu is always in sync with the playlist grid.
+   - **Filtering**:
+     - Respects `activeTabId`: Filters playlists to match the current tab.
+     - Respects `showColoredFolders`: Interleaves folder items if enabled.
+   - Sets `navigationItems` in store → used for next/prev navigation.
 
 **Source of Truth:**
 - `playlistStore.navigationItems` - Flat array of playlists and folders (Source of Truth for navigation)

@@ -23,7 +23,7 @@ const PlaylistList = ({ onPlaylistSelect, onVideoSelect }) => {
   const [playlistFolders, setPlaylistFolders] = useState({}); // Store folders for each playlist: { playlistId: [folders] }
   const [playlistsWithFolders, setPlaylistsWithFolders] = useState(new Set()); // Track which playlists have folders (for showing expand button)
   const { showColoredFolders, setShowColoredFolders } = useFolderStore();
-  const { setPlaylistItems } = usePlaylistStore();
+  const { setPlaylistItems, setAllPlaylists } = usePlaylistStore();
   const { setViewMode } = useLayoutStore();
 
   useEffect(() => {
@@ -59,6 +59,7 @@ const PlaylistList = ({ onPlaylistSelect, onVideoSelect }) => {
       }
 
       setPlaylists(data);
+      setAllPlaylists(data);
 
       // Load first video for each playlist to get thumbnail
       const dataMap = {};
@@ -518,9 +519,9 @@ const PlaylistList = ({ onPlaylistSelect, onVideoSelect }) => {
                     {/* Playlist Info */}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm truncate transition-colors"
-                          style={{ color: '#052F4A' }}
-                          onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
-                          onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
+                        style={{ color: '#052F4A' }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
                         {playlist.name}
                       </h3>
                       {playlist.description && (

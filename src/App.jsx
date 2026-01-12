@@ -220,10 +220,6 @@ function App() {
 
   const handlePlaylistSelect = (items, playlistId) => {
     setPlaylistItems(items, playlistId);
-    // Auto-switch to half mode if in full mode to show side menu
-    if (viewMode === 'full') {
-      setViewMode('half');
-    }
   };
 
   const handleVideoSelect = async (videoUrl) => {

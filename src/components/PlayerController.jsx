@@ -120,11 +120,44 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   const getInspectTitle = (label) => inspectMode ? label : undefined;
 
   // Load all playlists and folders on mount and when showColoredFolders changes
+  // Initial load of playlists
   useEffect(() => {
-    const loadNavigationItems = async () => {
+    const initPlaylists = async () => {
       try {
         const playlists = await getAllPlaylists();
         setAllPlaylists(playlists || []);
+      } catch (error) {
+        console.error('Failed to init playlists:', error);
+      }
+    };
+    initPlaylists();
+  }, [setAllPlaylists]);
+
+  // Build navigation items when state changes
+  useEffect(() => {
+    const buildNav = async () => {
+      try {
+        let playlists = allPlaylists;
+
+        console.log('XXX DEBUG NAV: start buildNav', {
+          activeTabId,
+          tabsCount: tabs.length,
+          rawPlaylistsCount: playlists?.length
+        });
+
+        // Filter playlists based on active tab
+        if (activeTabId !== 'all') {
+          const activeTab = tabs.find(t => t.id === activeTabId);
+          console.log('XXX DEBUG NAV: filtering', { activeTab });
+          if (activeTab && Array.isArray(playlists)) {
+            const allowedIds = new Set(activeTab.playlistIds);
+            playlists = playlists.filter(p => allowedIds.has(p.id));
+            console.log('XXX DEBUG NAV: filtered playlists', {
+              original: playlists?.length,
+              allowedIds: activeTab.playlistIds
+            });
+          }
+        }
 
         // Load folders: stuck folders always, plus all folders if toggle is on
         const foldersToInclude = [];
@@ -140,7 +173,10 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
           allFoldersData.forEach(folder => {
             const folderKey = `${folder.playlist_id}:${folder.folder_color}`;
             if (stuckSet.has(folderKey)) {
-              foldersToInclude.push(folder);
+              // Only include stuck folder if its playlist is visible (filtered)
+              if (playlists.find(p => p.id === folder.playlist_id)) {
+                foldersToInclude.push(folder);
+              }
             }
           });
         } catch (error) {
@@ -155,7 +191,10 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
 
             allFoldersData.forEach(folder => {
               const folderKey = `${folder.playlist_id}:${folder.folder_color}`;
-              if (!existingKeys.has(folderKey)) {
+              // Only include folder if its playlist is visible (filtered)
+              const parentVisible = playlists.find(p => p.id === folder.playlist_id);
+
+              if (parentVisible && !existingKeys.has(folderKey)) {
                 foldersToInclude.push(folder);
               }
             });
@@ -168,11 +207,12 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
         const navItems = buildNavigationItems(playlists || [], foldersToInclude);
         setNavigationItems(navItems);
       } catch (error) {
-        console.error('Failed to load navigation items:', error);
+        console.error('Failed to build navigation items:', error);
       }
     };
-    loadNavigationItems();
-  }, [setAllPlaylists, buildNavigationItems, setNavigationItems, showColoredFolders]);
+    buildNav();
+  }, [allPlaylists, buildNavigationItems, setNavigationItems, showColoredFolders, activeTabId, tabs]);
+
 
   // --- UI State ---
   const [showPins, setShowPins] = useState(true);
@@ -784,6 +824,20 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   };
 
   const handleVideosGrid = () => {
+    // Clear any preview state to ensure we show the currently playing playlist
+    if (storePreviewPlaylistId) {
+      clearPreview();
+    }
+
+    // Also clear local preview if active
+    if (playlistCheckpoint !== null) {
+      setPreviewNavigationIndex(null);
+      setPreviewPlaylistItems(null);
+      setPreviewPlaylistId(null);
+      setPreviewFolderInfo(null);
+      setPlaylistCheckpoint(null);
+    }
+
     if (currentPlaylistId) {
       setCurrentPage('videos');
       if (viewMode === 'full') {

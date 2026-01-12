@@ -87,7 +87,7 @@ The application uses **Zustand** (v5.0.9) for state management. Zustand is a lig
 - `currentPlaylistItems`: Array - Videos in current playlist
 - `currentPlaylistId`: number | null - Current playlist ID
 - `currentVideoIndex`: number - Index of currently playing video
-- `allPlaylists`: Array - All playlists in database
+- `allPlaylists`: Array - All playlists in database (synced globally for navigation)
 - `currentPlaylistIndex`: number - Index in allPlaylists array
 - `navigationItems`: Array - Flat list of playlists and folders for navigation
 - `currentNavigationIndex`: number - Index in navigationItems array

@@ -36,7 +36,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
   const [expandedPlaylists, setExpandedPlaylists] = useState(new Set()); // Track which playlists are expanded
   const [playlistFolders, setPlaylistFolders] = useState({}); // Store folders for each playlist: { playlistId: [folders] }
   const [stuckFolders, setStuckFolders] = useState(new Set()); // Track stuck folders: Set of "playlistId:folderColor" strings
-  const { setPlaylistItems, currentPlaylistItems, setCurrentFolder, setPreviewPlaylist } = usePlaylistStore();
+  const { setPlaylistItems, currentPlaylistItems, setCurrentFolder, setPreviewPlaylist, setAllPlaylists } = usePlaylistStore();
   const { showColoredFolders, setShowColoredFolders } = useFolderStore();
   const { tabs, activeTabId, addPlaylistToTab, removePlaylistFromTab } = useTabStore();
   const { activePresetId, presets } = useTabPresetStore();
@@ -182,6 +182,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
       // Ensure data is an array
       if (Array.isArray(data)) {
         setPlaylists(data);
+        setAllPlaylists(data);
 
         // Load thumbnails and item counts for each playlist
         // Also check for folders to determine if expand option should be shown
