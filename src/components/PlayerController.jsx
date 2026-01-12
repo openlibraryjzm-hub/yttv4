@@ -1859,13 +1859,37 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                   {showColorPicker ? (<div className="flex items-center justify-center w-full h-full animate-in fade-in slide-in-from-bottom-1 duration-300"><span className="text-[10px] font-black uppercase tracking-[0.3em] text-sky-700/80">{hoveredColorName || `Select ${showColorPicker} color`}</span></div>) : (
                     <div className="w-full h-full relative">
                       {/* Navigation Controls - Now Absolute Centered */}
+                      {/* Navigation Contols (Left Cluster - "Far Left") - Mirrored from Playlist */}
+                      {/* Previous Video - Left of Grid */}
                       <button
                         onClick={handlePrevVideo}
                         className="absolute left-1/2 top-1/2 p-0.5 text-sky-400"
-                        style={{ transform: `translate(calc(-50% + ${videoChevronLeftX}px), -50%)` }}
+                        style={{ transform: `translate(calc(-50% - 148px), -50%)` }}
                         title={getInspectTitle('Previous video')}
                       >
                         <ChevronLeft size={navChevronSize} strokeWidth={3} />
+                      </button>
+
+                      {/* Video Grid Button - Center of Cluster */}
+                      <button
+                        onClick={handleVideosGrid}
+                        className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
+                        style={{ transform: `translate(calc(-50% - 120px), -50%)` }}
+                        title={getInspectTitle('View videos grid')}
+                      >
+                        <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#334155' }}>
+                          <Grid3X3 size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
+                        </div>
+                      </button>
+
+                      {/* Next Video - Right of Grid */}
+                      <button
+                        onClick={handleNextVideo}
+                        className="absolute left-1/2 top-1/2 p-0.5 text-sky-400"
+                        style={{ transform: `translate(calc(-50% - 92px), -50%)` }}
+                        title={getInspectTitle('Next video')}
+                      >
+                        <ChevronRight size={navChevronSize} strokeWidth={3} />
                       </button>
 
                       <button
@@ -1883,7 +1907,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                           playButtonRightClickRef.current = now;
                         }}
                         className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
-                        style={{ transform: `translate(calc(-50% + ${videoPlayButtonX}px), -50%)` }}
+                        style={{ transform: `translate(calc(-50% - 60px), -50%)` }}
                         title={getInspectTitle('Cycle Folder Filter (Left: Forward, Right: Reverse)')}
                       >
                         {(() => {
@@ -1906,27 +1930,6 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                             </div>
                           );
                         })()}
-                      </button>
-
-                      <button
-                        onClick={handleNextVideo}
-                        className="absolute left-1/2 top-1/2 p-0.5 text-sky-400"
-                        style={{ transform: `translate(calc(-50% + ${videoChevronRightX}px), -50%)` }}
-                        title={getInspectTitle('Next video')}
-                      >
-                        <ChevronRight size={navChevronSize} strokeWidth={3} />
-                      </button>
-
-                      {/* Video Grid Button - Moved to Right of Chevrons */}
-                      <button
-                        onClick={handleVideosGrid}
-                        className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
-                        style={{ transform: `translate(calc(-50% + ${modeSwitcherX}px), -50%)` }}
-                        title={getInspectTitle('View videos grid')}
-                      >
-                        <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#334155' }}>
-                          <Grid3X3 size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
-                        </div>
                       </button>
 
                       {/* Tool Buttons - Absolute Centered */}

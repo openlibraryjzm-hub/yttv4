@@ -80,20 +80,20 @@ export const useConfigStore = create(
             videoPlayButtonX: -65, // Nudged right (swapped with grid)
             setVideoPlayButtonX: (val) => set({ videoPlayButtonX: val }),
 
-            // Right Side Group (Shifted right)
-            starButtonX: -25,
+            // Right Side Group (Shifted for equal spacing)
+            starButtonX: -19,
             setStarButtonX: (val) => set({ starButtonX: val }),
-            shuffleButtonX: 10,
+            shuffleButtonX: 22,
             setShuffleButtonX: (val) => set({ shuffleButtonX: val }),
 
             // Right Flank
-            pinFirstButtonX: 45,
+            pinFirstButtonX: 63,
             setPinFirstButtonX: (val) => set({ pinFirstButtonX: val }),
-            likeButtonX: 80,
+            likeButtonX: 104,
             setLikeButtonX: (val) => set({ likeButtonX: val }),
-            menuButtonX: 150,
+            menuButtonX: 180, // Nudged out to keep distance from info
             setMenuButtonX: (val) => set({ menuButtonX: val }),
-            tooltipButtonX: 115,
+            tooltipButtonX: 145,
             setTooltipButtonX: (val) => set({ tooltipButtonX: val }),
 
             // Custom Banner Image
@@ -178,7 +178,7 @@ export const useConfigStore = create(
             visualizerGradient: true,
             setVisualizerGradient: (val) => set({ visualizerGradient: val }),
         }), {
-        name: 'config-storage-v7', // name of the item in the storage (must be unique)
+        name: 'config-storage-v9', // name of the item in the storage (must be unique)
     }
     )
 );
