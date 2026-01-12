@@ -71,25 +71,27 @@ export const useConfigStore = create(
             setModeHandleInternalSize: (val) => set({ modeHandleInternalSize: val }),
 
             // Center Cluster
-            modeSwitcherX: -120, // Grid moved to Star's old position
+            modeSwitcherX: -65, // Grid moved right
             setModeSwitcherX: (val) => set({ modeSwitcherX: val }),
-            videoChevronLeftX: -148, // Left of Grid
+            videoChevronLeftX: -160, // Leftmost
             setVideoChevronLeftX: (val) => set({ videoChevronLeftX: val }),
-            videoChevronRightX: -92, // Right of Grid
+            videoChevronRightX: -100, // Right of Play
             setVideoChevronRightX: (val) => set({ videoChevronRightX: val }),
+            videoPlayButtonX: -128, // Nudged right
+            setVideoPlayButtonX: (val) => set({ videoPlayButtonX: val }),
 
-            // Right Side Group (Shifted left by 60px)
-            starButtonX: -60, // Was 0
+            // Right Side Group (Shifted right)
+            starButtonX: -25,
             setStarButtonX: (val) => set({ starButtonX: val }),
-            shuffleButtonX: -20, // Was 40
+            shuffleButtonX: 10,
             setShuffleButtonX: (val) => set({ shuffleButtonX: val }),
 
-            // Right Flank (Existing)
-            pinFirstButtonX: 20, // Was 80
+            // Right Flank
+            pinFirstButtonX: 45,
             setPinFirstButtonX: (val) => set({ pinFirstButtonX: val }),
-            likeButtonX: 60, // Was 120
+            likeButtonX: 80,
             setLikeButtonX: (val) => set({ likeButtonX: val }),
-            menuButtonX: 92, // Was 152
+            menuButtonX: 115,
             setMenuButtonX: (val) => set({ menuButtonX: val }),
 
             // Custom Banner Image
@@ -174,7 +176,7 @@ export const useConfigStore = create(
             visualizerGradient: true,
             setVisualizerGradient: (val) => set({ visualizerGradient: val }),
         }), {
-        name: 'config-storage-v5', // name of the item in the storage (must be unique)
+        name: 'config-storage-v6', // name of the item in the storage (must be unique)
     }
     )
 );

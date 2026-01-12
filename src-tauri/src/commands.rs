@@ -70,6 +70,7 @@ pub fn add_video_to_playlist(
     is_local: Option<bool>,
     author: Option<String>,
     view_count: Option<String>,
+    published_at: Option<String>,
 ) -> Result<i64, String> {
     let db = db.lock().map_err(|e| e.to_string())?;
     db.add_video_to_playlist(
@@ -81,6 +82,7 @@ pub fn add_video_to_playlist(
         is_local.unwrap_or(false),
         author.as_deref(),
         view_count.as_deref(),
+        published_at.as_deref(),
     )
     .map_err(|e| e.to_string())
 }

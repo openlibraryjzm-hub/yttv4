@@ -5,7 +5,7 @@
 > **Current Status: RESTORED / USABLE**
 > - Layout has been rebuilt with fixed dimensions (102px height, 340px width) and absolute positioning.
 > - **Top Video Menu:** Buttons aligned on 40px grid. Navigation controls clustered left, actions right.
-> - **Top Playlist Menu:** Thumbnail removed. Title moved inside, with video metadata (Author/Views) displayed below it.
+> - **Top Playlist Menu:** Thumbnail removed. Title moved inside, with video metadata (Author | Views) displayed below it.
 > - **Metadata Bubbles:** Video metadata has been moved into the playlist menu, removing the floating bubble above the video menu.
 > - **Action Required:** Minor visual tuning may still be desired, but the critical regression is resolved. The default values in `configStore.js` now match this restored state.
 
@@ -229,14 +229,15 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
     - **Colored border** = shuffle from that folder color
     - Right-click opens color picker to set quick shuffle default
     - Left-click shuffles to random video from selected folder (or all videos)
-  - **Priority Pin Button** (20px offset): A yellow/amber pin button that sets the current video as the priority pin. 
   - **Priority Pin Button** (20px offset): A yellow/amber pin button that sets the current video as the priority pin.
     - Distinctive amber border (#fbbf24) and filled amber pin icon.
-    - Clicking sets the video as the priority pin (always leftmost in pin track).
+    - **Left-click** sets the video as the priority pin (always leftmost in pin track).
+    - **Right-click** navigates to the Pins Page.
   - **Like Button** (60px offset): A circular button with thumbs-up icon.
     - **Filled with blue** = video is liked (in "Likes" playlist)
     - **Empty/outline** = video not liked
-    - Clicking toggles like status
+    - **Left-click** toggles like status.
+    - **Right-click** navigates to the Likes Page.
   - **Tab Button** (80px offset): A circular button with a tab icon that toggles the Tab Preset dropdown.
   - **More Menu Button** (92px offset): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
     - **Hide/Show Preview Menus**: Toggles visibility of side navigation menus.

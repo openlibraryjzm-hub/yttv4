@@ -140,7 +140,8 @@ const PlaylistUploader = ({ onUploadComplete, onCancel, initialPlaylistId }) => 
                   title: v.snippet.title,
                   thumbnailUrl: v.snippet.thumbnails?.medium?.url || v.snippet.thumbnails?.default?.url,
                   author: v.snippet.channelTitle,
-                  viewCount: v.statistics?.viewCount
+                  viewCount: v.statistics?.viewCount,
+                  publishedAt: v.snippet.publishedAt
                 };
               });
             }
@@ -164,7 +165,8 @@ const PlaylistUploader = ({ onUploadComplete, onCancel, initialPlaylistId }) => 
               title: details.title || item.snippet.title,
               thumbnailUrl: details.thumbnailUrl || item.snippet.thumbnails?.medium?.url,
               author: details.author || item.snippet.videoOwnerChannelTitle || 'Unknown',
-              viewCount: details.viewCount || '0'
+              viewCount: details.viewCount || '0',
+              publishedAt: details.publishedAt || item.snippet.publishedAt // Fallback to playlist add date if needed, but ideally video date
             };
           })
       };
@@ -178,6 +180,7 @@ const PlaylistUploader = ({ onUploadComplete, onCancel, initialPlaylistId }) => 
       let thumbnailUrl = null;
       let author = 'Unknown';
       let viewCount = '0';
+      let publishedAt = null;
 
       if (data.items && data.items.length > 0) {
         const snippet = data.items[0].snippet;
@@ -186,6 +189,7 @@ const PlaylistUploader = ({ onUploadComplete, onCancel, initialPlaylistId }) => 
         thumbnailUrl = snippet.thumbnails?.medium?.url;
         author = snippet.channelTitle;
         viewCount = statistics?.viewCount || '0';
+        publishedAt = snippet.publishedAt;
       }
 
       return {
@@ -196,7 +200,8 @@ const PlaylistUploader = ({ onUploadComplete, onCancel, initialPlaylistId }) => 
           title,
           thumbnailUrl,
           author,
-          viewCount
+          viewCount,
+          publishedAt
         }]
       };
     } else {
@@ -214,7 +219,8 @@ const PlaylistUploader = ({ onUploadComplete, onCancel, initialPlaylistId }) => 
         title: i.title,
         thumbnailUrl: i.thumbnail_url,
         author: i.author || 'Unknown',
-        viewCount: i.view_count || '0'
+        viewCount: i.view_count || '0',
+        publishedAt: i.published_at || null
       }))
     };
   };
@@ -229,7 +235,8 @@ const PlaylistUploader = ({ onUploadComplete, onCancel, initialPlaylistId }) => 
         title: i.title,
         thumbnailUrl: i.thumbnail_url,
         author: i.author || 'Unknown',
-        viewCount: i.view_count || '0'
+        viewCount: i.view_count || '0',
+        publishedAt: i.published_at || null
       }))
     };
   };
@@ -350,7 +357,7 @@ const PlaylistUploader = ({ onUploadComplete, onCancel, initialPlaylistId }) => 
       for (let i = 0; i < allVideosToInsert.length; i++) {
         const v = allVideosToInsert[i];
         try {
-          const itemId = await addVideoToPlaylist(dbPlaylistId, v.videoUrl, v.videoId, v.title, v.thumbnailUrl, v.author, v.viewCount);
+          const itemId = await addVideoToPlaylist(dbPlaylistId, v.videoUrl, v.videoId, v.title, v.thumbnailUrl, v.author, v.viewCount, v.publishedAt, false);
           addedCount++;
 
           if (v.folderColor) {
@@ -425,7 +432,7 @@ const PlaylistUploader = ({ onUploadComplete, onCancel, initialPlaylistId }) => 
         const vid = v.videoId || v.video_id || extractVideoId(u);
         if (!vid) continue;
 
-        const itemId = await addVideoToPlaylist(dbId, u || `https://youtube.com/watch?v=${vid}`, vid, v.title, v.thumbnailUrl || v.thumbnail_url, v.author, v.viewCount);
+        const itemId = await addVideoToPlaylist(dbId, u || `https://youtube.com/watch?v=${vid}`, vid, v.title, v.thumbnailUrl || v.thumbnail_url, v.author, v.viewCount, v.publishedAt || v.published_at, v.isLocal || false);
 
         // Folder assignments
         if (v.folder_assignments && Array.isArray(v.folder_assignments)) {

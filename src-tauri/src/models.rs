@@ -23,6 +23,7 @@ pub struct PlaylistItem {
     pub is_local: bool,
     pub author: Option<String>,
     pub view_count: Option<String>,
+    pub published_at: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -47,6 +48,7 @@ pub struct AddVideoToPlaylistRequest {
     pub thumbnail_url: Option<String>,
     pub author: Option<String>,
     pub view_count: Option<String>,
+    pub published_at: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

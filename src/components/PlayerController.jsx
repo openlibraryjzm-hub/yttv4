@@ -1247,7 +1247,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
     orbMenuGap, setOrbMenuGap, orbButtonSpread,
     // New
     playlistToggleX, playlistTabsX, playlistInfoX, playlistInfoWidth,
-    videoChevronLeftX, videoChevronRightX,
+    videoChevronLeftX, videoChevronRightX, videoPlayButtonX,
     modeSwitcherX, shuffleButtonX, gridButtonX, starButtonX,
     setCustomBannerImage,
     // Orb State (From Config Store now)
@@ -1268,8 +1268,10 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   // Helper to format view count
   const formatViews = (count) => {
     if (!count) return '0';
+    if (count >= 1000000000) return `${(count / 1000000000).toFixed(1)}B`;
+    if (count >= 10000000) return `${(count / 1000000).toFixed(0)}M`;
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
-    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    if (count >= 1000) return `${(count / 1000).toFixed(0)}K`;
     return count.toString();
   };
 
@@ -1284,6 +1286,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
       title: String(finalDisplayVideoItem.title || 'Untitled Video'),
       author: String(finalDisplayVideoItem.author || 'Unknown'),
       viewers: String(finalDisplayVideoItem.view_count ? formatViews(finalDisplayVideoItem.view_count) : '0 live'),
+      publishedYear: finalDisplayVideoItem.published_at ? new Date(finalDisplayVideoItem.published_at).getFullYear() : null,
       verified: Boolean(false)
     };
   } else {
@@ -1477,11 +1480,17 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                 <div className={`border-t flex items-center px-3 shrink-0 relative rounded-b-2xl ${theme.bottomBar}`} style={{ height: `${bottomBarHeight}px` }}>
                   <div className="w-full h-full relative">
                     {/* Left Side: Video Metadata */}
-                    <div className={`absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1 ${theme.accent} font-bold uppercase tracking-widest opacity-80`} style={{ fontSize: `${metadataFontSize}px` }}>
-                      <span className="truncate max-w-[100px]">{displayVideo.author}</span>
+                    <div className={`absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1 ${theme.accent} font-bold uppercase tracking-widest opacity-80`} style={{ fontSize: `${metadataFontSize}px`, maxWidth: '210px' }}>
+                      <span className="truncate">{displayVideo.author}</span>
                       {displayVideo.verified && <CheckCircle2 size={metadataFontSize} className="fill-current shrink-0" />}
-                      <span className="mx-1 opacity-50">|</span>
-                      <span>{displayVideo.viewers}</span>
+                      <span className="mx-1 opacity-50 shrink-0">|</span>
+                      <span className="shrink-0">{displayVideo.viewers}</span>
+                      {displayVideo.publishedYear && (
+                        <>
+                          <span className="mx-1 opacity-50 shrink-0">|</span>
+                          <span className="shrink-0">{displayVideo.publishedYear}</span>
+                        </>
+                      )}
                     </div>
 
                     {/* Right Components: Action & Navigation Buttons */}
@@ -1505,7 +1514,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                       style={{ transform: `translate(calc(-50% + 120px), -50%)` }}
                       title={getInspectTitle('View playlists grid')}
                     >
-                      <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px` }}>
+                      <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#334155' }}>
                         <Library size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
                       </div>
                     </button>
@@ -1685,13 +1694,13 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                       </button>
 
                       <button
-                        onClick={handleVideosGrid}
+                        onClick={() => { console.log('New Play Button Clicked'); }}
                         className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
-                        style={{ transform: `translate(calc(-50% + ${modeSwitcherX}px), -50%)` }}
-                        title={getInspectTitle('View videos grid')}
+                        style={{ transform: `translate(calc(-50% + ${videoPlayButtonX}px), -50%)` }}
+                        title={getInspectTitle('Play (New Feature)')}
                       >
                         <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px` }}>
-                          <Grid3X3 size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
+                          <Play size={Math.round(bottomIconSize * 0.5)} className="text-slate-600 fill-slate-600" strokeWidth={0} />
                         </div>
                       </button>
 
@@ -1702,6 +1711,18 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                         title={getInspectTitle('Next video')}
                       >
                         <ChevronRight size={navChevronSize} strokeWidth={3} />
+                      </button>
+
+                      {/* Video Grid Button - Moved to Right of Chevrons */}
+                      <button
+                        onClick={handleVideosGrid}
+                        className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
+                        style={{ transform: `translate(calc(-50% + ${modeSwitcherX}px), -50%)` }}
+                        title={getInspectTitle('View videos grid')}
+                      >
+                        <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#334155' }}>
+                          <Grid3X3 size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
+                        </div>
                       </button>
 
                       {/* Tool Buttons - Absolute Centered */}
@@ -1754,36 +1775,43 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
 
                       <button
                         onClick={handleFirstPinClick}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          if (viewMode === 'full') setViewMode('half');
+                          setCurrentPage('pins');
+                        }}
                         className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
                         style={{ transform: `translate(calc(-50% + ${pinFirstButtonX}px), -50%)` }}
-                        title={getInspectTitle('Set as first pin')}
+                        title={getInspectTitle('Set as first pin (Right-click for Pins)')}
                       >
-                        <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#fbbf24' }}>
-                          <Pin size={Math.round(bottomIconSize * 0.5)} color="#fbbf24" fill="#fbbf24" strokeWidth={2} />
-                        </div>
+                        {(() => {
+                          const targetVideo = activeVideoItem || currentVideo;
+                          const isPinned = targetVideo && isPriorityPin(targetVideo.id);
+                          return (
+                            <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#fbbf24' }}>
+                              <Pin size={Math.round(bottomIconSize * 0.5)} color="#fbbf24" fill={isPinned ? "#fbbf24" : "transparent"} strokeWidth={isPinned ? 2 : 3} />
+                            </div>
+                          );
+                        })()}
                       </button>
 
                       <button
                         onClick={handleLikeClick}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          if (viewMode === 'full') setViewMode('half');
+                          setCurrentPage('likes');
+                        }}
                         className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
                         style={{ transform: `translate(calc(-50% + ${likeButtonX}px), -50%)` }}
-                        title={getInspectTitle('Like button')}
+                        title={getInspectTitle('Like button (Right-click for Likes)')}
                       >
                         <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: isVideoLiked ? likeColor : '#3b82f6' }}>
                           <ThumbsUp size={Math.round(bottomIconSize * 0.5)} color={isVideoLiked ? likeColor : '#3b82f6'} fill="transparent" strokeWidth={3} />
                         </div>
                       </button>
 
-                      {/* Tab Button - Moved from Playlist Menu (Far Right) */}
-                      <button
-                        className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
-                        style={{ transform: `translate(calc(-50% + ${menuButtonX}px), -50%)` }}
-                        title={getInspectTitle('Tab Menu')}
-                      >
-                        <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px` }}>
-                          <List size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
-                        </div>
-                      </button>
+
 
                       <div className="absolute left-1/2 top-1/2" style={{ transform: `translate(calc(-50% + ${menuButtonX + 32}px), -50%)` }}>
                         <button

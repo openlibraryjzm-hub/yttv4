@@ -41,7 +41,13 @@ impl Database {
                 title TEXT,
                 thumbnail_url TEXT,
                 position INTEGER NOT NULL,
+                thumbnail_url TEXT,
+                position INTEGER NOT NULL,
                 added_at TEXT NOT NULL,
+                is_local INTEGER NOT NULL DEFAULT 0,
+                author TEXT,
+                view_count TEXT,
+                published_at TEXT,
                 FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE
             )",
             [],
@@ -191,6 +197,11 @@ impl Database {
         if !columns.contains(&"view_count".to_string()) {
             self.conn
                 .execute("ALTER TABLE playlist_items ADD COLUMN view_count TEXT", [])?;
+        }
+
+        if !columns.contains(&"published_at".to_string()) {
+            self.conn
+                .execute("ALTER TABLE playlist_items ADD COLUMN published_at TEXT", [])?;
         }
 
         // Migration: Add Video Progress columns
@@ -374,6 +385,7 @@ impl Database {
         is_local: bool,
         author: Option<&str>,
         view_count: Option<&str>,
+        published_at: Option<&str>,
     ) -> Result<i64> {
         // Get the next position (max position + 1)
         let position: i32 = self.conn.query_row(
@@ -384,9 +396,9 @@ impl Database {
 
         let now = Utc::now().to_rfc3339();
         self.conn.execute(
-            "INSERT INTO playlist_items (playlist_id, video_url, video_id, title, thumbnail_url, position, added_at, is_local, author, view_count) 
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
-            params![playlist_id, video_url, video_id, title, thumbnail_url, position, now, if is_local { 1 } else { 0 }, author, view_count],
+            "INSERT INTO playlist_items (playlist_id, video_url, video_id, title, thumbnail_url, position, added_at, is_local, author, view_count, published_at) 
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+            params![playlist_id, video_url, video_id, title, thumbnail_url, position, now, if is_local { 1 } else { 0 }, author, view_count, published_at],
         )?;
 
         Ok(self.conn.last_insert_rowid())
@@ -394,7 +406,7 @@ impl Database {
 
     pub fn get_playlist_items(&self, playlist_id: i64) -> Result<Vec<PlaylistItem>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, playlist_id, video_url, video_id, title, thumbnail_url, position, added_at, is_local, author, view_count 
+            "SELECT id, playlist_id, video_url, video_id, title, thumbnail_url, position, added_at, is_local, author, view_count, published_at 
              FROM playlist_items 
              WHERE playlist_id = ?1 
              ORDER BY position ASC"
@@ -414,6 +426,7 @@ impl Database {
                     is_local: row.get::<_, i32>(8)? != 0,
                     author: row.get(9).unwrap_or(None),
                     view_count: row.get(10).unwrap_or(None),
+                    published_at: row.get(11).unwrap_or(None),
                 })
             })?
             .collect::<Result<Vec<_>, _>>()?;
@@ -559,7 +572,7 @@ impl Database {
         folder_color: &str,
     ) -> Result<Vec<PlaylistItem>> {
         let mut stmt = self.conn.prepare(
-            "SELECT pi.id, pi.playlist_id, pi.video_url, pi.video_id, pi.title, pi.thumbnail_url, pi.position, pi.added_at, pi.is_local, pi.author, pi.view_count
+            "SELECT pi.id, pi.playlist_id, pi.video_url, pi.video_id, pi.title, pi.thumbnail_url, pi.position, pi.added_at, pi.is_local, pi.author, pi.view_count, pi.published_at
              FROM playlist_items pi
              INNER JOIN video_folder_assignments vfa ON pi.id = vfa.item_id
              WHERE vfa.playlist_id = ?1 AND vfa.folder_color = ?2
@@ -580,6 +593,7 @@ impl Database {
                     is_local: row.get::<_, i32>(8)? != 0,
                     author: row.get(9).unwrap_or(None),
                     view_count: row.get(10).unwrap_or(None),
+                    published_at: row.get(11).unwrap_or(None),
                 })
             })?
             .collect::<Result<Vec<_>, _>>()?;
@@ -640,7 +654,7 @@ impl Database {
             let first_video = if let Some(pos) = min_position {
                 // Get the first video in this folder (by position, then by id for consistency)
                 let mut video_stmt = self.conn.prepare(
-                    "SELECT pi.id, pi.playlist_id, pi.video_url, pi.video_id, pi.title, pi.thumbnail_url, pi.position, pi.added_at, pi.is_local, pi.author, pi.view_count
+                    "SELECT pi.id, pi.playlist_id, pi.video_url, pi.video_id, pi.title, pi.thumbnail_url, pi.position, pi.added_at, pi.is_local, pi.author, pi.view_count, pi.published_at
                      FROM playlist_items pi
                      INNER JOIN video_folder_assignments vfa ON pi.id = vfa.item_id
                      WHERE vfa.playlist_id = ?1 AND vfa.folder_color = ?2 AND pi.position = ?3
@@ -661,6 +675,7 @@ impl Database {
                         is_local: row.get::<_, i32>(8)? != 0,
                         author: row.get(9).unwrap_or(None),
                         view_count: row.get(10).unwrap_or(None),
+                        published_at: row.get(11).unwrap_or(None),
                     })
                 }) {
                     Ok(video) => Some(video),
@@ -719,7 +734,7 @@ impl Database {
             // Get the first video (lowest position) for this folder
             let first_video = if let Some(pos) = min_position {
                 let mut video_stmt = self.conn.prepare(
-                    "SELECT pi.id, pi.playlist_id, pi.video_url, pi.video_id, pi.title, pi.thumbnail_url, pi.position, pi.added_at, pi.is_local, pi.author, pi.view_count
+                    "SELECT pi.id, pi.playlist_id, pi.video_url, pi.video_id, pi.title, pi.thumbnail_url, pi.position, pi.added_at, pi.is_local, pi.author, pi.view_count, pi.published_at
                      FROM playlist_items pi
                      INNER JOIN video_folder_assignments vfa ON pi.id = vfa.item_id
                      WHERE vfa.playlist_id = ?1 AND vfa.folder_color = ?2 AND pi.position = ?3
@@ -740,6 +755,7 @@ impl Database {
                         is_local: row.get::<_, i32>(8)? != 0,
                         author: row.get(9).unwrap_or(None),
                         view_count: row.get(10).unwrap_or(None),
+                        published_at: row.get(11).unwrap_or(None),
                     })
                 }) {
                     Ok(video) => Some(video),

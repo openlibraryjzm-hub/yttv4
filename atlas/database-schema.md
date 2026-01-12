@@ -95,6 +95,10 @@ CREATE TABLE IF NOT EXISTS playlist_items (
 - `view_count` (TEXT) - Video view count (e.g. "103405")
 - `position` (INTEGER NOT NULL) - Order position in playlist (0-indexed)
 - `added_at` (TEXT NOT NULL) - ISO 8601 timestamp (RFC3339 format)
+- `is_local` (INTEGER NOT NULL DEFAULT 0) - Boolean (0 or 1), 1 if video is a local file
+- `author` (TEXT) - Channel name/author
+- `view_count` (TEXT) - Video view count
+- `published_at` (TEXT) - ISO 8601 timestamp of video publication
 
 **Indexes:**
 - `idx_playlist_items_playlist_id` - On `playlist_id` for faster playlist lookups
