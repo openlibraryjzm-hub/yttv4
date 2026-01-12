@@ -350,7 +350,43 @@ For detailed information about the application's theme system and recent color c
 -   **Preview vs. Active Context**: It is critical to strictly separate "Browsing/Preview" state from "Active Playback" state in the UI. The Top Player Menu is a global control for the *active* audio/video context and should not reflect transient browsing actions until they are committed to playback.
 -   **Store Reactivity**: Explicitly passing metadata (like titles) during state transitions (`setPlaylistItems`) prevents UI flickers and "Unknown" states better than relying solely on derived state from async fetches.
 
+## Session Updates (Jan 12, 2026 - Part 2) -> Refine Player Controls & UI
+
+### Key Features Summary:
+
+1.  **Play Button Enhancements**:
+    *   **Functionality**: Added right-click to reverse cycle colored folders and double right-click to reset filter to "All Videos".
+    *   **Placement**: Swapped positions with the Grid button. Play button is now right of the chevrons, Grid button is centered between them.
+    *   **visuals**: Aligned "All Videos" state with the neutral specific style (slate border/icon).
+
+2.  **Pin Button Dual-Action**:
+    *   **Logic**: Implemented short-click for "Normal Pin" and long-click (>600ms) for "Priority Pin".
+    *   **Visuals**:
+        *   Default/Inactive: Slate border/icon (matches Shuffle).
+        *   Normal Pin: Black border, blue filled icon.
+        *   Priority Pin: Amber border, amber filled icon.
+
+3.  **New "Tooltip" Control**:
+    *   Added an interactive **Info (i)** button to the action bar.
+    *   Toggles a popup menu providing quick reference for mouse interaction shortcuts (Left/Right/Double/Long clicks).
+
+4.  **Visual Unification**:
+    *   **Like & Star Buttons**: Updated default (inactive) states to use uniform Slate colors (`#334155` border, `#475569` icon), replacing ad-hoc colors. All bottom-row action buttons now share a consistent design language.
+
+### Learnings:
+*   **Visual Hierarchy**: Using a consistent "neutral" style for inactive states allows active states (Colored Play, Pinned, Liked) to pop more effectively.
+*   **Interaction Density**: Dual-action buttons (click vs. long-press) and right-click contexts allow for high functionality density without cluttering the UI with extra buttons.
 
 
 
 
+
+
+## Session Updates (Jan 12, 2026 - Part 2) -> Refine Player Controls & UI
+
+### Key Features Summary:
+1.  **Play Button Enhancements**:
+    *   **Functionality**: Added right-click to reverse cycle colored folders and double right-click to reset filter to 'All Videos'.
+    *   **Placement**: Swapped positions with the Grid button.
+    *   **Visuals**: Aligned 'All Videos' state with standard slate style.
+2. **Pin and Tooltip**: Added dual-action pin and new Info button.

@@ -76,6 +76,8 @@ const COLORS = FOLDER_COLORS.map(color => ({ hex: color.hex, name: color.name, i
 
 export default function PlayerController({ onPlaylistSelect, onVideoSelect, activePlayer = 1, onActivePlayerChange, secondPlayerVideoUrl = null, secondPlayerVideoIndex = 0, onSecondPlayerVideoIndexChange, secondPlayerPlaylistId = null, secondPlayerPlaylistItems = [], currentThemeId = 'blue', onThemeChange }) {
   const fileInputRef = useRef(null);
+  const playButtonRightClickRef = useRef(0); // Track right clicks for double-click detection
+  const pinLongPressTimerRef = useRef(null); // Track long press for pin button
   const hoverTimerRef = useRef(null);
 
   // Store hooks
@@ -107,7 +109,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   } = usePlaylistStore();
 
   const { setCurrentPage } = useNavigationStore();
-  const { pinnedVideos, setFirstPin, removePin, isPriorityPin } = usePinStore();
+  const { pinnedVideos, togglePriorityPin, removePin, isPriorityPin, isPinned, togglePin } = usePinStore();
   const { viewMode, setViewMode, inspectMode, toggleMenuQuarterMode, menuQuarterMode, showDebugBounds, toggleDebugBounds, toggleInspectMode, showRuler, toggleRuler, showDevToolbar, toggleDevToolbar } = useLayoutStore();
   const { showColoredFolders } = useFolderStore();
   const { tabs, activeTabId, setActiveTab } = useTabStore();
@@ -228,6 +230,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   const [activeHeaderMode, setActiveHeaderMode] = useState('info'); // Start with playlist title 
   const [isModeLeft, setIsModeLeft] = useState(true);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false); // Tooltip popup state
   const [showPreviewMenus, setShowPreviewMenus] = useState(true); // Default to true based on user request "toggle visibility... with [options]" implies options are main focus, but need to hide/show something? Actually request says "toggle visibility OF the top right menu" - ok so we need a state for the menu itself?
   // Wait, the request is: "add an option to toggle visibility of the top right menu with 'full, half, quarter, menu q, debug, inspect, ruler, menu' buttons"
   // This likely means: INSIDE the existing 3-dot menu (More options), adding these toggles.
@@ -1165,15 +1168,65 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   };
 
   // Handle first pin button click - set current video as first (leftmost) pin
-  const handleFirstPinClick = () => {
+  // Handle Pin Button Interactions
+  const handlePinMouseDown = () => {
     const targetVideo = activeVideoItem || currentVideo;
-    if (targetVideo) {
-      setFirstPin(targetVideo);
+    if (!targetVideo) return;
+
+    // Start long press timer (e.g., 500ms)
+    pinLongPressTimerRef.current = setTimeout(() => {
+      // Long Press Action: Set Priority Pin
+      // Ensure we don't toggle it OFF if it's already ON
+      if (!isPriorityPin(targetVideo.id)) {
+        togglePriorityPin(targetVideo);
+      }
+      pinLongPressTimerRef.current = null; // Mark as handled
+    }, 600);
+  };
+
+  const handlePinMouseUp = () => {
+    const targetVideo = activeVideoItem || currentVideo;
+    if (!targetVideo) return;
+
+    if (pinLongPressTimerRef.current) {
+      // Timer still running -> Short Click -> Toggle Normal Pin
+      clearTimeout(pinLongPressTimerRef.current);
+      pinLongPressTimerRef.current = null;
+
+      // We only toggle normal pin here. If it's already a priority pin, maybe we want to unpin it or convert to normal?
+      // Logic: if pinned (any type), unpin. If not pinned, pin normal.
+      // But user said: "single click makes it normal pin".
+
+      // Let's rely on standard toggle behavior, but ensure it sets to normal pin if adding.
+      // togglePin handles adding as normal pin.
+
+      // Special case: If it is currently a Priority Pin, should short click make it a normal pin?
+      // User request: "single click makes it normal pin". 
+      // If it's priority, togglePin(targetVideo) might remove "pin" status or add duplicate?
+      // usePinStore.togglePin adds if not present, removes if present.
+      // If it is priority pin, it IS pinned. So togglePin would remove it. 
+      // This seems correct: click -> toggles pin status.
+
+      // Wait, "single click makes it normal pin" implies if unpinned -> normal pin.
+      // If already pinned (normal) -> togglePin removes it.
+      // If already pinned (priority) -> togglePin removes it?
+
+      // Let's stick to togglePin for short click.
+      togglePin(targetVideo);
     }
   };
 
+  const handlePinMouseLeave = () => {
+    // If mouse leaves button while holding, cancel long press
+    if (pinLongPressTimerRef.current) {
+      clearTimeout(pinLongPressTimerRef.current);
+      pinLongPressTimerRef.current = null;
+    }
+  };
+
+
   // Handle play button toggle - cycle through colored folders
-  const handlePlayButtonToggle = async () => {
+  const handlePlayButtonToggle = async (direction = 'forward') => {
     if (!currentPlaylistId) return;
 
     try {
@@ -1193,14 +1246,31 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
 
       // Determine next color
       let nextColor = 'all';
-      if (currentColor === 'all') {
-        if (validColors.length > 0) nextColor = validColors[0];
-      } else {
-        const idx = validColors.indexOf(currentColor);
-        if (idx !== -1 && idx < validColors.length - 1) {
-          nextColor = validColors[idx + 1];
+
+      if (direction === 'reset') {
+        nextColor = 'all';
+      } else if (direction === 'forward') {
+        if (currentColor === 'all') {
+          if (validColors.length > 0) nextColor = validColors[0];
         } else {
-          nextColor = 'all';
+          const idx = validColors.indexOf(currentColor);
+          if (idx !== -1 && idx < validColors.length - 1) {
+            nextColor = validColors[idx + 1];
+          } else {
+            nextColor = 'all';
+          }
+        }
+      } else {
+        // Reverse cycle
+        if (currentColor === 'all') {
+          if (validColors.length > 0) nextColor = validColors[validColors.length - 1];
+        } else {
+          const idx = validColors.indexOf(currentColor);
+          if (idx > 0) {
+            nextColor = validColors[idx - 1];
+          } else {
+            nextColor = 'all';
+          }
         }
       }
 
@@ -1350,7 +1420,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   const [rightAltNavX, setRightAltNavX] = useState(-10);
   // --- Config Store ---
   const {
-    pinFirstButtonX, pinFirstButtonSize, likeButtonX, menuButtonX,
+    pinFirstButtonX, pinFirstButtonSize, likeButtonX, menuButtonX, tooltipButtonX,
     pinAnchorX, pinAnchorY, plusButtonX, plusButtonY, pinToggleY,
     dotMenuWidth, dotMenuHeight, dotMenuY, dotSize,
     playlistCapsuleX, playlistCapsuleY, playlistCapsuleWidth, playlistCapsuleHeight,
@@ -1562,7 +1632,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                       <button
                         onClick={() => handlePinClick(priorityPinData.video)}
                         className={`rounded-lg flex items-center justify-center transition-all shadow-md overflow-hidden ${activePin === priorityPinData.id ? 'ring-2 ring-sky-400' : ''}`}
-                        style={{ width: '52px', height: '39px', border: '2px solid #fbbf24' }}
+                        style={{ width: '52px', height: '39px', border: '2px solid #334155' }}
                         title={`Priority Pin: ${priorityPinData.video.title || 'Untitled Video'}`}
                       >
                         {thumbnailUrl ? (
@@ -1799,10 +1869,22 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                       </button>
 
                       <button
-                        onClick={handlePlayButtonToggle}
+                        onClick={() => handlePlayButtonToggle('forward')}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          const now = Date.now();
+                          if (now - playButtonRightClickRef.current < 300) {
+                            // Double right click detected -> Reset to all
+                            handlePlayButtonToggle('reset');
+                          } else {
+                            // Single right click -> Reverse cycle
+                            handlePlayButtonToggle('reverse');
+                          }
+                          playButtonRightClickRef.current = now;
+                        }}
                         className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
                         style={{ transform: `translate(calc(-50% + ${videoPlayButtonX}px), -50%)` }}
-                        title={getInspectTitle('Cycle Folder Filter')}
+                        title={getInspectTitle('Cycle Folder Filter (Left: Forward, Right: Reverse)')}
                       >
                         {(() => {
                           const activeColorData = currentFolder ? FOLDER_COLORS.find(c => c.id === currentFolder.folder_color) : null;
@@ -1810,17 +1892,16 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                           const isColored = !!activeColorData;
 
                           return (
-                            <div className="rounded-full flex items-center justify-center border-2 shadow-sm transition-colors duration-300"
+                            <div className="rounded-full flex items-center justify-center border-2 shadow-sm transition-colors duration-300 bg-white"
                               style={{
                                 width: `${bottomIconSize}px`,
                                 height: `${bottomIconSize}px`,
-                                borderColor: isColored ? activeColorHex : '#e2e8f0',
-                                backgroundColor: isColored ? activeColorHex : '#ffffff'
+                                borderColor: isColored ? activeColorHex : '#334155'
                               }}>
                               <Play size={Math.round(bottomIconSize * 0.5)}
-                                color={isColored ? '#ffffff' : '#475569'}
-                                fill={isColored ? '#ffffff' : 'transparent'}
-                                strokeWidth={isColored ? 0 : 2.5}
+                                color={isColored ? activeColorHex : '#475569'}
+                                fill={isColored ? activeColorHex : '#475569'}
+                                strokeWidth={0}
                               />
                             </div>
                           );
@@ -1888,8 +1969,8 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                             );
                           } else {
                             return (
-                              <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: quickAssignColorObj.hex }}>
-                                <Star size={Math.round(bottomIconSize * 0.5)} color={quickAssignColorObj.hex} fill="transparent" strokeWidth={3} />
+                              <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#334155' }}>
+                                <Star size={Math.round(bottomIconSize * 0.5)} color="#475569" fill="transparent" strokeWidth={3} />
                               </div>
                             );
                           }
@@ -1897,7 +1978,9 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                       </button>
 
                       <button
-                        onClick={handleFirstPinClick}
+                        onMouseDown={handlePinMouseDown}
+                        onMouseUp={handlePinMouseUp}
+                        onMouseLeave={handlePinMouseLeave}
                         onContextMenu={(e) => {
                           e.preventDefault();
                           if (viewMode === 'full') setViewMode('half');
@@ -1905,14 +1988,38 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                         }}
                         className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
                         style={{ transform: `translate(calc(-50% + ${pinFirstButtonX}px), -50%)` }}
-                        title={getInspectTitle('Set as first pin (Right-click for Pins)')}
+                        title={getInspectTitle('Pin Video (Click: Normal Pin, Hold: Priority Pin, Right-click: Pins Page)')}
                       >
                         {(() => {
                           const targetVideo = activeVideoItem || currentVideo;
-                          const isPinned = targetVideo && isPriorityPin(targetVideo.id);
+                          const isPriority = targetVideo && isPriorityPin(targetVideo.id);
+                          const isNormalPinned = targetVideo && isPinned(targetVideo.id) && !isPriority;
+
+                          // Visual Logic
+                          // Priority: Amber border (#fbbf24), Amber fill
+                          // Normal: Black border (#000000), Blue fill (#3b82f6)
+                          // Inactive: Slate border (#334155), Slate icon (#475569)
+
+                          let borderColor = '#334155';
+                          let iconColor = '#475569';
+                          let iconFill = 'transparent';
+                          let strokeWidth = 2.5;
+
+                          if (isPriority) {
+                            borderColor = '#fbbf24';
+                            iconColor = '#fbbf24';
+                            iconFill = '#fbbf24';
+                            strokeWidth = 1.5; // Stroke needed for needle visibility
+                          } else if (isNormalPinned) {
+                            borderColor = '#000000';
+                            iconColor = '#3b82f6';
+                            iconFill = '#3b82f6';
+                            strokeWidth = 1.5; // Stroke needed for needle visibility
+                          }
+
                           return (
-                            <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#fbbf24' }}>
-                              <Pin size={Math.round(bottomIconSize * 0.5)} color="#fbbf24" fill={isPinned ? "#fbbf24" : "transparent"} strokeWidth={isPinned ? 2 : 3} />
+                            <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor }}>
+                              <Pin size={Math.round(bottomIconSize * 0.5)} color={iconColor} fill={iconFill} strokeWidth={strokeWidth} />
                             </div>
                           );
                         })()}
@@ -1929,10 +2036,125 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                         style={{ transform: `translate(calc(-50% + ${likeButtonX}px), -50%)` }}
                         title={getInspectTitle('Like button (Right-click for Likes)')}
                       >
-                        <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: isVideoLiked ? likeColor : '#3b82f6' }}>
-                          <ThumbsUp size={Math.round(bottomIconSize * 0.5)} color={isVideoLiked ? likeColor : '#3b82f6'} fill="transparent" strokeWidth={3} />
+                        <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: isVideoLiked ? likeColor : '#334155' }}>
+                          <ThumbsUp size={Math.round(bottomIconSize * 0.5)} color={isVideoLiked ? likeColor : '#475569'} fill={isVideoLiked ? likeColor : 'transparent'} strokeWidth={3} />
                         </div>
                       </button>
+
+                      {/* Tooltip Button */}
+                      <div className="absolute left-1/2 top-1/2" style={{ transform: `translate(calc(-50% + ${tooltipButtonX}px), -50%)` }}>
+                        <button
+                          onClick={() => setIsTooltipOpen(!isTooltipOpen)}
+                          className="flex items-center justify-center group/tool relative"
+                          title={getInspectTitle('Controls Help')}
+                        >
+                          <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#334155' }}>
+                            <Info size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
+                          </div>
+                        </button>
+
+                        {isTooltipOpen && (
+                          <div className="absolute top-full right-0 mt-3 w-80 bg-white/95 backdrop-blur-xl border border-sky-100 rounded-2xl shadow-2xl overflow-hidden z-[10002] animate-in fade-in zoom-in-95 duration-200 p-4 text-xs text-sky-900 font-medium" style={{ zIndex: 10002 }}>
+                            <div className="flex flex-col gap-4">
+
+                              {/* Play Button */}
+                              <div className="flex gap-3">
+                                <div className="shrink-0 w-8 h-8 bg-sky-50 rounded-full flex items-center justify-center border border-sky-100 shadow-sm text-sky-600">
+                                  <Play size={14} fill="currentColor" strokeWidth={0} />
+                                </div>
+                                <div className="flex flex-col gap-1.5 pt-0.5">
+                                  <div className="flex items-center gap-2 text-slate-600">
+                                    <div className="flex gap-1">
+                                      {/* Left Click Icon */}
+                                      <svg width="12" height="16" viewBox="0 0 12 16" fill="none" className="text-sky-500">
+                                        <rect x="0.5" y="0.5" width="11" height="15" rx="3.5" stroke="currentColor" />
+                                        <line x1="6" y1="0.5" x2="6" y2="6" stroke="currentColor" />
+                                        <line x1="0.5" y1="6" x2="11.5" y2="6" stroke="currentColor" />
+                                        <path d="M1 4C1 2.34315 2.34315 1 4 1H6V6H1V4Z" fill="currentColor" />
+                                      </svg>
+                                      {/* Right Click Icon */}
+                                      <svg width="12" height="16" viewBox="0 0 12 16" fill="none" className="text-sky-500">
+                                        <rect x="0.5" y="0.5" width="11" height="15" rx="3.5" stroke="currentColor" />
+                                        <line x1="6" y1="0.5" x2="6" y2="6" stroke="currentColor" />
+                                        <line x1="0.5" y1="6" x2="11.5" y2="6" stroke="currentColor" />
+                                        <path d="M6 1H8C9.65685 1 11 2.34315 11 4V6H6V1Z" fill="currentColor" />
+                                      </svg>
+                                    </div>
+                                    <span className="font-semibold text-sky-900/80">Cycle Folder Filter</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-slate-500">
+                                    {/* Double Click (Two dots/badges) */}
+                                    <div className="flex items-center justify-center w-6 h-4 bg-sky-100 rounded text-[9px] font-bold text-sky-700 tracking-tighter px-0.5">
+                                      2x
+                                    </div>
+                                    <span>Reset to All Videos</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Pin Button */}
+                              <div className="flex gap-3">
+                                <div className="shrink-0 w-8 h-8 bg-amber-50 rounded-full flex items-center justify-center border border-amber-100 shadow-sm text-amber-500">
+                                  <Pin size={14} fill="currentColor" strokeWidth={0} />
+                                </div>
+                                <div className="flex flex-col gap-1.5 pt-0.5">
+                                  <div className="flex items-center gap-2 text-slate-600">
+                                    <svg width="12" height="16" viewBox="0 0 12 16" fill="none" className="text-amber-500">
+                                      <rect x="0.5" y="0.5" width="11" height="15" rx="3.5" stroke="currentColor" />
+                                      <line x1="6" y1="0.5" x2="6" y2="6" stroke="currentColor" />
+                                      <line x1="0.5" y1="6" x2="11.5" y2="6" stroke="currentColor" />
+                                      <path d="M1 4C1 2.34315 2.34315 1 4 1H6V6H1V4Z" fill="currentColor" />
+                                    </svg>
+                                    <span className="font-semibold text-sky-900/80">Normal Pin</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-slate-500">
+                                    {/* Long Press Icon */}
+                                    <Clock size={12} className="text-amber-500" strokeWidth={2.5} />
+                                    <span>Hold for Priority Pin</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Like Button */}
+                              <div className="flex gap-3">
+                                <div className="shrink-0 w-8 h-8 bg-indigo-50 rounded-full flex items-center justify-center border border-indigo-100 shadow-sm text-indigo-500">
+                                  <ThumbsUp size={14} fill="currentColor" strokeWidth={0} />
+                                </div>
+                                <div className="flex flex-col gap-1.5 pt-1.5">
+                                  <div className="flex items-center gap-2 text-slate-600">
+                                    <svg width="12" height="16" viewBox="0 0 12 16" fill="none" className="text-indigo-500">
+                                      <rect x="0.5" y="0.5" width="11" height="15" rx="3.5" stroke="currentColor" />
+                                      <line x1="6" y1="0.5" x2="6" y2="6" stroke="currentColor" />
+                                      <line x1="0.5" y1="6" x2="11.5" y2="6" stroke="currentColor" />
+                                      <path d="M6 1H8C9.65685 1 11 2.34315 11 4V6H6V1Z" fill="currentColor" />
+                                    </svg>
+                                    <span className="font-semibold text-sky-900/80">Go to Likes Page</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Star Button */}
+                              <div className="flex gap-3">
+                                <div className="shrink-0 w-8 h-8 bg-purple-50 rounded-full flex items-center justify-center border border-purple-100 shadow-sm text-purple-500">
+                                  <Star size={14} fill="currentColor" strokeWidth={0} />
+                                </div>
+                                <div className="flex flex-col gap-1.5 pt-1.5">
+                                  <div className="flex items-center gap-2 text-slate-600">
+                                    <svg width="12" height="16" viewBox="0 0 12 16" fill="none" className="text-purple-500">
+                                      <rect x="0.5" y="0.5" width="11" height="15" rx="3.5" stroke="currentColor" />
+                                      <line x1="6" y1="0.5" x2="6" y2="6" stroke="currentColor" />
+                                      <line x1="0.5" y1="6" x2="11.5" y2="6" stroke="currentColor" />
+                                      <path d="M6 1H8C9.65685 1 11 2.34315 11 4V6H6V1Z" fill="currentColor" />
+                                    </svg>
+                                    <span className="font-semibold text-sky-900/80">Assign Quick Color</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
 
 

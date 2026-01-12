@@ -71,13 +71,13 @@ export const useConfigStore = create(
             setModeHandleInternalSize: (val) => set({ modeHandleInternalSize: val }),
 
             // Center Cluster
-            modeSwitcherX: -65, // Grid moved right
+            modeSwitcherX: -128, // Grid moved to between chevrons
             setModeSwitcherX: (val) => set({ modeSwitcherX: val }),
             videoChevronLeftX: -160, // Leftmost
             setVideoChevronLeftX: (val) => set({ videoChevronLeftX: val }),
             videoChevronRightX: -100, // Right of Play
             setVideoChevronRightX: (val) => set({ videoChevronRightX: val }),
-            videoPlayButtonX: -128, // Nudged right
+            videoPlayButtonX: -65, // Nudged right (swapped with grid)
             setVideoPlayButtonX: (val) => set({ videoPlayButtonX: val }),
 
             // Right Side Group (Shifted right)
@@ -91,8 +91,10 @@ export const useConfigStore = create(
             setPinFirstButtonX: (val) => set({ pinFirstButtonX: val }),
             likeButtonX: 80,
             setLikeButtonX: (val) => set({ likeButtonX: val }),
-            menuButtonX: 115,
+            menuButtonX: 150,
             setMenuButtonX: (val) => set({ menuButtonX: val }),
+            tooltipButtonX: 115,
+            setTooltipButtonX: (val) => set({ tooltipButtonX: val }),
 
             // Custom Banner Image
             customBannerImage: null,
@@ -176,7 +178,7 @@ export const useConfigStore = create(
             visualizerGradient: true,
             setVisualizerGradient: (val) => set({ visualizerGradient: val }),
         }), {
-        name: 'config-storage-v6', // name of the item in the storage (must be unique)
+        name: 'config-storage-v7', // name of the item in the storage (must be unique)
     }
     )
 );

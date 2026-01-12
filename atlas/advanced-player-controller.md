@@ -215,19 +215,22 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
 
 - **Navigation Controls (Left-Aligned Cluster)**:
   - **Previous Video** (chevron left): Navigates to previous video (-160px offset).
-  - **Play Button (Folder Cycle)** (center): A circular button with play icon (-128px offset).
-    - **Logic**: Cycles through colored folders within the playlist that actually contain videos.
-    - **Visuals**:
-      - **"All Videos" State**: White background, light-slate border, hollow slate icon. Represents viewing the full playlist.
-      - **"Colored Folder" State**: Solid colored background (matches folder), colored border, white icon. Represents the filtered folder view.
-    - **Auto-Play**: If switching the filter causes the currently playing video to be hidden (not in the nex folder), it automatically starts playing the first video of the new view.
+  - **Grid Button** (center): Opens the Videos page grid view. Icon: Grid3X3. Positioned between chevrons (-128px offset).
   - **Next Video** (chevron right): Navigates to next video (-100px offset).
-  - **Grid Button** (right of next): Opens the Videos page grid view. Icon: Grid3X3. Positioned after chevrons (-65px offset).
+  - **Play Button (Folder Cycle)** (right of next): A centralized play/pause/reset control (-65px offset).
+    - **Logic**: Cycles through colored folders within the playlist that actually contain videos.
+      - **Left-Click**: Cycles forward (All -> Red -> Orange ...).
+      - **Right-Click**: Cycles backward (All -> Pink -> Purple ...).
+      - **Double Right-Click**: Resets to "All Videos".
+    - **Visuals**:
+      - **"All Videos" State**: White background, dark slate border (matches Shuffle), filled slate icon. Represents viewing the full playlist.
+      - **"Colored Folder" State**: White background, colored border, colored icon. Matches the Shuffle button style. Represents the filtered folder view.
+    - **Auto-Play**: If switching the filter causes the currently playing video to be hidden (not in the nex folder), it automatically starts playing the first video of the new view.
 
 - **Action Controls (Right-Aligned Cluster)**:
   - **Star Button** (-25px offset): A circular button with star icon for folder assignment.
     - **Filled star with colored border** = video belongs to that folder color
-    - **Empty star with colored outline** = video not in folder, outline shows "quick assign" default color
+    - **Empty/outline** = video not in folder (Slate border #334155, Slate icon #475569)
     - Left-click assigns/unassigns video to quick assign folder
     - Right-click opens color picker to set quick assign default
   - **Shuffle Button** (10px offset): A circular button with shuffle icon.
@@ -235,16 +238,24 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
     - **Colored border** = shuffle from that folder color
     - Right-click opens color picker to set quick shuffle default
     - Left-click shuffles to random video from selected folder (or all videos)
-  - **Priority Pin Button** (45px offset): A yellow/amber pin button that sets the current video as the priority pin.
-    - Distinctive amber border (#fbbf24) and filled amber pin icon.
-    - **Left-click** sets the video as the priority pin (always leftmost in pin track).
-    - **Right-click** navigates to the Pins Page. *Auto-switches to Half View if in Full View.*
+  - **Priority Pin Button** (45px offset): A multi-function pin button.
+    - **Actions**:
+      - **Short Click**: Toggles **Normal Pin** (Black border, Blue filled icon).
+      - **Long Click (>600ms)**: Sets **Priority Pin** (Amber border, Amber filled icon).
+      - **Right-Click**: Navigates to the Pins Page. *Auto-switches to Half View if in Full View.*
+    - **Visuals**:
+      - **Inactive**: White background, slate border, slate hollow icon. Matches Shuffle/Play button default style.
+      - **Normal Pin**: White background, black border (#000000), blue filled icon (#3b82f6).
+      - **Priority Pin**: White background, amber border (#fbbf24), amber filled icon.
   - **Like Button** (85px offset): A circular button with thumbs-up icon.
     - **Filled with blue** = video is liked (in "Likes" playlist)
-    - **Empty/outline** = video not liked
+    - **Empty/outline** = video not liked (Slate border #334155, Slate icon #475569)
     - **Left-click** toggles like status.
     - **Right-click** navigates to the Likes Page. *Auto-switches to Half View if in Full View.*
-  - **More Menu Button** (120px offset): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
+  - **Tooltip Button** (115px offset): A circular button with "info" icon.
+    - **Click**: Toggles a popup Help Menu showing controls for Play, Pin, Like, Star buttons.
+    - **Visuals**: Standard white circle with slate icon (#334155 border, #475569 icon).
+  - **More Menu Button** (150px offset): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
     - **Hide/Show Preview Menus**: Toggles visibility of side navigation menus.
     - **Hide/Show Dev Toolbar**: Toggles visibility of floating development toolbar.
 
