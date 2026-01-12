@@ -390,3 +390,15 @@ For detailed information about the application's theme system and recent color c
     *   **Placement**: Swapped positions with the Grid button.
     *   **Visuals**: Aligned 'All Videos' state with standard slate style.
 2. **Pin and Tooltip**: Added dual-action pin and new Info button.
+
+## Session Updates (Jan 12, 2026 - Part 3) -> Polishing Player Controller UI
+
+### Key Features Summary:
+1.  **Refined Video Menu Spacing**:
+    *   **Spacing Parity**: Adjusted the Video Menu's navigation controls (Chevron Left, Grid, Chevron Right) to match the exact spacing of the Playlist Menu (28px gaps).
+    *   **Mirrored Layout**: Re-implemented the video navigation capsule to structurally mirror the playlist navigation capsule for consistency.
+2.  **Custom Icons**:
+    *   **Curvy Film Strip**: Replaced the standard 3x3 Grid icon with a custom SVG "curvy film strip" icon to represent the Grid View in a more dynamic/chaotic way.
+3.  **Action Button Layout**:
+    *   **Equal Spacing**: Evenly distributed the Star, Shuffle, Pin, and Like buttons between the Play Button (Left Anchor) and Info Button (Right Anchor).
+    *   **Far Right Menu**: Moved the 3-dot "More Menu" button to the far right edge (280px offset) to separate it from the primary action cluster.

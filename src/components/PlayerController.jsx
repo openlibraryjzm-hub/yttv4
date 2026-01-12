@@ -1878,7 +1878,23 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                         title={getInspectTitle('View videos grid')}
                       >
                         <div className="rounded-full flex items-center justify-center border-2 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px`, borderColor: '#334155' }}>
-                          <Grid3X3 size={Math.round(bottomIconSize * 0.5)} className="text-slate-600" strokeWidth={3} />
+                          <svg
+                            width={Math.round(bottomIconSize * 0.55)}
+                            height={Math.round(bottomIconSize * 0.55)}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="text-slate-600"
+                          >
+                            <path d="M2 8 Q 7 3 12 8 T 22 8" />
+                            <path d="M2 18 Q 7 13 12 18 T 22 18" />
+                            <path d="M7 5.5 V 15.5" />
+                            <path d="M12 8 V 18" />
+                            <path d="M17 10.5 V 20.5" />
+                          </svg>
                         </div>
                       </button>
 

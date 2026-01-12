@@ -213,11 +213,17 @@ Users see a centralized display of pinned videos, split between a dedicated Prio
 
 Users see a bottom toolbar in the video menu rectangle with distinct, grouped action buttons:
 
+##### ### 1.2.2 Navigation & Action Controls
+
+**1: User-Perspective Description**
+
+Users see a bottom toolbar in the video menu rectangle with distinct, grouped action buttons:
+
 - **Navigation Controls (Left-Aligned Cluster)**:
-  - **Previous Video** (chevron left): Navigates to previous video (-160px offset).
-  - **Grid Button** (center): Opens the Videos page grid view. Icon: Grid3X3. Positioned between chevrons (-128px offset).
-  - **Next Video** (chevron right): Navigates to next video (-100px offset).
-  - **Play Button (Folder Cycle)** (right of next): A centralized play/pause/reset control (-65px offset).
+  - **Previous Video** (chevron left): Navigates to previous video (-148px offset).
+  - **Grid Button** (center): Opens the Videos page grid view. Icon: **Custom Curvy Film Strip SVG**. Positioned between chevrons (-120px offset).
+  - **Next Video** (chevron right): Navigates to next video (-92px offset).
+  - **Play Button (Folder Cycle)** (right of next): A centralized play/pause/reset control (-60px offset).
     - **Logic**: Cycles through colored folders within the playlist that actually contain videos.
       - **Left-Click**: Cycles forward (All -> Red -> Orange ...).
       - **Right-Click**: Cycles backward (All -> Pink -> Purple ...).
@@ -227,18 +233,18 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
       - **"Colored Folder" State**: White background, colored border, colored icon. Matches the Shuffle button style. Represents the filtered folder view.
     - **Auto-Play**: If switching the filter causes the currently playing video to be hidden (not in the nex folder), it automatically starts playing the first video of the new view.
 
-- **Action Controls (Right-Aligned Cluster)**:
-  - **Star Button** (-25px offset): A circular button with star icon for folder assignment.
+- **Action Controls (Center-Right Spread)**:
+  - **Star Button** (-19px offset): A circular button with star icon for folder assignment.
     - **Filled star with colored border** = video belongs to that folder color
     - **Empty/outline** = video not in folder (Slate border #334155, Slate icon #475569)
     - Left-click assigns/unassigns video to quick assign folder
     - Right-click opens color picker to set quick assign default
-  - **Shuffle Button** (10px offset): A circular button with shuffle icon.
+  - **Shuffle Button** (22px offset): A circular button with shuffle icon.
     - **Slate/Dark border** = shuffle from all videos
     - **Colored border** = shuffle from that folder color
     - Right-click opens color picker to set quick shuffle default
     - Left-click shuffles to random video from selected folder (or all videos)
-  - **Priority Pin Button** (45px offset): A multi-function pin button.
+  - **Priority Pin Button** (63px offset): A multi-function pin button.
     - **Actions**:
       - **Short Click**: Toggles **Normal Pin** (Black border, Blue filled icon).
       - **Long Click (>600ms)**: Sets **Priority Pin** (Amber border, Amber filled icon).
@@ -247,15 +253,17 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
       - **Inactive**: White background, slate border, slate hollow icon. Matches Shuffle/Play button default style.
       - **Normal Pin**: White background, black border (#000000), blue filled icon (#3b82f6).
       - **Priority Pin**: White background, amber border (#fbbf24), amber filled icon.
-  - **Like Button** (85px offset): A circular button with thumbs-up icon.
+  - **Like Button** (104px offset): A circular button with thumbs-up icon.
     - **Filled with blue** = video is liked (in "Likes" playlist)
     - **Empty/outline** = video not liked (Slate border #334155, Slate icon #475569)
     - **Left-click** toggles like status.
     - **Right-click** navigates to the Likes Page. *Auto-switches to Half View if in Full View.*
-  - **Tooltip Button** (115px offset): A circular button with "info" icon.
+  - **Info / Tooltip Button** (145px offset): A circular button with "info" icon.
     - **Click**: Toggles a popup Help Menu showing controls for Play, Pin, Like, Star buttons.
     - **Visuals**: Standard white circle with slate icon (#334155 border, #475569 icon).
-  - **More Menu Button** (150px offset): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
+
+- **Menu Controls (Far Right)**
+  - **More Menu Button** (280px offset - far right): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
     - **Hide/Show Preview Menus**: Toggles visibility of side navigation menus.
     - **Hide/Show Dev Toolbar**: Toggles visibility of floating development toolbar.
 

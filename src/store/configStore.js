@@ -91,7 +91,7 @@ export const useConfigStore = create(
             setPinFirstButtonX: (val) => set({ pinFirstButtonX: val }),
             likeButtonX: 104,
             setLikeButtonX: (val) => set({ likeButtonX: val }),
-            menuButtonX: 180, // Nudged out to keep distance from info
+            menuButtonX: 280, // Moved 100px right
             setMenuButtonX: (val) => set({ menuButtonX: val }),
             tooltipButtonX: 145,
             setTooltipButtonX: (val) => set({ tooltipButtonX: val }),
@@ -178,7 +178,7 @@ export const useConfigStore = create(
             visualizerGradient: true,
             setVisualizerGradient: (val) => set({ visualizerGradient: val }),
         }), {
-        name: 'config-storage-v9', // name of the item in the storage (must be unique)
+        name: 'config-storage-v10', // name of the item in the storage (must be unique)
     }
     )
 );
