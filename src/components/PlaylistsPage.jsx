@@ -47,6 +47,25 @@ const PlaylistsPage = ({ onVideoSelect }) => {
   const getInspectTitle = (label) => inspectMode ? label : undefined;
   const hasDeletedTestPlaylist = useRef(false);
 
+  // Sticky header state detection
+  const [isStuck, setIsStuck] = useState(false);
+  const stickySentinelRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsStuck(entry.intersectionRatio < 1 && entry.boundingClientRect.top < 0);
+      },
+      { threshold: [1], rootMargin: '-1px 0px 0px 0px' }
+    );
+
+    if (stickySentinelRef.current) {
+      observer.observe(stickySentinelRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     loadPlaylists();
     loadStuckFolders();
@@ -499,42 +518,10 @@ const PlaylistsPage = ({ onVideoSelect }) => {
         </div>
       ) : (
         <>
-          {/* Header with Upload Button and Folder Toggle - Compact Mode */}
-          <div className="flex items-center gap-2 px-2 py-1 border-b border-slate-700 justify-end">
-            {/* Actions - Fixed width */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Folder Toggle */}
-              <button
-                onClick={() => {
-                  console.log('Toggle folders clicked in PlaylistsPage, current state:', showColoredFolders);
-                  setShowColoredFolders(!showColoredFolders);
-                }}
-                title={getInspectTitle(showColoredFolders ? 'Hide colored folders' : 'Show colored folders') || (showColoredFolders ? 'Hide colored folders' : 'Show colored folders')}
-                className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${showColoredFolders ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                  }`}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                </svg>
-              </button>
 
-              {/* Add Button */}
-              <button
-                onClick={() => setShowUploader(true)}
-                className="flex items-center gap-1 px-3 py-1.5 bg-sky-500 rounded-lg text-xs font-medium hover:bg-sky-600 transition-colors"
-                style={{ color: '#052F4A' }}
-                title={getInspectTitle('Add playlist')}
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Add</span>
-              </button>
-            </div>
-          </div>
 
           {/* Playlist Grid - 3 per row */}
-          <div className="flex-1 overflow-y-auto p-4 bg-transparent">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto bg-transparent relative">
             {(() => {
               const activePreset = presets.find(p => p.id === activePresetId);
               const bannerTitle = activePresetId === 'all' || !activePreset
@@ -542,21 +529,69 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                 : `Playlists - ${activePreset.name}`;
 
               return (
-                <PageBanner
-                  title={bannerTitle}
-                  description={null}
-                  color={null}
-                  isEditable={false}
-                  childrenPosition="bottom"
-                  topRightContent={<TabPresetsDropdown align="right" />}
-                >
-                  <div className="mt-4">
-                    <TabBar onAddPlaylistToTab={addPlaylistToTab} showPresets={false} />
-                  </div>
-                </PageBanner>
+                <div className="px-8 pt-8">
+                  <PageBanner
+                    title={bannerTitle}
+                    description={null}
+                    color={null}
+                    isEditable={false}
+                    seamlessBottom={true}
+                  />
+                </div>
               );
             })()}
-            <div className="grid grid-cols-3 gap-4">
+
+            {/* Sticky Sentinel */}
+            <div ref={stickySentinelRef} className="absolute h-px w-full -mt-px pointer-events-none opacity-0" />
+
+            {/* Sticky Toolbar */}
+            <div className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) border-white/5
+              ${isStuck
+                ? 'bg-slate-900/95 backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2'
+                : 'bg-slate-800/40 backdrop-blur-md border-b border-x shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-4 pb-4'
+              }`}
+            >
+              <div className={`px-8 flex flex-col gap-4 transition-all duration-300 ${isStuck ? 'scale-95 origin-top' : 'scale-100'}`}>
+                {/* Tabs Row */}
+                <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                  <TabBar onAddPlaylistToTab={addPlaylistToTab} showPresets={false} />
+                  <div className="ml-4">
+                    <TabPresetsDropdown align="right" />
+                  </div>
+                </div>
+
+                {/* Controls Row */}
+                <div className="flex items-center justify-end gap-3">
+                  {/* Folder Toggle */}
+                  <button
+                    onClick={() => {
+                      console.log('Toggle folders clicked in PlaylistsPage, current state:', showColoredFolders);
+                      setShowColoredFolders(!showColoredFolders);
+                    }}
+                    title={getInspectTitle(showColoredFolders ? 'Hide colored folders' : 'Show colored folders') || (showColoredFolders ? 'Hide colored folders' : 'Show colored folders')}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${showColoredFolders ? 'bg-sky-600 text-white' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'}`}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                  </button>
+
+                  {/* Add Button */}
+                  <button
+                    onClick={() => setShowUploader(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-sky-500 rounded-lg text-sm font-medium hover:bg-sky-600 transition-colors text-white"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Grid */}
+            <div className="grid grid-cols-3 gap-4 px-8 pb-8">
               {/* Colored Folders - Filtered by active tab (only show if showColoredFolders is true) */}
               {showColoredFolders && folders
                 .filter((folder) => {

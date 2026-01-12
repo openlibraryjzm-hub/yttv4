@@ -13,6 +13,8 @@ import { useStickyStore } from '../store/stickyStore';
 import StickyVideoCarousel from './StickyVideoCarousel';
 import PageBanner from './PageBanner';
 import EditPlaylistModal from './EditPlaylistModal';
+import { useNavigationStore } from '../store/navigationStore';
+import { Star, MoreVertical, Plus, Play, Check, X, ArrowUp, Clock, Heart, Pin, Settings, Cat } from 'lucide-react';
 import { updatePlaylist, getAllPlaylists, getFolderMetadata, setFolderMetadata } from '../api/playlistApi';
 import { useConfigStore } from '../store/configStore';
 
@@ -44,7 +46,31 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     toggleBulkTagSelection,
     clearBulkTagSelections,
   } = useFolderStore();
-  const { setViewMode, inspectMode } = useLayoutStore();
+  const { setViewMode, inspectMode, viewMode } = useLayoutStore();
+  const { currentPage: currentNavTab, setCurrentPage: setCurrentNavTab } = useNavigationStore();
+  const scrollContainerRef = useRef(null);
+
+  const scrollToTop = () => {
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const tabs = [
+    { id: 'playlists', label: 'Playlists' },
+    { id: 'videos', label: 'Videos' },
+    { id: 'history', label: 'History', icon: <Clock size={16} /> },
+    { id: 'likes', label: 'Likes', icon: <Heart size={16} /> },
+    { id: 'pins', label: 'Pins', icon: <Pin size={16} /> },
+    { id: 'settings', label: 'Settings', icon: <Settings size={16} /> },
+    { id: 'support', label: 'Support', icon: <Cat size={16} /> },
+  ];
+
+  const handleTabClick = (tabId) => {
+    setCurrentNavTab(tabId);
+    const isNavigationTab = ['playlists', 'videos', 'history', 'likes', 'pins', 'settings', 'support'].includes(tabId);
+    if (isNavigationTab && viewMode === 'full') {
+      setViewMode('half');
+    }
+  };
   const { userName, userAvatar } = useConfigStore();
 
   // Helper to get inspect label
@@ -75,8 +101,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
 
-  // Ref for scrolling to top on page change
-  const scrollContainerRef = useRef(null);
+
 
   // Reset page when playlist, folder, or sort filters change
   useEffect(() => {
@@ -849,6 +874,25 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     return mostRecent;
   }, [videosToDisplay, videoProgress]);
 
+  // Sticky header state detection
+  const [isStuck, setIsStuck] = useState(false);
+  const stickySentinelRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // When sentinel is NOT visible (scrolled past top), we are stuck
+        setIsStuck(entry.intersectionRatio < 1 && entry.boundingClientRect.top < 0);
+      },
+      { threshold: [1], rootMargin: '-1px 0px 0px 0px' }
+    );
+
+    if (stickySentinelRef.current) {
+      observer.observe(stickySentinelRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="w-full h-full flex flex-col">
       {/* Video Grid - 3 per row */}
@@ -861,7 +905,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
           />
         </div>
       ) : (
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto bg-transparent">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto bg-transparent relative">
           {/* Page Banner - Always visible for context */}
           {activePlaylistId && (
             <div className="px-8 pt-8">
@@ -880,13 +924,24 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
                     onVideoSelect(continueVideo.video_url);
                   }
                 }}
+                seamlessBottom={true}
               />
             </div>
           )}
 
+          {/* Sticky Sentinel */}
+          <div ref={stickySentinelRef} className="absolute h-px w-full -mt-px pointer-events-none opacity-0" />
+
           {/* Sticky Toolbar */}
-          <div className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-xl border-y border-white/5 shadow-2xl transition-all mb-6">
-            <div className="px-8 py-4 flex flex-col gap-4">
+          <div className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) border-white/5
+            ${isStuck
+              ? 'bg-slate-900/95 backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2'
+              : 'bg-slate-800/40 backdrop-blur-md border-b border-x shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-4 pb-4'
+            }`}
+          >
+            <div className={`px-8 flex flex-col gap-4 transition-all duration-300 ${isStuck ? 'scale-95 origin-top' : 'scale-100'}`}>
+
+
               {/* Folder Selection Row */}
               <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                 <button
@@ -989,6 +1044,16 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
                 </div>
 
                 <div className="flex items-center gap-3">
+                  {/* Scroll To Top Button */}
+                  {isStuck && (
+                    <button
+                      onClick={scrollToTop}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 rounded-lg font-medium shadow-sm transition-all text-xs animate-fade-in"
+                    >
+                      <ArrowUp size={14} />
+                      Top
+                    </button>
+                  )}
                   {/* Bulk Tag Controls */}
                   {bulkTagMode ? (
                     <div className="flex items-center gap-2 animate-fade-in">

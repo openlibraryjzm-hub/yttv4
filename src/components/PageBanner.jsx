@@ -6,7 +6,7 @@ import { getThumbnailUrl } from '../utils/youtubeUtils';
 
 import { useConfigStore } from '../store/configStore';
 
-const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue, children, childrenPosition = 'right', topRightContent }) => {
+const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue, children, childrenPosition = 'right', topRightContent, seamlessBottom = false }) => {
     const { bannerPattern, customPageBannerImage } = useConfigStore();
 
     // Find color config if folderColor is provided
@@ -61,14 +61,14 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
     const isGif = customPageBannerImage?.startsWith('data:image/gif');
 
     return (
-        <div className="w-full relative mb-8 animate-fade-in group mx-auto">
+        <div className={`w-full relative animate-fade-in group mx-auto ${seamlessBottom ? 'mb-0' : 'mb-8'}`}>
 
             {/* Background Layer - Hides overflow for shapes/patterns/images */}
             <div
-                className={`absolute inset-0 rounded-2xl overflow-hidden shadow-lg ${(customPageBannerImage && !isGif) ? 'animate-page-banner-scroll' : ''}`}
+                className={`absolute inset-0 overflow-hidden ${seamlessBottom ? 'rounded-t-2xl rounded-b-none shadow-none' : 'rounded-2xl shadow-lg'} ${(customPageBannerImage && !isGif) ? 'animate-page-banner-scroll' : ''}`}
                 style={{
                     ...gradientStyle,
-                    boxShadow: `0 10px 25px -5px ${shadowColor}50`
+                    boxShadow: seamlessBottom ? 'none' : `0 10px 25px -5px ${shadowColor}50`
                 }}
             >
                 {/* Animated Pattern Overlay */}
@@ -201,5 +201,6 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
         </div>
     );
 };
+
 
 export default PageBanner;

@@ -37,19 +37,13 @@ Users see a 3-column grid of playlist cards in the Playlists page:
 
 - **Sticky Folders**: Folders that are "stuck" appear in the grid even when their parent playlist is collapsed. They appear after their parent playlist card regardless of expansion state.
 
-- **Header Actions**:
-  - **Folder Toggle Button**: Toggles display of colored folders in the grid.
-  - **Add Playlist Button**: Opens the Playlist Uploader modal in "Add" mode.
-  - **(Removed)**: Config Playlist Button has been removed; functionality merged into Add/Modify workflows.
+- **Sticky Toolbar**: A dynamic toolbar that sits below the Page Banner and sticks to the top of the viewport when scrolling.
+  - **Seamless Integration**: When at the top, it visually blends with the Page Banner (`seamlessBottom` effect). When sticky, it becomes darker/blurred with square corners.
+  - **Tab Bar**: Integrated into the top row of the toolbar, with the **Tab Presets Dropdown** on the right.
+  - **Controls Row**: Below the tabs, displaying:
+    - **Folder Toggle**: Toggles display of colored folders in the grid.
+    - **Add Playlist**: Opens the Playlist Uploader modal in "Add" mode.
 
-- **Tab Bar**: Below header, shows all tabs with:
-  - Active tab highlighted in blue
-  - Tab name with playlist count in parentheses
-  - **3-Dot Menu**: Located inside each tab button (on hover/active), providing options to:
-    - **Add Playlists**: Open modal to add playlists to the tab.
-    - **Rename**: Enter rename mode.
-    - **Delete**: Remove the tab.
-  - Plus button to create new tab at the end of the bar.
 
 **2: File Manifest**
 
@@ -317,7 +311,7 @@ Users see colored folders as a way to organize videos within playlists:
 
 **1: User-Perspective Description**
 
-Users see a horizontal tab bar below the Playlists page header:
+Users see a horizontal tab bar integrated into the Sticky Toolbar on the Playlists page:
 
 - **Tab Buttons**: Each tab displays:
   - Tab name (e.g., "All", "Work", "Personal")
@@ -430,7 +424,7 @@ Users see a horizontal tab bar below the Playlists page header:
 
 **1: User-Perspective Description**
 
-Users see a dropdown button at the start of the tab bar labeled with the current preset name:
+Users see a dropdown button on the right side of the Tab Bar (within the Sticky Toolbar) labeled with the current preset name:
 
 - **Preset Dropdown**: Clicking opens a dropdown menu showing:
   - List of all presets with name and tab count

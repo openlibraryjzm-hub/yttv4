@@ -167,10 +167,11 @@ Users see a 3-column grid of playlist cards. For detailed description of playlis
   - 3-dot menu with expand/export/add-to-tab/delete options
 
 - **Header Actions**: Top of page shows:
-- **Header Actions**: Top of page shows a compact single-row header:
-  - **Tab bar**: Integrated into the left side of the header.
-  - **Action Buttons**: Right-aligned buttons for:
-    - **Folder toggle**: Toggles inline folder display.
+- **Sticky Toolbar**: A dynamic toolbar that sits below the Page Banner and sticks to the top of the viewport when scrolling.
+  - **Seamless Integration**: When at the top, it visually blends with the Page Banner (`seamlessBottom` effect). When sticky, it becomes darker/blurred with square corners.
+  - **Tab Bar**: Integrated into the top row of the toolbar, with the **Tab Presets Dropdown** on the right.
+  - **Controls Row**: Below the tabs, displaying:
+    - **Folder Toggle**: Toggles inline folder display.
     - **Add Playlist**: Opens playlist import/create modal.
 
 - **Colored Folders**: When folder toggle is on, folder cards appear in grid (see Section 2.2)
@@ -319,21 +320,9 @@ Users see playlist cards built using the reusable Card component system:
 
 Users see a 3-column grid of video cards showing videos from the current playlist:
 
-- **Header**: Top of page shows:
-  - **Sort Dropdown**: "Sort by" dropdown with options:
-    - "Default Order" (playlist order)
-    - "Watch Progress" (sorts by view percentage)
-  - **Progress Filters** (visible when "Watch Progress" selected):
-    - **Sort Direction**: Toggle between Ascending/Descending.
-    - **Show Unwatched**: Toggle to include/exclude unwatched (0%) videos.
-    - **Hide Watched**: Toggle to hide fully watched (≥85%) videos.
-  - **Add Button**: Opens the Config Playlist Modal (pre-selecting current playlist) to add videos/playlists.
-  - **Bulk Tag Mode Toggle**: Button to enter/exit bulk tagging mode
-  - **Save/Cancel Buttons**: Appear when in bulk tag mode
-  - **Pagination Controls**: For performance, videos are paginated (50 videos per page). Previous/Next controls appear at the bottom of the grid.
-
-  - **Page Banner**: 
-  - **Location**: Displayed at the top of the scrollable content area, above the Sticky Video Carousel.
+- **Page Banner**: 
+  - **Location**: Displayed at the very top of the scrollable content area.
+  - **Seamless Integration**: Connects seamlessly with the Sticky Toolbar below it (`seamlessBottom` prop), removing bottom rounding/shadows for a unified header look.
   - **Content**: Shows the title (Playlist Name, "{Color} Folder", custom folder name, or "Unsorted Videos") and description text.
   - **Metadata**: Displays video count, creation year (hardcoded 2026), and **Author Identity**:
     - Shows the user's configured **Display Name** and **ASCII Avatar**.
@@ -348,6 +337,18 @@ Users see a 3-column grid of video cards showing videos from the current playlis
     - Displays "CONTINUE?" text and the video thumbnail.
     - Hovering reveals a Play icon.
     - Clicking resumes the most recently watched video.
+
+- **Sticky Toolbar**: Sits below the Page Banner and sticks to the top of the viewport when scrolling.
+  - **Visuals**: Dynamic styling (darker/square when stuck, lighter/rounded when not).
+  - **Navigation & Sort Row**:
+    - **Scroll To Top**: Button appears on the left when stuck, allowing quick scrolling to top.
+    - **Folder Selector**: Horizontal scrollable list of "All" / "Unsorted" / Color Dots for filtering.
+    - **Sort Controls**: Dropdown for Default/Progress sort.
+  - **Actions Row**:
+    - **Bulk Tag Mode**: Toggle button to enter bulk tagging.
+    - **Add Button**: Opens Config Playlist Modal.
+
+- **Pagination Controls**: For performance, videos are paginated (50 videos per page). Previous/Next controls appear at the bottom of the grid and also via the Sticky Toolbar's logic (internal aliasing only).
 
 - **Sticky Video Carousel**: 
   - **Purpose**: Displays important videos at the very top of the page.
