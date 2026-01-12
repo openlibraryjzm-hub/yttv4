@@ -73,7 +73,7 @@ export const useConfigStore = create(
             // Center Cluster
             modeSwitcherX: -128, // Grid moved to between chevrons
             setModeSwitcherX: (val) => set({ modeSwitcherX: val }),
-            videoChevronLeftX: -160, // Leftmost
+            videoChevronLeftX: -150, // Leftmost
             setVideoChevronLeftX: (val) => set({ videoChevronLeftX: val }),
             videoChevronRightX: -100, // Right of Play
             setVideoChevronRightX: (val) => set({ videoChevronRightX: val }),
