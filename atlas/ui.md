@@ -343,7 +343,7 @@ Users see a 3-column grid of video cards showing videos from the current playlis
   - **Navigation & Sort Row**:
     - **Scroll To Top**: Button appears on the left when stuck, allowing quick scrolling to top.
     - **Folder Selector**: Horizontal scrollable list of "All" / "Unsorted" / Color Dots for filtering.
-    - **Sort Controls**: Dropdown for Default/Progress sort.
+    - **Sort Controls**: Dropdown for Default, Chronological, and Watch Progress.
   - **Actions Row**:
     - **Bulk Tag Mode**: Toggle button to enter bulk tagging.
     - **Add Button**: Opens Config Playlist Modal.
@@ -407,6 +407,9 @@ Users see a 3-column grid of video cards showing videos from the current playlis
   - `videoFolderAssignments`: Map of video ID to array of folder colors
   - `bulkTagMode`: Boolean for bulk tagging mode
   - `bulkTagSelections`: Map of video ID to Set of folder colors
+- `src/store/shuffleStore.js`:
+  - `shuffleStates`: Map of playlist ID to shuffle mapping (VideoID → Rank)
+  - `getShuffleState`: Generates or retrieves consistent shuffle order for session
 - `src/components/VideosPage.jsx` (local state):
   - `displayedVideos`: Array of videos to show (filtered by folder)
   - `selectedVideoIndex`: Currently selected video index
@@ -452,12 +455,11 @@ Users see a 3-column grid of video cards showing videos from the current playlis
 
 3. **Sorting Flow:**
    - User selects sort option → `setSortBy(option)` (line 42)
-   - `useMemo` (line 385) recalculates → `sortedVideos`
-   - Sort logic:
-     - **Default**: No sorting, original order
-     - **Unwatched**: Videos with 0% progress
-     - **Partially Watched**: Videos with >0% and <85% progress
-     - **Watched**: Videos with ≥85% progress
+    - `useMemo` (line 707) recalculates → `sortedVideos`
+    - Sort logic:
+      - **Default**: Randomizes video order (Shuffle behavior). Order persists per playlist for the current session.
+      - **Chronological**: Original playlist order.
+      - **Watch Progress**: Sorts by progress (Unwatched/Partially Watched/Watched).
    - Grid re-renders with sorted videos
 
 4. **Bulk Tag Mode Flow:**

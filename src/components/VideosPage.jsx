@@ -17,6 +17,7 @@ import { useNavigationStore } from '../store/navigationStore';
 import { Star, MoreVertical, Plus, Play, Check, X, ArrowUp, Clock, Heart, Pin, Settings, Cat } from 'lucide-react';
 import { updatePlaylist, getAllPlaylists, getFolderMetadata, setFolderMetadata } from '../api/playlistApi';
 import { useConfigStore } from '../store/configStore';
+import { useShuffleStore } from '../store/shuffleStore';
 
 const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   const {
@@ -46,6 +47,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     toggleBulkTagSelection,
     clearBulkTagSelections,
   } = useFolderStore();
+  const { shuffleStates, getShuffleState } = useShuffleStore();
   const { setViewMode, inspectMode, viewMode } = useLayoutStore();
   const { currentPage: currentNavTab, setCurrentPage: setCurrentNavTab } = useNavigationStore();
   const scrollContainerRef = useRef(null);
@@ -78,7 +80,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   const [displayedVideos, setDisplayedVideos] = useState([]);
   const [loadingFolders, setLoadingFolders] = useState(false);
   const [savingBulkTags, setSavingBulkTags] = useState(false);
-  const [sortBy, setSortBy] = useState('default'); // 'default', 'progress'
+  const [sortBy, setSortBy] = useState('shuffle'); // 'shuffle', 'chronological', 'progress'
   const [sortDirection, setSortDirection] = useState('desc'); // 'asc', 'desc'
   const [includeUnwatched, setIncludeUnwatched] = useState(true);
   const [showOnlyCompleted, setShowOnlyCompleted] = useState(false);
@@ -244,6 +246,15 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
 
     loadAssignments();
   }, [activePlaylistId, activePlaylistItems, loadVideoFolders]);
+
+  // Initialize shuffle state when entering shuffle mode or playlist loading
+  useEffect(() => {
+    if (activePlaylistId && activePlaylistItems.length > 0) {
+      // We essentially want to ensure the shuffle map exists for this playlist
+      // This is "low cost" because getShuffleState checks if it exists first
+      getShuffleState(activePlaylistId, activePlaylistItems.map(v => v.id));
+    }
+  }, [activePlaylistId, activePlaylistItems, getShuffleState]);
 
   // Filter videos by selected folder - this is the main filtering logic
   useEffect(() => {
@@ -702,8 +713,19 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
       return [];
     }
 
-    if (sortBy === 'default') {
+    if (sortBy === 'chronological') {
       return baseVideos;
+    }
+
+    if (sortBy === 'shuffle') {
+      const state = shuffleStates[activePlaylistId];
+      if (!state || !state.map) return baseVideos;
+
+      return [...baseVideos].sort((a, b) => {
+        const rankA = state.map[a.id] ?? 0;
+        const rankB = state.map[b.id] ?? 0;
+        return rankA - rankB;
+      });
     }
 
     if (sortBy === 'progress') {
@@ -756,7 +778,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     }
 
     return baseVideos;
-  }, [selectedFolder, displayedVideos, activePlaylistItems, sortBy, sortDirection, videoProgress, includeUnwatched, showOnlyCompleted]);
+  }, [selectedFolder, displayedVideos, activePlaylistItems, sortBy, sortDirection, videoProgress, includeUnwatched, showOnlyCompleted, shuffleStates, activePlaylistId]);
 
   // Determine which videos to display (for count display)
   const videosToDisplay = selectedFolder !== null ? displayedVideos : activePlaylistItems;
@@ -995,7 +1017,8 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
                       className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-sm hover:bg-slate-700 transition-colors appearance-none pr-8"
                       title={getInspectTitle('Sort videos')}
                     >
-                      <option value="default">Default Order</option>
+                      <option value="shuffle">Default</option>
+                      <option value="chronological">Chronological</option>
                       <option value="progress">Watch Progress</option>
                     </select>
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
