@@ -329,6 +329,27 @@ For detailed information about the application's theme system and recent color c
 3. **Use cross-references** to navigate between related topics
 4. **Check this index** when unsure which document contains information
 
+## Session Updates (Jan 12, 2026) -> Fix Playlist Navigation & Title Sync
+
+### Key Fixes Implemented:
+
+1.  **Playlist Title Synchronization**:
+    -   **Problem**: Title in Top Playlist Menu would "freeze" on a previewed playlist title when navigating away from the Videos page, or break when playing from a new context.
+    -   **Fix**: Modified `PlayerController.jsx` to **strictly prioritize the active player's playlist title**. It now ignores `previewPlaylistId` for the top menu title display. The menu only updates when `currentPlaylistId` or `secondPlayerPlaylistId` changes.
+    -   **Commit Logic**: Added "Commit Preview" logic to `VideosPage.jsx`. When clicking a video in a previewed playlist, it now explicitly calls `setPlaylistItems` with the *title included*, promoting the preview to the active state.
+
+2.  **Navigation Loop Fix ("First 5 Playlists")**:
+    -   **Problem**: Using the Next/Prev chevrons in the top menu would loop within the first few playlists.
+    -   **Root Cause**: `currentNavigationIndex` in `playlistStore.js` was resetting to `-1` due to context lookup failures (likely type mismatch or missing folder references).
+    -   **Fix**: Stabilized `setNavigationItems` logic in `playlistStore` and improved context matching. The index now correctly persists, preventing the reset-to-zero behavior.
+
+3.  **Robust Metadata Fallback**:
+    -   Added `currentPlaylistTitle` to `playlistStore` state. This acts as a "sticky" fallback, ensuring valid title text is displayed even during async loading states where the full playlist object might be momentarily unavailable.
+
+### Learnings:
+-   **Preview vs. Active Context**: It is critical to strictly separate "Browsing/Preview" state from "Active Playback" state in the UI. The Top Player Menu is a global control for the *active* audio/video context and should not reflect transient browsing actions until they are committed to playback.
+-   **Store Reactivity**: Explicitly passing metadata (like titles) during state transitions (`setPlaylistItems`) prevents UI flickers and "Unknown" states better than relying solely on derived state from async fetches.
+
 
 
 

@@ -103,6 +103,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
     previewPlaylistId: storePreviewPlaylistId,
     previewFolderInfo: storePreviewFolderInfo,
     clearPreview,
+    currentPlaylistTitle,
   } = usePlaylistStore();
 
   const { setCurrentPage } = useNavigationStore();
@@ -139,22 +140,21 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
       try {
         let playlists = allPlaylists;
 
-        console.log('XXX DEBUG NAV: start buildNav', {
-          activeTabId,
-          tabsCount: tabs.length,
-          rawPlaylistsCount: playlists?.length
+        console.log('[DEBUG_EXT] Building Navigation Items. Sources:', {
+          allPlaylistsCount: allPlaylists?.length,
+          activeTabId: activeTabId,
+          showColoredFolders: showColoredFolders
         });
 
         // Filter playlists based on active tab
         if (activeTabId !== 'all') {
           const activeTab = tabs.find(t => t.id === activeTabId);
-          console.log('XXX DEBUG NAV: filtering', { activeTab });
           if (activeTab && Array.isArray(playlists)) {
             const allowedIds = new Set(activeTab.playlistIds);
             playlists = playlists.filter(p => allowedIds.has(p.id));
-            console.log('XXX DEBUG NAV: filtered playlists', {
-              original: playlists?.length,
-              allowedIds: activeTab.playlistIds
+            console.log('[DEBUG_EXT] Filtered by Tab:', {
+              tabName: activeTab.name,
+              filteredCount: playlists.length
             });
           }
         }
@@ -205,6 +205,11 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
 
         // Build hierarchical navigation: playlists with their folders interleaved
         const navItems = buildNavigationItems(playlists || [], foldersToInclude);
+        console.log('[DEBUG_EXT] Final Navigation Items:', {
+          count: navItems.length,
+          firstFive: navItems.slice(0, 5).map(i => i.type === 'playlist' ? i.data.name : `Folder: ${i.data.folder_color}`),
+          lastItem: navItems.length > 0 ? (navItems[navItems.length - 1].type === 'playlist' ? navItems[navItems.length - 1].data.name : 'Folder') : 'None'
+        });
         setNavigationItems(navItems);
       } catch (error) {
         console.error('Failed to build navigation items:', error);
@@ -620,7 +625,8 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
 
       try {
         const items = await getPlaylistItems(playlist.id);
-        setPlaylistItems(items, playlist.id, null);
+        // Use playlist name from navigation item to ensure title consistency
+        setPlaylistItems(items, playlist.id, null, playlist.name);
         if (onPlaylistSelect) {
           onPlaylistSelect(items, playlist.id);
         }
@@ -672,7 +678,8 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
 
       try {
         const items = await getPlaylistItems(playlist.id);
-        setPlaylistItems(items, playlist.id, null);
+        // Use playlist name from navigation item to ensure title consistency
+        setPlaylistItems(items, playlist.id, null, playlist.name);
         if (onPlaylistSelect) {
           onPlaylistSelect(items, playlist.id);
         }
@@ -1439,23 +1446,11 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
   // Get playlist/folder title (show preview if in preview mode)
   let playlistTitle;
 
-  // 1. Preview Mode (Store or Local)
-  if (activePreviewItems && activePreviewPlaylistId) {
-    const previewPlaylist = allPlaylists.find(p => p.id === activePreviewPlaylistId);
-    if (previewPlaylist) {
-      if (activePreviewFolderInfo) {
-        // Show "Playlist - Color"
-        const folderName = getFolderColorById(activePreviewFolderInfo.folder_color).name;
-        playlistTitle = `${previewPlaylist.name} - ${folderName}`;
-      } else {
-        playlistTitle = previewPlaylist.name;
-      }
-    } else {
-      playlistTitle = 'Preview Playlist';
-    }
-  }
+  // 1. Preview Mode - NO! User requested top menu NOT to update on preview.
+  // We skip this block entirely and fall through to Second Player or Main Player.
+
   // 2. Second Player Mode (if appropriate)
-  else if (hasSecondPlayerVideo && secondPlayerPlaylistId) {
+  if (hasSecondPlayerVideo && secondPlayerPlaylistId) {
     const secondPlayerPlaylist = allPlaylists.find(p => p.id === secondPlayerPlaylistId);
     playlistTitle = secondPlayerPlaylist ? secondPlayerPlaylist.name : 'Unknown Playlist';
   }
@@ -1472,7 +1467,7 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
         playlistTitle = foundPlaylist.name;
       }
     } else {
-      playlistTitle = 'Unknown Playlist';
+      playlistTitle = currentPlaylistTitle || 'Unknown Playlist';
     }
   } else {
     playlistTitle = currentPlaylist ? currentPlaylist.name : 'No Playlist';

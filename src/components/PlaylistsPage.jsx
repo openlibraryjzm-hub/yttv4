@@ -780,7 +780,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                           }
                           try {
                             const items = await getPlaylistItems(playlist.id);
-                            setPlaylistItems(items, playlist.id);
+                            setPlaylistItems(items, playlist.id, null, playlist.name);
                             if (items.length > 0 && onVideoSelect) {
                               onVideoSelect(items[0].video_url);
                             }
@@ -887,7 +887,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                                   e.stopPropagation();
                                   try {
                                     const items = await getPlaylistItems(playlist.id);
-                                    setPlaylistItems(items, playlist.id);
+                                    setPlaylistItems(items, playlist.id, null, playlist.name);
                                     if (items.length > 0 && onVideoSelect) {
                                       onVideoSelect(items[0].video_url);
                                     }
@@ -1012,7 +1012,9 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                           }
                           try {
                             const items = await getPlaylistItems(folder.playlist_id);
-                            setPlaylistItems(items, folder.playlist_id);
+                            // Use parentPlaylist name if available (it should be attach to item in the list builder)
+                            const playlistTitle = item.parentPlaylist ? item.parentPlaylist.name : null;
+                            setPlaylistItems(items, folder.playlist_id, { playlist_id: folder.playlist_id, folder_color: folder.folder_color }, playlistTitle);
                             if (folder.first_video && onVideoSelect) {
                               onVideoSelect(folder.first_video.video_url);
                             }

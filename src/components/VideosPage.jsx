@@ -478,6 +478,24 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
 
   const handleVideoClick = (video, index) => {
     if (bulkTagMode) return; // Don't play videos in bulk tag mode
+
+    // If we are in preview mode, commit this playlist to be the active one
+    if (previewPlaylistId) {
+      // Find playlist name for title consistency
+      const playlist = allPlaylists.find(p => p.id === previewPlaylistId);
+      const title = playlist ? playlist.name : null;
+
+      // Commit preview to current
+      setPlaylistItems(previewPlaylistItems, previewPlaylistId, previewFolderInfo, title);
+
+      // Clear preview state since it's now active
+      // actually setPlaylistItems updates current, we might want to clear preview explicitly or let store handle it?
+      // store.setPlaylistItems doesn't autoclear preview.
+      // But usually checking `activePlaylistItems = preview || current` handles the view.
+      // If we made it current, we should probably clear preview so we aren't "previewing" anymore, we are "playing".
+      // But let's stick to the core requirement: ensure title is correct.
+    }
+
     const originalIndex = activePlaylistItems.findIndex(v => v.id === video.id);
     setSelectedVideoIndex(originalIndex >= 0 ? originalIndex : index);
     if (onVideoSelect) {

@@ -484,7 +484,7 @@ Users see:
 - When `activeTabId` changes → PlaylistsPage filters playlists by tab → Only playlists in active tab shown
 - When `activePresetId` changes → Tab preset system loads preset → Applies tab configuration
 - When playlist navigation occurs → `currentNavigationIndex` updates → Header title updates to show current playlist/folder name
-- **Title Sync**: The playlist title dynamically updates based on `currentPlaylistId` (with robust fallback logic) to ensure it stays in sync even if navigation state lags.
+- **Title Sync**: The playlist title dynamically updates based on `currentPlaylistId` (with robust fallback logic) to ensure it stays in sync even if navigation state lags. **Crucially, it ignores `previewPlaylistId`**, ensuring the top menu always reflects the *active* playback context, not transient browsing.
 - When `navigationItems` changes → Next/prev navigation uses new array → Navigation wraps around correctly
 
 ---
@@ -578,7 +578,7 @@ Users can preview playlists and videos without interrupting current playback thr
 - `playlistCheckpoint`, `videoCheckpoint` - Original state before preview started
 
 **State Dependencies:**
-- When `previewNavigationIndex` changes → Playlist title updates to show preview playlist name
+- When `previewNavigationIndex` changes → `VideosPage` banner updates to show preview playlist name (Top Menu remains locked to active)
 - When `previewVideoIndex` changes → Video title updates to show preview video name
 - When preview is active → Commit/revert buttons appear → User can commit or cancel
 - When preview is committed → `currentPlaylistItems`, `currentVideoIndex` update → Playback actually changes
