@@ -117,7 +117,7 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
 
 The Top Video Menu is the right rectangle in the PlayerController, displaying video information (Title, Author, View Count) and controls for the currently playing video. Metadata is fetched from the database (populated via YouTube API during import).
 
-**Note:** The action buttons (Star, Shuffle, Pin, Like, Menu) have been shifted left by 60px from their original centered positions to create a more compact layout adjacent to the navigation controls.
+**Note:** The action buttons (Star, Shuffle, Pin, Like, Menu) have been shifted right to create a cohesive cluster with the navigation controls. The 3x3 Grid button has been integrated into the navigation cluster.
 
 ##### ### 1.2.1 Pins
 
@@ -207,42 +207,48 @@ Users see a centralized display of pinned videos, split between a dedicated Prio
 
 ---
 
-##### ### 1.2.2 Like, Shuffle, Colored Folders
+##### ### 1.2.2 Navigation & Action Controls
 
 **1: User-Perspective Description**
 
 Users see a bottom toolbar in the video menu rectangle with distinct, grouped action buttons:
 
 - **Navigation Controls (Left-Aligned Cluster)**:
-  - **Grid Button**: Opens the Videos page grid view. Icon: Grid3X3. Positioned at far left (-120px offset).
-  - **Previous Video** (chevron left): Navigates to previous video (-148px offset). (Note: Visual order is Grid -> Prev -> Next).
-  - **Next Video** (chevron right): Navigates to next video (-92px offset).
+  - **Previous Video** (chevron left): Navigates to previous video (-160px offset).
+  - **Play Button (Folder Cycle)** (center): A circular button with play icon (-128px offset).
+    - **Logic**: Cycles through colored folders within the playlist that actually contain videos.
+    - **Visuals**:
+      - **"All Videos" State**: White background, light-slate border, hollow slate icon. Represents viewing the full playlist.
+      - **"Colored Folder" State**: Solid colored background (matches folder), colored border, white icon. Represents the filtered folder view.
+    - **Auto-Play**: If switching the filter causes the currently playing video to be hidden (not in the nex folder), it automatically starts playing the first video of the new view.
+  - **Next Video** (chevron right): Navigates to next video (-100px offset).
+  - **Grid Button** (right of next): Opens the Videos page grid view. Icon: Grid3X3. Positioned after chevrons (-65px offset).
 
 - **Action Controls (Right-Aligned Cluster)**:
-  - **Star Button** (-60px offset): A circular button with star icon for folder assignment.
+  - **Star Button** (-25px offset): A circular button with star icon for folder assignment.
     - **Filled star with colored border** = video belongs to that folder color
     - **Empty star with colored outline** = video not in folder, outline shows "quick assign" default color
     - Left-click assigns/unassigns video to quick assign folder
     - Right-click opens color picker to set quick assign default
-  - **Shuffle Button** (-20px offset): A circular button with shuffle icon.
+  - **Shuffle Button** (10px offset): A circular button with shuffle icon.
     - **Slate/Dark border** = shuffle from all videos
     - **Colored border** = shuffle from that folder color
     - Right-click opens color picker to set quick shuffle default
     - Left-click shuffles to random video from selected folder (or all videos)
-  - **Priority Pin Button** (20px offset): A yellow/amber pin button that sets the current video as the priority pin.
+  - **Priority Pin Button** (45px offset): A yellow/amber pin button that sets the current video as the priority pin.
     - Distinctive amber border (#fbbf24) and filled amber pin icon.
     - **Left-click** sets the video as the priority pin (always leftmost in pin track).
-    - **Right-click** navigates to the Pins Page.
-  - **Like Button** (60px offset): A circular button with thumbs-up icon.
+    - **Right-click** navigates to the Pins Page. *Auto-switches to Half View if in Full View.*
+  - **Like Button** (85px offset): A circular button with thumbs-up icon.
     - **Filled with blue** = video is liked (in "Likes" playlist)
     - **Empty/outline** = video not liked
     - **Left-click** toggles like status.
-    - **Right-click** navigates to the Likes Page.
-  - **Tab Button** (80px offset): A circular button with a tab icon that toggles the Tab Preset dropdown.
-  - **More Menu Button** (92px offset): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
+    - **Right-click** navigates to the Likes Page. *Auto-switches to Half View if in Full View.*
+  - **More Menu Button** (120px offset): A circular button with 3 horizontal dots icon, providing access to UI visibility toggles:
     - **Hide/Show Preview Menus**: Toggles visibility of side navigation menus.
     - **Hide/Show Dev Toolbar**: Toggles visibility of floating development toolbar.
 
+- **(Removed)** Tab Button: The toggle list/tab button has been removed from this menu.
 - **(Removed)** Mode Switcher Button: The disabled "1" toggle button has been removed from the UI.
 
 **Color Picker Modal**: When star or shuffle button is right-clicked, a modal appears showing:
@@ -362,7 +368,7 @@ The Top Playlist Menu is the left rectangle in the PlayerController. It has been
 
 *   **Display**: Shows the current playlist's title, centered within the menu. If the video belongs to a colored folder, a colored badge displaying the folder name appears below the title.
 *   **Bottom Control Bar**: Divided into two distinct zones:
-    *   **Left Side (Metadata)**: Displays the current video's author and view count.
+    *   **Left Side (Metadata)**: Displays the current video's author, view count, and published year. Format: `Author | Views | Year`.
     *   **Right Side (Controls)**: Contains only the Navigation buttons (Previous, Grid, Next). The Tab and Shuffle buttons have been moved or removed.
 *   **Priority Pin Display**: The **Priority Pin** (if set) is displayed at the **top-right** of the menu.
 *   **Spacing**: The gap between this menu, the central orb, and the video menu (`orbMenuGap`) is 20px.

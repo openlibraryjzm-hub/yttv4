@@ -1111,6 +1111,62 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
     }
   };
 
+  // Handle play button toggle - cycle through colored folders
+  const handlePlayButtonToggle = async () => {
+    if (!currentPlaylistId) return;
+
+    try {
+      // Fetch fresh folder data
+      const allFolders = await getAllFoldersWithVideos();
+      // Filter for current playlist and ensure count > 0
+      // Note: getAllFoldersWithVideos returns objects like { playlist_id, folder_color, video_count }
+      const playlistFolders = allFolders.filter(f => String(f.playlist_id) === String(currentPlaylistId) && f.video_count > 0);
+
+      // Current State
+      const currentColor = currentFolder ? currentFolder.folder_color : 'all';
+
+      // Sort playlistFolders by FOLDER_COLORS order
+      const validColors = FOLDER_COLORS
+        .map(c => c.id)
+        .filter(id => playlistFolders.some(f => f.folder_color === id));
+
+      // Determine next color
+      let nextColor = 'all';
+      if (currentColor === 'all') {
+        if (validColors.length > 0) nextColor = validColors[0];
+      } else {
+        const idx = validColors.indexOf(currentColor);
+        if (idx !== -1 && idx < validColors.length - 1) {
+          nextColor = validColors[idx + 1];
+        } else {
+          nextColor = 'all';
+        }
+      }
+
+      // Execute Transition
+      let newItems = [];
+      if (nextColor === 'all') {
+        newItems = await getPlaylistItems(currentPlaylistId);
+        setPlaylistItems(newItems, currentPlaylistId, null);
+      } else {
+        newItems = await getVideosInFolder(currentPlaylistId, nextColor);
+        setPlaylistItems(newItems, currentPlaylistId, { playlist_id: currentPlaylistId, folder_color: nextColor });
+      }
+
+      // Handle auto-play logic if current video is lost
+      if (newItems.length > 0) {
+        const currentVideoStillExists = newItems.some(v => v.id === activeVideoItem?.id);
+        if (!currentVideoStillExists) {
+          // Play first video in new view
+          setCurrentVideoIndex(0);
+        }
+      }
+
+    } catch (error) {
+      console.error('Failed to cycle play button folder:', error);
+    }
+  };
+
   // Handle like button click - add/remove video from Likes playlist
   const handleLikeClick = async () => {
     // Get the active video (main or second player) - use activeVideoItem which is computed above
@@ -1694,14 +1750,32 @@ export default function PlayerController({ onPlaylistSelect, onVideoSelect, acti
                       </button>
 
                       <button
-                        onClick={() => { console.log('New Play Button Clicked'); }}
+                        onClick={handlePlayButtonToggle}
                         className="absolute left-1/2 top-1/2 flex items-center justify-center group/tool"
                         style={{ transform: `translate(calc(-50% + ${videoPlayButtonX}px), -50%)` }}
-                        title={getInspectTitle('Play (New Feature)')}
+                        title={getInspectTitle('Cycle Folder Filter')}
                       >
-                        <div className="rounded-full flex items-center justify-center border-2 border-sky-200 shadow-sm bg-white" style={{ width: `${bottomIconSize}px`, height: `${bottomIconSize}px` }}>
-                          <Play size={Math.round(bottomIconSize * 0.5)} className="text-slate-600 fill-slate-600" strokeWidth={0} />
-                        </div>
+                        {(() => {
+                          const activeColorData = currentFolder ? FOLDER_COLORS.find(c => c.id === currentFolder.folder_color) : null;
+                          const activeColorHex = activeColorData ? activeColorData.hex : '#cbd5e1';
+                          const isColored = !!activeColorData;
+
+                          return (
+                            <div className="rounded-full flex items-center justify-center border-2 shadow-sm transition-colors duration-300"
+                              style={{
+                                width: `${bottomIconSize}px`,
+                                height: `${bottomIconSize}px`,
+                                borderColor: isColored ? activeColorHex : '#e2e8f0',
+                                backgroundColor: isColored ? activeColorHex : '#ffffff'
+                              }}>
+                              <Play size={Math.round(bottomIconSize * 0.5)}
+                                color={isColored ? '#ffffff' : '#475569'}
+                                fill={isColored ? '#ffffff' : 'transparent'}
+                                strokeWidth={isColored ? 0 : 2.5}
+                              />
+                            </div>
+                          );
+                        })()}
                       </button>
 
                       <button

@@ -317,6 +317,19 @@ When navigating playlists:
 4. Sets playlist items → `setPlaylistItems(items, playlistId, folderInfo)`
 5. Starts playing first video → `onVideoSelect(firstVideo.video_url)`
 
+### Entry Point 7: Play Button Folder Cycle
+
+**Flow:**
+1. User clicks Play Button (center of navigation controls) → `handlePlayButtonToggle()`
+2. Logic determines next colored folder in sequence (or 'All')
+3. Loads items:
+   - If 'All': `getPlaylistItems(currentPlaylistId)`
+   - If 'Folder': `getVideosInFolder(currentPlaylistId, nextColor)`
+4. Sets playlist items → `setPlaylistItems(newItems, currentPlaylistId, folderInfo)`
+5. Checks if `activeVideoItem` exists in new list:
+   - If yes: Continues playing current video
+   - If no: Auto-plays first video of new list → `setCurrentVideoIndex(0)`
+
 ---
 
 ## Navigation State Dependencies
