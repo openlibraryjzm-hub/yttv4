@@ -22,23 +22,24 @@ for (const video of activePlaylistItems) {
 
 ## 2. The Solution: "Batch & Cache" Roadmap
 
-### Phase 1: Batch Data Fetching (High Impact)
+### Phase 1: Batch Data Fetching (High Impact) - **COMPLETED**
 **Goal:** Reduce 50+ database calls to **1** call per page load.
 
 **Actions:**
 1.  **Backend (Rust)**:
-    -   Implement `get_all_folder_assignments_for_playlist(playlist_id)` that returns a `HashMap<VideoId, Vec<FolderColor>>`.
-    -   Implement `get_all_video_progress_batch(video_ids)` if not already optimized.
+    -   [x] Implemented `get_all_folder_assignments_for_playlist(playlist_id)` that returns assignments keyed by `item_id`.
+    -   [x] Implemented `get_all_playlist_metadata()` to batch fetch counts, thumbnails, and recent videos for PlaylistsPage.
 2.  **Frontend (React)**:
-    -   Replace the `for...of` loop in `VideosPage.jsx` with a single `await getAllFolderAssignments(...)`.
-    -   Apply this pattern to `PlaylistsPage` for thumbnail/count fetching if applicable.
+    -   [x] Refactored `VideosPage.jsx` to use `getAllFolderAssignments` (1 call) instead of looping (N calls).
+    -   [x] Refactored `PlaylistsPage.jsx` to use `getAllPlaylistMetadata` and `getAllFoldersWithVideos` (batch calls).
 
-### Phase 2: Optimistic UI & Transition (Perceived Speed)
+### Phase 2: Optimistic UI & Transition (Perceived Speed) - **COMPLETED**
 **Goal:** Make the UI feel instant even while data is loading.
 
 **Actions:**
-1.  **Skeleton Loading**: If data *is* pending, show a skeleton layout immediately instead of a blank screen.
-2.  **Stale-While-Revalidate**: Show the *previous* list (if available in a cache) while fetching the new one, rather than clearing the screen.
+1.  [x] **Skeleton Loading**: Implemented `VideoCardSkeleton` and `PlaylistCardSkeleton` with shimmer effects.
+2.  [x] **Integration**: Replaced "Loading..." text in `VideosPage.jsx` and `PlaylistsPage.jsx` with skeleton grids.
+3.  [x] **Animation**: Added `gpu-scroll` and `shimmer` animations to `App.css`.
 
 ### Phase 3: Global Data Stores (The "Omnipresent" Approach)
 **Goal:** Pre-fetch data so it's already there when the user clicks.

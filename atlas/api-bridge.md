@@ -95,6 +95,7 @@ await invoke('add_video_to_playlist', {
 - `update_playlist(id, name?, description?, custom_ascii?)` → Returns `boolean`
 - `delete_playlist(id)` → Returns `boolean`
 - `delete_playlist_by_name(name)` → Returns `boolean`
+- `get_all_playlist_metadata()` → Returns `Array<PlaylistMetadata>` (count, thumbnail, recent video)
 
 **API Functions** (`playlistApi.js`):
 - `createPlaylist(name, description)`
@@ -139,6 +140,7 @@ await invoke('add_video_to_playlist', {
 - `unassign_video_from_folder(playlist_id, item_id, folder_color)` → Returns `boolean`
 - `get_videos_in_folder(playlist_id, folder_color)` → Returns `Array<PlaylistItem>`
 - `get_video_folder_assignments(playlist_id, item_id)` → Returns `Array<String>` (folder colors)
+- `get_all_folder_assignments(playlist_id)` → Returns `Map<String, Array<String>>` (Batch fetch)
 - `get_folders_for_playlist(playlist_id)` → Returns `Array<String>` (folder colors)
 - `get_all_folders_with_videos()` → Returns `Array<FolderWithVideos>`
 - `get_playlists_for_video_ids(video_ids)` → Returns `Map<String, Array<String>>` (video_id -> playlist_names)

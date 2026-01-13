@@ -23,6 +23,14 @@ pub fn get_all_playlists(db: State<Mutex<Database>>) -> Result<Vec<Playlist>, St
 }
 
 #[tauri::command]
+pub fn get_all_playlist_metadata(
+    db: State<Mutex<Database>>,
+) -> Result<Vec<PlaylistMetadata>, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.get_all_playlist_metadata().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub fn get_playlist(db: State<Mutex<Database>>, id: i64) -> Result<Option<Playlist>, String> {
     let db = db.lock().map_err(|e| e.to_string())?;
     db.get_playlist(id).map_err(|e| e.to_string())

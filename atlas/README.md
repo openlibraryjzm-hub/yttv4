@@ -426,4 +426,18 @@ For detailed information about the application's theme system and recent color c
         -   **Fallback**: Standard left-click behavior (play from start) remains unchanged.
 
 3.  **Cross-Component Consistency**:
-    -   Applied all UI changes and new interaction logic (Shuffle, Smart Play) to **Folder Cards** as well, ensuring a unified experience across the entire playlist grid.
+
+## Session Updates (Jan 13, 2026 - Part 2) -> Performance Optimization & Skeletons
+
+### Key Features Implemented:
+1.  **Batch Data Fetching (Backend)**:
+    -   Implemented `get_all_folder_assignments` and `get_all_playlist_metadata` Tauri commands.
+    -   Reduced N+1 database queries to single batch operations for Videos and Playlists pages.
+
+2.  **Optimistic UI (Frontend)**:
+    -   **Skeleton Loading**: Created `VideoCardSkeleton` and `PlaylistCardSkeleton` components with `shimmer` animation.
+    -   Integrated skeletons into `VideosPage` and `PlaylistsPage` to eliminate "pop-in" and provide instant perceived loading.
+
+3.  **Result**:
+    -   Eliminated UI stutter during page transitions.
+    -   Grid layouts load progressively and smoothly.

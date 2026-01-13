@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { usePlaylistStore } from '../store/playlistStore';
 import { useFolderStore } from '../store/folderStore';
 import { useLayoutStore } from '../store/layoutStore';
-import { assignVideoToFolder, unassignVideoFromFolder, getVideoFolderAssignments, getVideosInFolder, removeVideoFromPlaylist, getWatchedVideoIds, getAllVideoProgress } from '../api/playlistApi';
+import { assignVideoToFolder, unassignVideoFromFolder, getVideoFolderAssignments, getAllFolderAssignments, getVideosInFolder, removeVideoFromPlaylist, getWatchedVideoIds, getAllVideoProgress } from '../api/playlistApi';
 import { FOLDER_COLORS, getFolderColorById } from '../utils/folderColors';
 import { extractVideoId } from '../utils/youtubeUtils';
 import VideoCard from './VideoCard';
@@ -16,6 +16,7 @@ import EditPlaylistModal from './EditPlaylistModal';
 import UnifiedBannerBackground from './UnifiedBannerBackground';
 import { useNavigationStore } from '../store/navigationStore';
 import { Star, MoreVertical, Plus, Play, Check, X, ArrowUp, Clock, Heart, Pin, Settings, Cat } from 'lucide-react';
+import VideoCardSkeleton from './skeletons/VideoCardSkeleton';
 import { updatePlaylist, getAllPlaylists, getFolderMetadata, setFolderMetadata } from '../api/playlistApi';
 import { useConfigStore } from '../store/configStore';
 import { useShuffleStore } from '../store/shuffleStore';
@@ -79,7 +80,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   // Helper to get inspect label
   const getInspectTitle = (label) => inspectMode ? label : undefined;
   const [displayedVideos, setDisplayedVideos] = useState([]);
-  const [loadingFolders, setLoadingFolders] = useState(false);
+  const [loadingFolders, setLoadingFolders] = useState(true); // Start true to show skeletons immediately
   const [savingBulkTags, setSavingBulkTags] = useState(false);
   const [sortBy, setSortBy] = useState('shuffle'); // 'shuffle', 'chronological', 'progress'
   const [sortDirection, setSortDirection] = useState('desc'); // 'asc', 'desc'
@@ -223,27 +224,28 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   // Load folder assignments when playlist changes (but don't filter here)
   useEffect(() => {
     const loadAssignments = async () => {
-      if (!activePlaylistId || activePlaylistItems.length === 0) {
+      // Set loading true immediately when ID changes
+      setLoadingFolders(true);
+
+      // If no playlist or it's empty, clear folders
+      // Actually, even if items are empty, we might want to clear or just wait.
+      // But if we have an ID, we can fetch assignments.
+      if (!activePlaylistId) {
         loadVideoFolders({});
+        setLoadingFolders(false);
         return;
       }
 
       try {
-        const assignments = {};
-        for (const video of activePlaylistItems) {
-          try {
-            const folders = await getVideoFolderAssignments(activePlaylistId, video.id);
-            // Only include videos that actually have folder assignments
-            assignments[video.id] = Array.isArray(folders) && folders.length > 0 ? folders : [];
-          } catch (error) {
-            console.error(`Failed to load folders for video ${video.id}:`, error);
-            assignments[video.id] = [];
-          }
-        }
-        loadVideoFolders(assignments);
+        // PERFORMANCE: Batch fetch all folder assignments in ONE call
+        // This replaces the previous N+1 loop that caused massive stuttering
+        const assignments = await getAllFolderAssignments(activePlaylistId);
+        loadVideoFolders(assignments || {});
       } catch (error) {
         console.error('Failed to load folder assignments:', error);
         loadVideoFolders({});
+      } finally {
+        setLoadingFolders(false);
       }
     };
 
@@ -1116,9 +1118,10 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
             />
 
             {loadingFolders ? (
-              <div className="flex items-center justify-center h-64 text-slate-400">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mr-3"></div>
-                Loading videos...
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 animate-pulse">
+                {[...Array(12)].map((_, i) => (
+                  <VideoCardSkeleton key={i} />
+                ))}
               </div>
             ) : sortedVideos.length > 0 ? (
               <>

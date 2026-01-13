@@ -101,3 +101,11 @@ pub struct VideoProgress {
     #[serde(default)]
     pub has_fully_watched: bool,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PlaylistMetadata {
+    pub playlist_id: i64,
+    pub count: i32,
+    pub first_video: Option<PlaylistItem>,
+    pub recent_video: Option<PlaylistItem>,
+}

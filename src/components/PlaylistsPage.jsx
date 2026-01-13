@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { createPlaylist, getAllPlaylists, getPlaylistItems, deletePlaylist, deletePlaylistByName, getAllFoldersWithVideos, exportPlaylist, getFoldersForPlaylist, toggleStuckFolder, getAllStuckFolders, getVideosInFolder, getAllVideoProgress } from '../api/playlistApi';
+import { createPlaylist, getAllPlaylists, getPlaylistItems, deletePlaylist, deletePlaylistByName, getAllFoldersWithVideos, exportPlaylist, getFoldersForPlaylist, toggleStuckFolder, getAllStuckFolders, getVideosInFolder, getAllVideoProgress, getAllPlaylistMetadata } from '../api/playlistApi';
 import { getThumbnailUrl } from '../utils/youtubeUtils';
 import { usePlaylistStore } from '../store/playlistStore';
 import { Eye, Play, Shuffle } from 'lucide-react';
@@ -21,6 +21,7 @@ import { useConfigStore } from '../store/configStore';
 import TabPresetsDropdown from './TabPresetsDropdown';
 import AddPlaylistToTabModal from './AddPlaylistToTabModal';
 import UnifiedBannerBackground from './UnifiedBannerBackground';
+import PlaylistCardSkeleton from './skeletons/PlaylistCardSkeleton';
 
 const PlaylistsPage = ({ onVideoSelect }) => {
   const [playlists, setPlaylists] = useState([]);
@@ -101,38 +102,20 @@ const PlaylistsPage = ({ onVideoSelect }) => {
 
   const loadFolders = async () => {
     try {
-      console.log('Loading folders via aggregation strategy to ensure thumbnails...');
+      console.log('Loading specific folders via optimized batch fetch...');
 
-      // Fetch all playlists to ensure we have the list to iterate over
-      const allPlaylists = await getAllPlaylists();
+      // Use the batch command to get all folders at once
+      const bulk = await getAllFoldersWithVideos();
 
-      if (!Array.isArray(allPlaylists)) {
-        throw new Error('Failed to load playlists for folder aggregation');
-      }
-
-      const aggregatedFolders = [];
-      await Promise.all(allPlaylists.map(async (p) => {
-        try {
-          const pFolders = await getFoldersForPlaylist(p.id);
-          if (Array.isArray(pFolders)) {
-            aggregatedFolders.push(...pFolders);
-          }
-        } catch (e) {
-          console.warn(`Failed to load folders for playlist ${p.id}`, e);
-        }
-      }));
-
-      console.log('Aggregated folders:', aggregatedFolders);
-      setFolders(aggregatedFolders);
-    } catch (error) {
-      console.error('Failed to load folders aggregation:', error);
-      // Fallback to bulk method if aggregation fails completely
-      try {
-        const bulk = await getAllFoldersWithVideos();
-        setFolders(Array.isArray(bulk) ? bulk : []);
-      } catch (e) {
+      if (Array.isArray(bulk)) {
+        console.log('Loaded folders (batch):', bulk.length);
+        setFolders(bulk);
+      } else {
         setFolders([]);
       }
+    } catch (error) {
+      console.error('Failed to load folders:', error);
+      setFolders([]);
     }
   };
 
@@ -165,9 +148,13 @@ const PlaylistsPage = ({ onVideoSelect }) => {
       setError(null);
       console.log('Loading playlists from database...');
 
-      // Load playlists and video progress in parallel
-      const [data, allProgress] = await Promise.all([
+      // Load playlists, metadata, and video progress in parallel
+      const [data, metadataList, allProgress] = await Promise.all([
         getAllPlaylists(),
+        getAllPlaylistMetadata().catch(e => {
+          console.error("Failed to load metadata", e);
+          return [];
+        }),
         getAllVideoProgress().catch(e => {
           console.error("Failed to load video progress", e);
           return [];
@@ -191,74 +178,65 @@ const PlaylistsPage = ({ onVideoSelect }) => {
         setPlaylists(data);
         setAllPlaylists(data);
 
-        // Load thumbnails and item counts for each playlist
-        // Also check for folders to determine if expand option should be shown
+        // Process metadata
         const thumbnailMap = {};
         const recentVideoMap = {};
         const itemCountMap = {};
-        const playlistsWithFoldersSet = new Set();
+
+        // Metadata list is an array of objects
+        const metadataMap = new Map();
+        if (Array.isArray(metadataList)) {
+          metadataList.forEach(m => metadataMap.set(m.playlist_id, m));
+        }
+
+        // Also pre-load folders for playlists to determine if expand option should be shown
+        // We can use the loaded 'folders' state if available, or fetch it.
+        // But loadFolders is called separately.
+        // We need 'playlistFolders' map populated.
+        // Since loadFolders now uses getAllFoldersWithVideos, we can derive playlistFolders from that.
+        // Use a separate call here or wait for folder state?
+        // Let's do a batch fetch of folders here too to be safe and populate playlistFolders
+        try {
+          const allFolders = await getAllFoldersWithVideos();
+          if (Array.isArray(allFolders)) {
+            const pFolders = {};
+            allFolders.forEach(f => {
+              if (!pFolders[f.playlist_id]) pFolders[f.playlist_id] = [];
+              pFolders[f.playlist_id].push(f);
+            });
+            setPlaylistFolders(pFolders);
+          }
+        } catch (e) {
+          console.warn("Failed to load folders for map", e);
+        }
 
         for (const playlist of data) {
-          try {
-            const items = await getPlaylistItems(playlist.id);
-            if (Array.isArray(items)) {
-              itemCountMap[playlist.id] = items.length;
+          const meta = metadataMap.get(playlist.id);
 
-              // Check for custom cover first
-              if (playlist.custom_thumbnail_url) {
-                thumbnailMap[playlist.id] = {
-                  max: playlist.custom_thumbnail_url,
-                  standard: playlist.custom_thumbnail_url // Fallback
-                };
-              } else if (items.length > 0) {
-                // Default thumbnail (first video)
-                const firstVideo = items[0];
-                thumbnailMap[playlist.id] = {
-                  max: getThumbnailUrl(firstVideo.video_id, 'max'),
-                  standard: getThumbnailUrl(firstVideo.video_id, 'standard')
-                };
-                console.log(`Playlist ${playlist.id} (${playlist.name}): video_id=${firstVideo.video_id}`);
+          // Item Count
+          itemCountMap[playlist.id] = meta ? meta.count : 0;
 
-                // Find most recently watched video
-                let mostRecent = null;
-                let maxTime = 0;
+          // Thumbnail
+          if (playlist.custom_thumbnail_url) {
+            thumbnailMap[playlist.id] = {
+              max: playlist.custom_thumbnail_url,
+              standard: playlist.custom_thumbnail_url
+            };
+          } else if (meta && meta.first_video) {
+            const vid = meta.first_video;
+            thumbnailMap[playlist.id] = {
+              max: vid.thumbnail_url || getThumbnailUrl(vid.video_id, 'max'),
+              standard: vid.thumbnail_url || getThumbnailUrl(vid.video_id, 'standard')
+            };
+          }
 
-                for (const item of items) {
-                  const updated = progressMap.get(item.video_id);
-                  if (updated) {
-                    const time = new Date(updated).getTime();
-                    if (time > maxTime) {
-                      maxTime = time;
-                      mostRecent = item;
-                    }
-                  }
-                }
-
-                if (mostRecent) {
-                  recentVideoMap[playlist.id] = mostRecent;
-                }
-              }
-            }
-
-            // Check if playlist has folders
-            try {
-              const folders = await getFoldersForPlaylist(playlist.id);
-              if (Array.isArray(folders) && folders.length > 0) {
-                playlistsWithFoldersSet.add(playlist.id);
-                // Pre-load folder data
-                setPlaylistFolders(prev => ({
-                  ...prev,
-                  [playlist.id]: folders
-                }));
-              }
-            } catch (folderError) {
-              // Ignore - just means no folders
-            }
-          } catch (error) {
-            console.error(`Failed to load thumbnail for playlist ${playlist.id}:`, error);
-            itemCountMap[playlist.id] = 0;
+          // Recent Video
+          // The backend now provides 'recent_video' based on DB query
+          if (meta && meta.recent_video) {
+            recentVideoMap[playlist.id] = meta.recent_video;
           }
         }
+
         setPlaylistThumbnails(thumbnailMap);
         setPlaylistRecentVideos(recentVideoMap);
         setPlaylistItemCounts(itemCountMap);
@@ -278,8 +256,16 @@ const PlaylistsPage = ({ onVideoSelect }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center w-full h-full">
-        <p className="text-lg" style={{ color: '#052F4A' }}>Loading playlists...</p>
+      <div className="w-full h-full flex flex-col">
+        <div className="px-8 pt-8">
+          {/* Skeleton Banner */}
+          <div className="w-full h-64 bg-slate-800/30 rounded-xl animate-pulse mb-8" />
+        </div>
+        <div className="grid grid-cols-2 gap-4 px-8 pb-8">
+          {[...Array(6)].map((_, i) => (
+            <PlaylistCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }

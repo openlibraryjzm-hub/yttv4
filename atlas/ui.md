@@ -57,6 +57,12 @@ The application employs a high-contrast, structured design with distinct borders
 - **Floating Metadata Bubbles**:
   - **Removed**: Video metadata (Author/View Count) and Playlist titles are now integrated directly into the Top Playlist/Video Menus for a cleaner, encapsulated look (see `advanced-player-controller.md`).
 
+**3: Loading & Skeletons (Optimistic UI)**
+To ensure immediate perceived response, the application uses **Skeleton Screens** instead of generic spinners:
+- **Video Grid**: Displays a grid of `VideoCardSkeleton` items (shimmering placeholders) immediately upon navigation, masking the backend data fetch time.
+- **Playlist Grid**: Displays `PlaylistCardSkeleton` items and a Banner skeleton while metadata loads.
+- **Animation**: Uses a custom `shimmer` CSS animation (`@keyframes shimmer`) for a premium "native app" feel.
+
 #### ### 4.1 Side Menu
 
 **1: User-Perspective Description**

@@ -48,6 +48,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::create_playlist,
             commands::get_all_playlists,
+            commands::get_all_playlist_metadata,
             commands::get_playlist,
             commands::update_playlist,
             commands::delete_playlist,

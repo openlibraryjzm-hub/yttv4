@@ -20,6 +20,16 @@ export const getAllPlaylists = async () => {
   }
 };
 
+export const getAllPlaylistMetadata = async () => {
+  try {
+    const result = await invoke('get_all_playlist_metadata');
+    return result || [];
+  } catch (error) {
+    console.error('Error in getAllPlaylistMetadata API:', error);
+    throw error;
+  }
+};
+
 export const getPlaylist = async (id) => {
   return await invoke('get_playlist', { id });
 };
@@ -123,6 +133,19 @@ export const getVideoFolderAssignments = async (playlistId, itemId) => {
     playlistId,
     itemId,
   });
+};
+
+export const getAllFolderAssignments = async (playlistId) => {
+  try {
+    const result = await invoke('get_all_folder_assignments', { playlistId });
+    // Result is HashMap<String, Vec<String>> where String is item_id
+    // We want the frontend to see it as Object/Map where key is item_id (int or string)
+    // Javascript object keys are strings.
+    return result || {};
+  } catch (error) {
+    console.error('Error in getAllFolderAssignments API:', error);
+    throw error;
+  }
 };
 
 export const getAllFoldersWithVideos = async () => {

@@ -282,6 +282,91 @@ impl Database {
         Ok(playlists)
     }
 
+    pub fn get_all_playlist_metadata(&self) -> Result<Vec<crate::models::PlaylistMetadata>> {
+        // 1. Get all playlists IDs
+        let mut stmt = self.conn.prepare("SELECT id FROM playlists")?;
+        let playlist_ids: Vec<i64> = stmt.query_map([], |row| row.get(0))?.collect::<Result<Vec<_>, _>>()?;
+
+        let mut metadata_list = Vec::new();
+
+        // Prepare statements
+        let mut count_stmt = self.conn.prepare("SELECT COUNT(*) FROM playlist_items WHERE playlist_id = ?1")?;
+        
+        // First video (position 0 or min)
+        let mut first_video_stmt = self.conn.prepare(
+             "SELECT id, playlist_id, video_url, video_id, title, thumbnail_url, position, added_at, is_local, author, view_count, published_at 
+              FROM playlist_items 
+              WHERE playlist_id = ?1 
+              ORDER BY position ASC 
+              LIMIT 1"
+        )?;
+
+        // Recent video logic: join video_progress and order by last_updated desc
+        let mut recent_video_stmt = self.conn.prepare(
+             "SELECT pi.id, pi.playlist_id, pi.video_url, pi.video_id, pi.title, pi.thumbnail_url, pi.position, pi.added_at, pi.is_local, pi.author, pi.view_count, pi.published_at 
+              FROM playlist_items pi
+              INNER JOIN video_progress vp ON pi.video_id = vp.video_id
+              WHERE pi.playlist_id = ?1
+              ORDER BY vp.last_updated DESC
+              LIMIT 1"
+        )?;
+
+        for pid in playlist_ids {
+            let count: i32 = count_stmt.query_row(params![pid], |row| row.get(0)).unwrap_or(0);
+            
+            let first_video = match first_video_stmt.query_row(params![pid], |row| {
+                 Ok(PlaylistItem {
+                    id: row.get(0)?,
+                    playlist_id: row.get(1)?,
+                    video_url: row.get(2)?,
+                    video_id: row.get(3)?,
+                    title: row.get(4)?,
+                    thumbnail_url: row.get(5)?,
+                    position: row.get(6)?,
+                    added_at: row.get(7)?,
+                    is_local: row.get::<_, i32>(8)? != 0,
+                    author: row.get(9).unwrap_or(None),
+                    view_count: row.get(10).unwrap_or(None),
+                    published_at: row.get(11).unwrap_or(None),
+                })
+            }) {
+                Ok(v) => Some(v),
+                Err(rusqlite::Error::QueryReturnedNoRows) => None,
+                Err(e) => return Err(e),
+            };
+
+            let recent_video = match recent_video_stmt.query_row(params![pid], |row| {
+                 Ok(PlaylistItem {
+                    id: row.get(0)?,
+                    playlist_id: row.get(1)?,
+                    video_url: row.get(2)?,
+                    video_id: row.get(3)?,
+                    title: row.get(4)?,
+                    thumbnail_url: row.get(5)?,
+                    position: row.get(6)?,
+                    added_at: row.get(7)?,
+                    is_local: row.get::<_, i32>(8)? != 0,
+                    author: row.get(9).unwrap_or(None),
+                    view_count: row.get(10).unwrap_or(None),
+                    published_at: row.get(11).unwrap_or(None),
+                })
+            }) {
+                Ok(v) => Some(v),
+                Err(rusqlite::Error::QueryReturnedNoRows) => None,
+                Err(e) => return Err(e),
+            };
+
+            metadata_list.push(crate::models::PlaylistMetadata {
+                playlist_id: pid,
+                count,
+                first_video,
+                recent_video,
+            });
+        }
+        
+        Ok(metadata_list)
+    }
+
     pub fn get_playlist(&self, id: i64) -> Result<Option<Playlist>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, name, description, created_at, updated_at, custom_ascii, custom_thumbnail_url FROM playlists WHERE id = ?1",
@@ -667,25 +752,24 @@ impl Database {
         playlist_id: i64,
     ) -> Result<HashMap<String, Vec<String>>> {
         let mut stmt = self.conn.prepare(
-            "SELECT pi.video_id, vfa.folder_color 
-             FROM video_folder_assignments vfa
-             INNER JOIN playlist_items pi ON vfa.item_id = pi.id
-             WHERE vfa.playlist_id = ?1"
+            "SELECT item_id, folder_color 
+             FROM video_folder_assignments 
+             WHERE playlist_id = ?1"
         )?;
 
         let mut assignments: HashMap<String, Vec<String>> = HashMap::new();
 
         let rows = stmt.query_map(params![playlist_id], |row| {
             Ok((
-                row.get::<_, String>(0)?, // video_id
+                row.get::<_, i64>(0)?, // item_id
                 row.get::<_, String>(1)?, // folder_color
             ))
         })?;
 
         for row_result in rows {
-            let (video_id, folder_color) = row_result?;
+            let (item_id, folder_color) = row_result?;
             assignments
-                .entry(video_id)
+                .entry(item_id.to_string())
                 .or_insert_with(Vec::new)
                 .push(folder_color);
         }
