@@ -5,7 +5,7 @@ import { useLayoutStore } from '../store/layoutStore';
 import { FOLDER_COLORS } from '../utils/folderColors';
 import { getVideoFolderAssignments } from '../api/playlistApi';
 
-const FolderSelector = () => {
+const FolderSelector = ({ compact = false }) => {
   const { selectedFolder, setSelectedFolder, videoFolderAssignments } = useFolderStore();
   const {
     currentPlaylistItems,
@@ -70,11 +70,12 @@ const FolderSelector = () => {
   }, [currentPlaylistItems, previewPlaylistItems, currentPlaylistId, previewPlaylistId, videoFolderAssignments]);
 
   return (
-    <div className="flex items-center gap-2 px-2 py-1">
+    <div className={`flex items-center ${compact ? 'gap-1 px-0 py-0' : 'gap-2 px-2 py-1'}`}>
       {/* "All" button */}
       <button
         onClick={() => setSelectedFolder(null)}
-        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${selectedFolder === null
+        className={`rounded-lg font-medium transition-all flex items-center gap-1 ${compact ? 'px-2 py-1 text-[10px]' : 'px-3 py-1.5 text-xs'
+          } ${selectedFolder === null
             ? 'bg-slate-600 text-white'
             : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
           }`}
@@ -86,7 +87,8 @@ const FolderSelector = () => {
       {/* "Unsorted" button */}
       <button
         onClick={() => setSelectedFolder(selectedFolder === 'unsorted' ? null : 'unsorted')} // Toggle or select? behave like folders
-        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${selectedFolder === 'unsorted'
+        className={`rounded-lg font-medium transition-all flex items-center gap-1 ${compact ? 'px-2 py-1 text-[10px]' : 'px-3 py-1.5 text-xs'
+          } ${selectedFolder === 'unsorted'
             ? 'bg-slate-500 text-white ring-2 ring-white ring-offset-2 ring-offset-slate-900'
             : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
           }`}
@@ -96,22 +98,23 @@ const FolderSelector = () => {
       </button>
 
       {/* Colored dots with counts */}
-      <div className="flex items-center gap-2 ml-2">
+      <div className={`flex items-center ${compact ? 'gap-1 ml-1' : 'gap-2 ml-2'}`}>
         {FOLDER_COLORS.map((color) => {
           const count = folderCounts[color.id] || 0;
           return (
             <button
               key={color.id}
               onClick={() => setSelectedFolder(selectedFolder === color.id ? null : color.id)}
-              className={`w-8 h-8 rounded-full transition-all hover:scale-110 flex items-center justify-center relative ${selectedFolder === color.id
-                ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800 scale-110'
-                : 'opacity-80 hover:opacity-100'
+              className={`rounded-full transition-all hover:scale-110 flex items-center justify-center relative ${compact ? 'w-6 h-6' : 'w-8 h-8'
+                } ${selectedFolder === color.id
+                  ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800 scale-110'
+                  : 'opacity-80 hover:opacity-100'
                 }`}
               style={{ backgroundColor: color.hex }}
               title={getInspectTitle(`${color.name} folder (${count} videos)`) || `${color.name} (${count})`}
             >
               {count > 0 && (
-                <span className="text-[10px] font-bold text-white drop-shadow-md">
+                <span className={`${compact ? 'text-[8px]' : 'text-[10px]'} font-bold text-white drop-shadow-md`}>
                   {count > 99 ? '99+' : count}
                 </span>
               )}

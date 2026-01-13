@@ -6,7 +6,7 @@ import { getThumbnailUrl } from '../utils/youtubeUtils';
 
 import { useConfigStore } from '../store/configStore';
 
-const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue, children, childrenPosition = 'right', topRightContent, seamlessBottom = false }) => {
+const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue, children, childrenPosition = 'right', topRightContent, seamlessBottom = false, onHeightChange }) => {
     const { bannerPattern, customPageBannerImage } = useConfigStore();
 
     // Find color config if folderColor is provided
@@ -21,12 +21,69 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
     let gradientStyle;
     let shadowColor;
 
+    // Measure height and calculate background size for Unified Banner
+    const bannerRef = React.useRef(null);
+    // Use state for local styles to avoid flicker, parent will trigger updates via prop
+    const [localBgSize, setLocalBgSize] = React.useState('100% auto');
+
+    React.useEffect(() => {
+        if (!bannerRef.current || !onHeightChange) return;
+
+        const updateDimensions = () => {
+            const banner = bannerRef.current;
+            if (!banner) return;
+
+            const width = banner.offsetWidth;
+            const height = banner.offsetHeight;
+
+            // If no custom image, just report height
+            if (!customPageBannerImage) {
+                onHeightChange(height, 'cover');
+                return;
+            }
+
+            // Load image to check aspect ratio
+            const img = new Image();
+            img.onload = () => {
+                const imgW = img.naturalWidth;
+                const imgH = img.naturalHeight;
+
+                const bannerRatio = width / (height + 80); // +80px for sticky toolbar safety buffer
+                const imageRatio = imgW / imgH;
+
+                let bgSize = '100% auto';
+                if (bannerRatio < imageRatio) {
+                    // Banner is taller relative to its width than the image
+                    // We need to scale by height to prevent grey gap
+                    bgSize = `auto ${height + 80}px`;
+                }
+
+                setLocalBgSize(bgSize);
+                onHeightChange(height, bgSize);
+            };
+            img.src = customPageBannerImage;
+        };
+
+        const observer = new ResizeObserver(updateDimensions);
+        observer.observe(bannerRef.current);
+
+        // Also listen to window resize for horizontal changes
+        window.addEventListener('resize', updateDimensions);
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('resize', updateDimensions);
+        };
+    }, [onHeightChange, customPageBannerImage]);
+
     if (customPageBannerImage) {
         gradientStyle = {
             backgroundImage: `url(${customPageBannerImage})`,
-            backgroundSize: 'auto 100%',
-            backgroundRepeat: 'repeat-x',
-            backgroundPosition: 'left center',
+            backgroundSize: localBgSize,
+            backgroundPositionY: 'top',
+            backgroundPositionX: '0px', // Allow animation to take over X axis
+            backgroundRepeat: 'repeat-x', // Repeat horizontally for scroll
+            // backgroundAttachment: 'fixed', // Removed fixed to basic absolute stitching
         };
         // Use a neutral or dominant color for shadow if possible, or fallback
         shadowColor = colorConfig?.hex || '#3b82f6';
@@ -61,7 +118,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
     const isGif = customPageBannerImage?.startsWith('data:image/gif');
 
     return (
-        <div className={`w-full relative animate-fade-in group mx-auto ${seamlessBottom ? 'mb-0' : 'mb-8'}`}>
+        <div ref={bannerRef} className={`w-full relative animate-fade-in group mx-auto ${seamlessBottom ? 'mb-0' : 'mb-8'}`}>
 
             {/* Background Layer - Hides overflow for shapes/patterns/images */}
             <div

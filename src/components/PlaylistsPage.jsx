@@ -17,6 +17,7 @@ import CardMenu from './CardMenu';
 import TabBar from './TabBar';
 import CardThumbnail from './CardThumbnail';
 import PageBanner from './PageBanner';
+import { useConfigStore } from '../store/configStore';
 import TabPresetsDropdown from './TabPresetsDropdown';
 
 const PlaylistsPage = ({ onVideoSelect }) => {
@@ -42,7 +43,12 @@ const PlaylistsPage = ({ onVideoSelect }) => {
   const { tabs, activeTabId, addPlaylistToTab, removePlaylistFromTab } = useTabStore();
   const { activePresetId, presets } = useTabPresetStore();
   const { setViewMode, viewMode, inspectMode } = useLayoutStore();
+  const { customPageBannerImage } = useConfigStore();
   const { setCurrentPage } = useNavigationStore();
+
+  // Unified Banner Height State
+  const [bannerHeight, setBannerHeight] = useState(0);
+  const [bannerBgSize, setBannerBgSize] = useState('100% auto');
 
   // Helper to get inspect label
   const getInspectTitle = (label) => inspectMode ? label : undefined;
@@ -547,6 +553,10 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                     color={null}
                     isEditable={false}
                     seamlessBottom={true}
+                    onHeightChange={(h, bgs) => {
+                      setBannerHeight(h);
+                      if (bgs) setBannerBgSize(bgs);
+                    }}
                   />
                 </div>
               );
@@ -556,48 +566,65 @@ const PlaylistsPage = ({ onVideoSelect }) => {
             <div ref={stickySentinelRef} className="absolute h-px w-full -mt-px pointer-events-none opacity-0" />
 
             {/* Sticky Toolbar */}
-            <div className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) border-white/5
+            <div
+              className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) border-white/5 overflow-hidden
               ${isStuck
-                ? 'bg-slate-900/95 backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2'
-                : 'bg-slate-800/40 backdrop-blur-md border-b border-x shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-4 pb-4'
-              }`}
+                  ? 'backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2'
+                  : 'backdrop-blur-md border-b border-x shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-4 pb-4'
+                }
+              ${!customPageBannerImage ? (isStuck ? 'bg-slate-900/95' : 'bg-slate-800/40') : ''}
+              ${customPageBannerImage ? 'animate-page-banner-scroll' : ''}
+              `}
+              style={customPageBannerImage ? {
+                backgroundImage: `url(${customPageBannerImage})`,
+                backgroundSize: bannerBgSize,
+                backgroundPositionY: `-${bannerHeight}px`,
+                backgroundPositionX: '0px',
+                backgroundRepeat: 'repeat-x',
+              } : {}}
             >
-              <div className={`px-8 flex flex-col gap-4 transition-all duration-300 ${isStuck ? 'scale-95 origin-top' : 'scale-100'}`}>
-                {/* Tabs Row */}
-                <div className="flex items-center justify-between border-b border-white/5 pb-2">
+              {/* Dark Overlay for Custom Banner */}
+              {customPageBannerImage && (
+                <div className="absolute inset-0 bg-black/60 pointer-events-none z-0" />
+              )}
+
+              <div className={`px-4 flex items-center justify-between transition-all duration-300 relative z-10 ${isStuck ? 'h-[52px]' : 'py-2'}`}>
+
+                {/* Left: Tab Bar */}
+                <div className="flex-1 overflow-x-auto no-scrollbar mask-gradient-right min-w-0">
                   <TabBar onAddPlaylistToTab={addPlaylistToTab} showPresets={false} />
-                  <div className="ml-4">
-                    <TabPresetsDropdown align="right" />
-                  </div>
                 </div>
 
-                {/* Controls Row */}
-                <div className="flex items-center justify-end gap-3">
-                  {/* Folder Toggle */}
+                {/* Right: Controls */}
+                <div className="flex items-center gap-2 ml-4 shrink-0 pl-3 border-l border-white/10">
+                  <TabPresetsDropdown align="right" />
+
+                  {/* Folder Toggle - Icon Only */}
                   <button
-                    onClick={() => {
-                      console.log('Toggle folders clicked in PlaylistsPage, current state:', showColoredFolders);
-                      setShowColoredFolders(!showColoredFolders);
-                    }}
-                    title={getInspectTitle(showColoredFolders ? 'Hide colored folders' : 'Show colored folders') || (showColoredFolders ? 'Hide colored folders' : 'Show colored folders')}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${showColoredFolders ? 'bg-sky-600 text-white' : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'}`}
+                    onClick={() => setShowColoredFolders(!showColoredFolders)}
+                    className={`p-1.5 rounded-md transition-all ${showColoredFolders
+                      ? 'bg-sky-600 text-white shadow-sm'
+                      : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-white border border-white/10'
+                      }`}
+                    title={showColoredFolders ? "Hide Folders" : "Show Folders"}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                     </svg>
                   </button>
 
-                  {/* Add Button */}
+                  {/* Add Playlist - Icon Only */}
                   <button
-                    onClick={() => setShowUploader(true)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-sky-500 rounded-lg text-sm font-medium hover:bg-sky-600 transition-colors text-white"
+                    onClick={() => setShowImportModal(true)}
+                    className="p-1.5 bg-sky-500 hover:bg-sky-400 text-white rounded-md transition-all shadow-lg hover:shadow-sky-500/25 border border-white/10"
+                    title="Add Playlist"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    Add
                   </button>
                 </div>
+
               </div>
             </div>
 

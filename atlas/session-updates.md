@@ -1,22 +1,26 @@
-# Session Updates - Jan 13, 2026 5:06pm
+# Session Updates: Sticky Toolbar & Banner Animation Restoration
+## Date: 2026-01-13
+## Goal: Single Row Sticky Header & Unified Scrolling
 
-## Overview
-This session focused on refining the **Playlist Card UI** by enhancing the hover actions in the title bar.
+### Overview
+1.  **Compact Layout**: Consolidated the sticky toolbar into a single, space-saving row for both **Videos Page** and **Playlists Page**.
+2.  **Unified Animation**: Restored the `animate-page-banner-scroll` horizontal scrolling for **both** the main top banner and the sticky toolbar.
+    -   This creates a cohesive visual effect where the custom image spans vertically across both elements but scrolls horizontally as a single unit.
 
-## Key Features Implemented
+### Changes
+-   **`VideosPage.jsx`**:
+    -   Merged Folder Selector and Action buttons into one row.
+    -   Applied `animate-page-banner-scroll` to the sticky toolbar.
+    -   Updated background styles to use `backgroundPositionY` (vertical offset) and `backgroundPositionX: '0px'` (start point for animation).
+-   **`PlaylistsPage.jsx`**:
+    -   Merged Tabs and Control buttons into one row.
+    -   Applied `animate-page-banner-scroll` to the sticky toolbar.
+    -   Updated background styles.
+-   **`PageBanner.jsx`**:
+    -   Updated styles to split background position (Y for offset/top, X for animation).
+    -   Moved `animate-page-banner-scroll` class from the outer wrapper to the **inner background div** to ensure the animation correctly affects the background image.
 
-### 1. Shuffle & Cover Play Actions
-- **Shuffle Button**: Added a new **Shuffle** button (icon only) to the right of the Play button in the playlist/folder title bar hover controls.
-  - Clicking this button immediately shuffles the playlist/folder items and starts playing the first shuffled video.
-- **Smart Play Button**:
-  - **Left Click**: Plays the playlist from the beginning (typically first added or manual order).
-  - **Right Click**: Plays the specific video whose thumbnail is currently displayed as the **playlist cover**.
-    - This is particularly useful when a user has "Set as Playlist Cover" on a specific video deeper in the list.
-    - If the cover doesn't match a video (e.g., custom upload not linked to a video), it gracefully falls back to the first video.
-  - **Tooltip**: Updated to "Play playlist (Right-click for cover video)".
-
-### 2. Folder Card Consistency
-- Applied identical Shuffle and Right-Click logic to **Folder Cards**, ensuring feature parity across all grid items.
-
-## Learnings
-- **Context Handling**: Implementing "Right Click to Play Cover" required searching the loaded playlist items for a thumbnail URL match against the current card's cover. This dynamic lookup ensures the correct "featured" video is played.
+### Result
+-   Every custom banner now has a slow, continuous horizontal scroll.
+-   The "stitched" vertical alignment between the top banner and sticky header is preserved.
+-   The user gets a premium, lively aesthetic without sacrificing vertical screen real estate.

@@ -164,6 +164,7 @@ yttv2/
 | **Video Player** | `videoplayer.md` | `database-schema.md`, `api-bridge.md`, `state-management.md` |
 | **Local Videos** | `local-videos.md` | `videoplayer.md`, `database-schema.md`, `api-bridge.md`, `importexport.md` |
 | **Audio Visualizer** | `audio-visualizer.md` | `advanced-player-controller.md`, `api-bridge.md` |
+| **Banners (ASCII & Unified)** | `banner.md` | `ui.md`, `state-management.md` |
 | **Debug/Testing** | `debug.md` | `ui.md` (inspect mode, debug bounds) |
 
 ### By Technical Domain
@@ -218,6 +219,11 @@ yttv2/
 **Covers**: System-wide audio visualization, cpal backend integration, FFT processing
 **Key Topics**: Rust audio capture, thread safety, frequency mapping, performance tuning
 **Cross-References**: See `advanced-player-controller.md` for UI integration, `api-bridge.md` for commands
+
+#### `banner.md`
+**Covers**: Unified Banner System, PageBanner component, Sticky Toolbar integration
+**Key Topics**: Visual stitching, intelligent background scaling, horizontal scroll animation, future refactoring plans
+**Cross-References**: See `ui.md` for layout integration
 
 #### `debug.md`
 **Covers**: Debug bounds, inspect mode, layout debugging, ruler overlay (non-functional)

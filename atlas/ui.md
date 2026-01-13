@@ -168,11 +168,12 @@ Users see a 2-column grid of playlist cards. For detailed description of playlis
 
 - **Header Actions**: Top of page shows:
 - **Sticky Toolbar**: A dynamic toolbar that sits below the Page Banner and sticks to the top of the viewport when scrolling.
-  - **Seamless Integration**: When at the top, it visually blends with the Page Banner (`seamlessBottom` effect). When sticky, it becomes darker/blurred with square corners.
-  - **Tab Bar**: Integrated into the top row of the toolbar, with the **Tab Presets Dropdown** on the right.
-  - **Controls Row**: Below the tabs, displaying:
-    - **Folder Toggle**: Toggles inline folder display.
-    - **Add Playlist**: Opens playlist import/create modal.
+  - **Unified Compact Design**: Shares the same single-row architecture and unified banner background as the Videos Page toolbar.
+  - **Tab Bar**: Integrated into the left side of the row, taking up the majority of the width (`flex-1`).
+  - **Controls Cluster**: A compact group on the right side containing:
+    - **Tab Presets Dropdown**: Manage tab sets.
+    - **Folder Toggle (Icon)**: Toggles inline folder display.
+    - **Add Playlist (Icon)**: Opens playlist import/create modal.
 
 - **Colored Folders**: When folder toggle is on, folder cards appear in grid (see Section 2.2)
 
@@ -325,31 +326,23 @@ Users see a 3-column grid of video cards showing videos from the current playlis
 
 - **Page Banner**: 
   - **Location**: Displayed at the very top of the scrollable content area.
-  - **Seamless Integration**: Connects seamlessly with the Sticky Toolbar below it (`seamlessBottom` prop), removing bottom rounding/shadows for a unified header look.
+  - **Unified Banner System**: Connects visually with the Sticky Toolbar below it. Both components display the same **Custom Banner Image** (if set) and use synchronized horizontal scrolling animation (`animate-page-banner-scroll`) to create the illusion of a single continuous surface.
+  - **Seamless Integration**: Connects seamlessly with the content area.
   - **Content**: Shows the title (Playlist Name, "{Color} Folder", custom folder name, or "Unsorted Videos") and description text.
-  - **Metadata**: Displays video count, creation year (hardcoded 2026), and **Author Identity**:
-    - Shows the user's configured **Display Name** and **ASCII Avatar**.
-    - **Custom ASCII Banner**: Users can set a custom ASCII art banner for each playlist or folder via the Edit Modal.
-    - **Fallback**: If no custom ASCII is set, it falls back to the globally configured ASCII Signature (from Settings).
-    - **Single-line Avatar**: Rendered large (text-3xl) as a watermark.
-    - **Multi-line Avatar**: Rendered in a compact monospace block (text-[4px]) below the name.
-  - **Styling**: Uses vibrant gradients (matching folder color) and glassmorphism effects for a premium look.
-  - **Background Pattern**: Features a smooth, continuously moving diagonal stripe pattern overlay (`animate-diagonal-pattern`) that adapts to any background color.
-  - **Edit Button**: Small pen icon in the top-left corner (on hover) allows renaming the playlist or colored folder, updating its description, and **setting a Custom ASCII Banner** via `EditPlaylistModal`. Custom folder names and banners persist in `folder_metadata`. (Not available for Unsorted Videos).
+  - **Metadata**: Displays video count, creation year (hardcoded 2026), and **Author Identity** (user avatar and name).
+  - **Styling**: Uses vibrant gradients (matching folder color) or custom image background.
+  - **Edit Button**: Small pen icon in the top-left corner (on hover) allows renaming the playlist or colored folder, updating its description, and **setting a Custom Page Banner** via `EditPlaylistModal`. Custom folder names and banners persist in `folder_metadata`. (Not available for Unsorted Videos).
   - **Continue Watching**: A "CONTINUE?" section appears in the bottom-right corner if the playlist/folder has a recently watched video.
-    - Displays "CONTINUE?" text and the video thumbnail.
-    - Hovering reveals a Play icon.
-    - Clicking resumes the most recently watched video.
 
 - **Sticky Toolbar**: Sits below the Page Banner and sticks to the top of the viewport when scrolling.
-  - **Visuals**: Dynamic styling (darker/square when stuck, lighter/rounded when not).
-  - **Navigation & Sort Row**:
-    - **Scroll To Top**: Button appears on the left when stuck, allowing quick scrolling to top.
-    - **Folder Selector**: Horizontal scrollable list of "All" / "Unsorted" / Color Dots for filtering.
-    - **Sort Controls**: Dropdown for Default, Chronological, and Watch Progress.
-  - **Actions Row**:
-    - **Bulk Tag Mode**: Toggle button to enter bulk tagging.
-    - **Add Button**: Opens Config Playlist Modal.
+  - **Compact Layout**: Features a streamlined single-row design to maximize vertical screen real estate.
+  - **Unified Background**: Inherits the **Custom Page Banner Image** (if set) and continues the same horizontal scroll animation, maintaining visual alignment with the top banner.
+  - **Videos Page Layout**:
+    - **Left**: Compact Folder Selector (horizontal scrollable list) + Sort Controls.
+    - **Right**: Action controls (Bulk Tag Mode toggle, Add Button).
+  - **Playlists Page Layout**:
+    - **Left**: Tab Bar navigation.
+    - **Right**: Control cluster (Tab Presets, Folder Toggle, Add Playlist).
 
 - **Pagination Controls**: For performance, videos are paginated (50 videos per page). Previous/Next controls appear at the bottom of the grid and also via the Sticky Toolbar's logic (internal aliasing only).
 

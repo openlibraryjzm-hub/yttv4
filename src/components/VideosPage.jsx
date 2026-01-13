@@ -73,7 +73,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
       setViewMode('half');
     }
   };
-  const { userName, userAvatar } = useConfigStore();
+  const { userName, userAvatar, customPageBannerImage } = useConfigStore();
 
   // Helper to get inspect label
   const getInspectTitle = (label) => inspectMode ? label : undefined;
@@ -102,6 +102,10 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
+
+  // Unified Banner Height State
+  const [bannerHeight, setBannerHeight] = useState(0);
+  const [bannerBgSize, setBannerBgSize] = useState('100% auto');
 
 
 
@@ -982,6 +986,10 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
                   }
                 }}
                 seamlessBottom={true}
+                onHeightChange={(h, bgs) => {
+                  setBannerHeight(h);
+                  if (bgs) setBannerBgSize(bgs);
+                }}
               />
             </div>
           )}
@@ -990,176 +998,130 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
           <div ref={stickySentinelRef} className="absolute h-px w-full -mt-px pointer-events-none opacity-0" />
 
           {/* Sticky Toolbar */}
-          <div className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) border-white/5
+          <div
+            className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) border-white/5 overflow-hidden
             ${isStuck
-              ? 'bg-slate-900/95 backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2'
-              : 'bg-slate-800/40 backdrop-blur-md border-b border-x shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-4 pb-4'
-            }`}
+                ? 'backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2'
+                : 'backdrop-blur-md border-b border-x shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-4 pb-4'
+              }
+            ${!customPageBannerImage ? (isStuck ? 'bg-slate-900/95' : 'bg-slate-800/40') : ''}
+            ${customPageBannerImage ? 'animate-page-banner-scroll' : ''}
+            `}
+            style={customPageBannerImage ? {
+              backgroundImage: `url(${customPageBannerImage})`,
+              backgroundSize: bannerBgSize,
+              backgroundPositionY: `-${bannerHeight}px`,
+              backgroundPositionX: '0px',
+              backgroundRepeat: 'repeat-x',
+            } : {}}
           >
-            <div className={`px-8 flex flex-col gap-4 transition-all duration-300 ${isStuck ? 'scale-95 origin-top' : 'scale-100'}`}>
+            {/* Dark Overlay for Custom Banner */}
+            {customPageBannerImage && (
+              <div className="absolute inset-0 bg-black/60 pointer-events-none z-0" />
+            )}
+
+            <div className={`px-4 flex items-center justify-between transition-all duration-300 relative z-10 ${isStuck ? 'h-[52px]' : 'py-2'}`}>
 
 
               {/* Folder Selection Row */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                <button
-                  onClick={() => setSelectedFolder(null)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${selectedFolder === null
-                    ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/25'
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
-                    }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setSelectedFolder('unsorted')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${selectedFolder === 'unsorted'
-                    ? 'bg-slate-500 text-white shadow-lg shadow-slate-500/25'
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
-                    }`}
-                >
-                  Unsorted
-                </button>
-                <div className="w-px h-6 bg-slate-700 mx-1" />
-                {FOLDER_COLORS.map((color) => {
-                  const isSelected = selectedFolder === color.id;
-                  return (
-                    <button
-                      key={color.id}
-                      onClick={() => setSelectedFolder(color.id)}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isSelected
-                        ? 'ring-2 ring-offset-2 ring-offset-slate-900 ring-white scale-110'
-                        : 'hover:scale-105 hover:brightness-110'
-                        }`}
-                      style={{ backgroundColor: color.hex }}
-                      title={color.name}
-                    >
-                      {isSelected && (
-                        <div className="w-2 h-2 rounded-full bg-white/50" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+              {/* Left Side: Compact Folder Selector + Sort */}
+              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar mask-gradient-right flex-1 min-w-0 pr-4">
 
-              {/* Controls Row */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  {/* Sort Dropdown */}
-                  <div className="relative group">
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer shadow-sm hover:bg-slate-700 transition-colors appearance-none pr-8"
-                      title={getInspectTitle('Sort videos')}
-                    >
-                      <option value="shuffle">Default</option>
-                      <option value="chronological">Chronological</option>
-                      <option value="progress">Watch Progress</option>
-                    </select>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Progress Filters */}
-                  {sortBy === 'progress' && (
-                    <div className="flex items-center gap-2 animate-fade-in">
-                      <button
-                        onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700"
-                        title={sortDirection === 'asc' ? 'Sort Ascending' : 'Sort Descending'}
-                      >
-                        {sortDirection === 'asc' ? (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4 4m0 0l4 4m-4-4v12" /></svg>
-                        ) : (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4 4m0 0l4 4m-4-4v12" transform="scale(1, -1) translate(0, -24)" /></svg>
-                        )}
-                      </button>
-
-                      <button
-                        onClick={() => setIncludeUnwatched(!includeUnwatched)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${includeUnwatched
-                          ? 'bg-sky-500/10 border-sky-500/50 text-sky-400'
-                          : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-400'
-                          }`}
-                      >
-                        Show Unwatched
-                      </button>
-
-                      <button
-                        onClick={() => setShowOnlyCompleted(!showOnlyCompleted)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${showOnlyCompleted
-                          ? 'bg-green-500/10 border-green-500/50 text-green-400'
-                          : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-400'
-                          }`}
-                      >
-                        Hide Watched
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3">
-                  {/* Scroll To Top Button */}
-                  {isStuck && (
-                    <button
-                      onClick={scrollToTop}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 rounded-lg font-medium shadow-sm transition-all text-xs animate-fade-in"
-                    >
-                      <ArrowUp size={14} />
-                      Top
-                    </button>
-                  )}
-                  {/* Bulk Tag Controls */}
-                  {bulkTagMode ? (
-                    <div className="flex items-center gap-2 animate-fade-in">
-                      <span className="text-sm font-medium text-slate-400 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-                        {bulkTagSelectionCount} selected
-                      </span>
-                      <button
-                        onClick={handleSaveBulkTags}
-                        disabled={savingBulkTags || bulkTagSelectionCount === 0}
-                        className="flex items-center gap-2 px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-lg font-medium shadow-sm transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {savingBulkTags ? 'Saving...' : 'Save Tags'}
-                      </button>
-                      <button
-                        onClick={handleCancelBulkTags}
-                        className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg font-medium shadow-sm transition-all text-sm"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setBulkTagMode(true)}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg font-medium shadow-sm transition-colors text-sm"
-                      title={getInspectTitle('Enter bulk tag mode')}
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                      </svg>
-                      Bulk Tag
-                    </button>
-                  )}
-
-                  {/* Add Video Button */}
+                {/* Compact Folder Buttons */}
+                <div className="flex items-center gap-1.5 shrink-0">
                   <button
-                    onClick={() => setShowUploader(true)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-medium shadow-sm transition-colors text-sm"
-                    title={getInspectTitle('Add videos to playlist')}
+                    onClick={() => setSelectedFolder(null)}
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all uppercase tracking-wider ${selectedFolder === null
+                      ? 'bg-sky-500 text-white shadow-sm'
+                      : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-white/5'
+                      }`}
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add
+                    All
+                  </button>
+                  <button
+                    onClick={() => setSelectedFolder('unsorted')}
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all uppercase tracking-wider ${selectedFolder === 'unsorted'
+                      ? 'bg-slate-500 text-white shadow-sm'
+                      : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-white/5'
+                      }`}
+                  >
+                    Unsorted
                   </button>
                 </div>
+
+                <div className="w-px h-4 bg-white/10 shrink-0" />
+
+                <div className="flex items-center gap-1 shrink-0">
+                  {FOLDER_COLORS.map((color) => {
+                    const isSelected = selectedFolder === color.id;
+                    return (
+                      <button
+                        key={color.id}
+                        onClick={() => setSelectedFolder(color.id)}
+                        className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected
+                          ? 'ring-1 ring-offset-1 ring-offset-slate-900 ring-white scale-110'
+                          : 'hover:scale-105 opacity-80 hover:opacity-100'
+                          }`}
+                        style={{ backgroundColor: color.hex }}
+                        title={color.name}
+                      >
+                        {isSelected && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-white/50" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="w-px h-4 bg-white/10 shrink-0" />
+
+                {/* Compact Sort */}
+                <div className="relative group shrink-0">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-slate-800/80 border border-white/10 rounded-md py-1 pl-2 pr-5 text-[10px] font-bold uppercase tracking-wider text-slate-300 focus:outline-none focus:ring-1 focus:ring-sky-500 cursor-pointer hover:bg-slate-700 transition-colors appearance-none"
+                    title="Sort"
+                  >
+                    <option value="shuffle">Default</option>
+                    <option value="chronological">Date</option>
+                    <option value="progress">Progress</option>
+                  </select>
+                </div>
               </div>
+
+              {/* Right Side: Actions */}
+              <div className="flex items-center gap-2 shrink-0 pl-3 border-l border-white/10 ml-auto">
+                {/* Bulk Tag */}
+                <button
+                  onClick={() => setBulkTagMode(!bulkTagMode)}
+                  className={`p-1.5 rounded-md transition-all ${bulkTagMode
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-white/10'
+                    }`}
+                  title={bulkTagMode ? "Exit Bulk Tagging" : "Bulk Tag"}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                </button>
+
+                {/* Add */}
+                <button
+                  onClick={() => setShowUploader(true)}
+                  className="p-1.5 bg-sky-500 hover:bg-sky-400 text-white rounded-md transition-all shadow-lg hover:shadow-sky-500/25 border border-white/10"
+                  title="Add Config"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              </div>
+
             </div>
-          </div>
+
+
+          </div >
 
           <div className="px-8 pb-8">
             {/* Edit Playlist/Folder Modal */}
