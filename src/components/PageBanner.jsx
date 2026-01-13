@@ -134,7 +134,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                         e.stopPropagation();
                         onEdit();
                     }}
-                    className="absolute top-6 left-6 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-105 z-20"
+                    className="absolute top-4 left-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-105 z-20"
                     title="Edit Details"
                 >
                     <Pen size={18} />
@@ -143,13 +143,13 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
 
             {/* Top Right Content */}
             {topRightContent && (
-                <div className="absolute top-8 right-8 z-30">
+                <div className="absolute top-4 right-4 z-30">
                     {topRightContent}
                 </div>
             )}
 
             {/* Content Container - Allow overflow for dropdowns */}
-            <div className="relative z-10 flex items-center h-full gap-8 w-full p-8">
+            <div className="relative z-10 flex items-end h-full gap-8 w-full px-8 pt-4 pb-16">
                 {/* Avatar Section (Optional) */}
                 {avatar && (
                     <div className="shrink-0 hidden md:flex flex-col items-center gap-1 animate-in fade-in slide-in-from-left-4 duration-700">

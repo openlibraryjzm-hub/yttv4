@@ -252,31 +252,19 @@ const VideoCard = ({
 
   // Badges for thumbnail (now can safely use quickActions, menuOptions, submenuOptions)
   const badges = [
-    isCurrentlyPlaying && {
-      component: (
-        <div className="bg-sky-500 text-white text-xs font-bold px-2 py-1 rounded">
-          Now Playing
-        </div>
-      ),
-      position: 'top-left',
-    },
+
     // Watched badge (only if NOT playing)
     !isCurrentlyPlaying && isWatched && {
       component: (
-        <div className="bg-black/90 text-green-500 text-[10px] font-bold px-1.5 py-0.5 rounded border border-green-900 tracking-wider shadow-md">
-          WATCHED
+        <div className="text-green-500 drop-shadow-md flex items-center justify-center filter drop-shadow-lg">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={4}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
         </div>
       ),
       position: 'top-left',
     },
-    {
-      component: (
-        <div className="bg-black/70 text-white text-xs font-medium px-2 py-1 rounded">
-          #{originalIndex >= 0 ? originalIndex + 1 : index + 1}
-        </div>
-      ),
-      position: 'bottom-left',
-    },
+
     // Pin icon badge - bottom-right
     !bulkTagMode && {
       component: (
@@ -427,7 +415,7 @@ const VideoCard = ({
           overlay={playOverlay}
           badges={bulkTagMode ? badges.filter(b => b.position !== 'top-right') : badges}
           progress={progress}
-          className="rounded-lg overflow-hidden" // Rounding thumbnail specifically
+          className={`rounded-lg overflow-hidden ${isCurrentlyPlaying ? 'ring-4 ring-red-500 ring-offset-2 ring-offset-black shadow-[0_0_40px_rgba(239,68,68,1),inset_0_0_40px_rgba(239,68,68,0.8)]' : ''}`} // Rounding thumbnail specifically
         />
 
         {/* Star color picker overlay */}

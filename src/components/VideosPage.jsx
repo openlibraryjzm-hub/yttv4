@@ -670,6 +670,21 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     }
   };
 
+  // Calculate folder counts
+  const folderCounts = useMemo(() => {
+    const counts = {};
+    if (videoFolderAssignments) {
+      Object.values(videoFolderAssignments).forEach(folders => {
+        if (Array.isArray(folders)) {
+          folders.forEach(folderId => {
+            counts[folderId] = (counts[folderId] || 0) + 1;
+          });
+        }
+      });
+    }
+    return counts;
+  }, [videoFolderAssignments]);
+
   const handleUploadComplete = async () => {
     setShowUploader(false);
 
@@ -999,84 +1014,89 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
             className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden -mt-16
             ${isStuck
                 ? 'backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2 bg-slate-900/95'
-                : 'backdrop-blur-xl border-b border-x border-t border-white/10 shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-4 pb-4 bg-black/30'
+                : 'backdrop-blur-xl border-b border-x border-t border-white/10 shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-1 pb-0 bg-black/30'
               }
             `}
           >
 
 
-            <div className={`px-4 flex items-center justify-between transition-all duration-300 relative z-10 ${isStuck ? 'h-[52px]' : 'py-2'}`}>
+            <div className={`px-4 flex items-center justify-between transition-all duration-300 relative z-10 ${isStuck ? 'h-[52px]' : 'py-0.5'}`}>
 
 
               {/* Folder Selection Row */}
               {/* Left Side: Compact Folder Selector + Sort */}
-              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar mask-gradient-right flex-1 min-w-0 pr-4">
+              {/* Left Side: Compact Folder Selector + Sort */}
+              <div className="flex items-center gap-0 overflow-x-auto no-scrollbar mask-gradient-right flex-1 min-w-0 pr-0">
 
-                {/* Compact Folder Buttons */}
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    onClick={() => setSelectedFolder(null)}
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all uppercase tracking-wider ${selectedFolder === null
-                      ? 'bg-sky-500 text-white shadow-sm'
-                      : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-white/5'
-                      }`}
-                  >
-                    All
-                  </button>
-                  <button
-                    onClick={() => setSelectedFolder('unsorted')}
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all uppercase tracking-wider ${selectedFolder === 'unsorted'
-                      ? 'bg-slate-500 text-white shadow-sm'
-                      : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-white/5'
-                      }`}
-                  >
-                    Unsorted
-                  </button>
+                <div className="flex items-center gap-3 pr-3 shrink-0">
+                  {/* Compact Sort */}
+                  <div className="relative group shrink-0">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="bg-slate-800/80 border border-white/10 rounded-md py-1 pl-2 pr-5 text-[10px] font-bold uppercase tracking-wider text-slate-300 focus:outline-none focus:ring-1 focus:ring-sky-500 cursor-pointer hover:bg-slate-700 transition-colors appearance-none"
+                      title="Sort"
+                    >
+                      <option value="shuffle">Default</option>
+                      <option value="chronological">Date</option>
+                      <option value="progress">Progress</option>
+                    </select>
+                  </div>
+
+                  {/* Compact Folder Buttons */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={() => setSelectedFolder(null)}
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all uppercase tracking-wider ${selectedFolder === null
+                        ? 'bg-sky-500 text-white shadow-sm'
+                        : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-white/5'
+                        }`}
+                    >
+                      All
+                    </button>
+                    <button
+                      onClick={() => setSelectedFolder('unsorted')}
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all uppercase tracking-wider ${selectedFolder === 'unsorted'
+                        ? 'bg-slate-500 text-white shadow-sm'
+                        : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-white/5'
+                        }`}
+                    >
+                      Unsorted
+                    </button>
+                  </div>
                 </div>
 
-                <div className="w-px h-4 bg-white/10 shrink-0" />
-
-                <div className="flex items-center gap-1 shrink-0">
-                  {FOLDER_COLORS.map((color) => {
+                <div className="flex-1 flex items-center shrink-0 h-6 mr-3 border-2 border-black rounded-lg overflow-hidden">
+                  {FOLDER_COLORS.map((color, index) => {
                     const isSelected = selectedFolder === color.id;
+                    const isFirst = index === 0;
+                    const isLast = index === FOLDER_COLORS.length - 1;
+                    const count = folderCounts[color.id] || 0;
+
                     return (
                       <button
                         key={color.id}
                         onClick={() => setSelectedFolder(color.id)}
-                        className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected
-                          ? 'ring-1 ring-offset-1 ring-offset-slate-900 ring-white scale-110'
-                          : 'hover:scale-105 opacity-80 hover:opacity-100'
-                          }`}
+                        className={`h-full flex-1 flex items-center justify-center transition-all ${isSelected
+                          ? 'opacity-100 z-10 relative after:content-[""] after:absolute after:inset-0 after:ring-2 after:ring-inset after:ring-white/50'
+                          : 'opacity-60 hover:opacity-100'
+                          } ${isFirst ? 'rounded-l-md' : ''} ${isLast ? 'rounded-r-md' : ''}`}
                         style={{ backgroundColor: color.hex }}
-                        title={color.name}
+                        title={`${color.name} (${count})`}
                       >
-                        {isSelected && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-white/50" />
+                        {count > 0 && (
+                          <span className="text-sm font-bold text-white/90 drop-shadow-md">
+                            {count}
+                          </span>
                         )}
                       </button>
                     );
                   })}
                 </div>
-
-                <div className="w-px h-4 bg-white/10 shrink-0" />
-
-                {/* Compact Sort */}
-                <div className="relative group shrink-0">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-slate-800/80 border border-white/10 rounded-md py-1 pl-2 pr-5 text-[10px] font-bold uppercase tracking-wider text-slate-300 focus:outline-none focus:ring-1 focus:ring-sky-500 cursor-pointer hover:bg-slate-700 transition-colors appearance-none"
-                    title="Sort"
-                  >
-                    <option value="shuffle">Default</option>
-                    <option value="chronological">Date</option>
-                    <option value="progress">Progress</option>
-                  </select>
-                </div>
               </div>
 
               {/* Right Side: Actions */}
-              <div className="flex items-center gap-2 shrink-0 pl-3 border-l border-white/10 ml-auto">
+              <div className="flex items-center gap-2 shrink-0 ml-auto">
                 {/* Bulk Tag */}
                 <button
                   onClick={() => setBulkTagMode(!bulkTagMode)}

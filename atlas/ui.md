@@ -48,6 +48,13 @@ The application employs a high-contrast, structured design with distinct borders
     - **Static Images**: Scroll slowly to the right (infinite loop).
     - **GIFs**: Play natively without scrolling.
   - **Customizable Identity**: Displays user avatar (ASCII art) and name.
+    - **Sticky Toolbar**:
+    - A translucent, glassmorphic toolbar (`backdrop-blur-xl`) that sits below the banner and sticks to the top of the viewport on scroll.
+    - **Unified Design**: Shares the banner's background image and scroll animation for a seamless look.
+    - **Structure**:
+      - **Left**: Sort controls (Videos) or Tab Bar (Playlists).
+      - **Right**: Action buttons (Filter, Add, etc.).
+      - **Color Bar Prism (Videos)**: A unified, stretchable "prism" bar of colored folder rectangles. Displays video counts inside the colors.
 
 - **Video Player**:
   - Wrapped in a `.layout-shell__player` container.
@@ -520,8 +527,8 @@ Users see video cards built using the Card component system with video-specific 
   - **Thumbnail Area**: 16:9 aspect ratio
     - Image: Video thumbnail from YouTube
     - **Badges**:
-      - **Top-left**: "Now Playing" badge (blue, only on currently playing video)
-      - **Bottom-left**: Video number badge (e.g., "#1", "#42")
+      - **Top-left**: "Now Playing" indicator (3 animated bouncing dots in Warm Red, only when playing)
+      - **Top-left**: "Watched" indicator (Green tick icon, only when watched and not playing)
       - **Bottom-right**: Pin icon button (amber when pinned, gray when not)
       - **Top-right**: (Empty)
     - **Progress Bar**: Red horizontal line at the bottom of the thumbnail indicating watch progress percentage.
@@ -533,12 +540,12 @@ Users see video cards built using the Card component system with video-specific 
   - **Title**: Video title, dark blue text (RGB(5, 47, 74) / #052F4A), truncates
   - **Hidden by default (visible on hover)**:
     - **Subtitle**: Video ID, gray text
-    - **Actions** (bottom-right): Star icon (for quick folder assign) and 3-dot menu
+    - **Actions** (bottom-right Star icon (for quick folder assign) and 3-dot menu
 
 - **Visual States**:
   - **Default**: Gray border, thumbnail and title visible
   - **Selected**: Blue border (when video is selected)
-  - **Playing**: Blue border with ring (when currently playing)
+  - **Playing**: **Vibrant Red Glow** (thick `ring-red-500` border + dual-layer shadow bleeding into/out of thumbnail)
   - **Hover**: Lighter background, play buttons, pin button (bottom-right), menu, star, and subtitle appear
 
 - **Interactive Elements**:

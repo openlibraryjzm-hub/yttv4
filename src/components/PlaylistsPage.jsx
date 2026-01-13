@@ -552,13 +552,13 @@ const PlaylistsPage = ({ onVideoSelect }) => {
               className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden -mt-16
               ${isStuck
                   ? 'backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2 bg-slate-900/95'
-                  : 'backdrop-blur-xl border-b border-x border-t border-white/10 shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-4 pb-4 bg-black/30'
+                  : 'backdrop-blur-xl border-b border-x border-t border-white/10 shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-1 pb-0 bg-black/30'
                 }
               `}
             >
 
 
-              <div className={`px-4 flex items-center justify-between transition-all duration-300 relative z-10 ${isStuck ? 'h-[52px]' : 'py-2'}`}>
+              <div className={`px-4 flex items-center justify-between transition-all duration-300 relative z-10 ${isStuck ? 'h-[52px]' : 'py-0.5'}`}>
 
                 {/* Left: Tab Bar */}
                 <div className="flex-1 overflow-x-auto no-scrollbar mask-gradient-right min-w-0">
