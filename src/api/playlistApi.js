@@ -24,8 +24,8 @@ export const getPlaylist = async (id) => {
   return await invoke('get_playlist', { id });
 };
 
-export const updatePlaylist = async (id, name = null, description = null, customAscii = null) => {
-  return await invoke('update_playlist', { id, name, description, customAscii });
+export const updatePlaylist = async (id, name = null, description = null, customAscii = null, customThumbnailUrl = null) => {
+  return await invoke('update_playlist', { id, name, description, customAscii, customThumbnailUrl });
 };
 
 export const deletePlaylist = async (id) => {

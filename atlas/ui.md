@@ -77,7 +77,7 @@ Users see a side menu panel that appears on the right side of the screen when in
   - Clicking a folder filters videos to show only videos in that folder
 
 - **Page Content**: The main content area below navigation, showing:
-  - **Playlists Page**: 3-column grid of playlist cards (see 4.1.1)
+  - **Playlists Page**: 2-column grid of playlist cards (see 4.1.1)
   - **Videos Page**: 3-column grid of video cards (see 4.1.2)
   - **History Page**: 3-column grid of history cards (see 4.1.3)
 
@@ -155,9 +155,9 @@ Users see a side menu panel that appears on the right side of the screen when in
 
 **1: User-Perspective Description**
 
-Users see a 3-column grid of playlist cards. For detailed description of playlist functionality, see **Section 2.1: Playlists**. This section focuses on the UI/visual aspects:
+Users see a 2-column grid of playlist cards. For detailed description of playlist functionality, see **Section 2.1: Playlists**. This section focuses on the UI/visual aspects:
 
-- **Grid Layout**: 3 columns, responsive spacing, scrollable vertical list
+- **Grid Layout**: 2 columns, responsive spacing, scrollable vertical list
 - **Playlist Cards**: Each card displays:
   - Thumbnail (16:9 aspect ratio, first video's thumbnail)
   - Playlist name (truncated if too long)
@@ -214,7 +214,7 @@ See **Section 2.1: Playlists** for complete logic flow. The UI-specific aspects:
    - Card uses `<CardActions>` for menu → 3-dot menu positioned inline with title
 
 2. **Grid Layout Flow:**
-   - CSS Grid: `grid grid-cols-3 gap-4` → 3 columns, 4-unit gap
+   - CSS Grid: `grid grid-cols-2 gap-4` → 2 columns, 4-unit gap
    - Responsive: Adjusts to container width
    - Scrollable: `overflow-y-auto` on container
 
@@ -234,15 +234,14 @@ Users see playlist cards built using the reusable Card component system:
 
 - **Card Structure**:
   - **Thumbnail Area**: 16:9 aspect ratio, rounded corners
-    - Image: First video's thumbnail from playlist
+    - Image: Custom cover (if set) or first video's thumbnail
     - Fallback: Gray placeholder icon if no thumbnail
-    - **Title Overlay**: Positioned at the bottom of the thumbnail with no backdrop.
-    - **Typography**: "Epic WordArt" style: `font-black`, `italic`, `text-3xl`.
-    - **Styling**: Dark blue text (`#052F4A`) with a white stroke (`2px white`) and a solid sky blue 3D shadow (`4px 4px 0 #38bdf8`) for maximum impact and readability.
     - **Hover Overlay**: Semi-transparent black with play/preview buttons
-  - **Interactive Elements Overlay**:
     - **3-Dot Menu**: Positioned at the top-right of the thumbnail, visible on hover.
-   - **Content Area**: (Removed - Title and Menu are now overlaid on the thumbnail)
+  - **Content Area**:
+    - **Container**: The entire card (title + thumbnail) is wrapped in a square border (`border-2 border-slate-700/50`) with rounded corners (`rounded-xl`) and a subtle background (`bg-slate-800/20`).
+    - **Playlist Title**: Positioned inside the container, above the thumbnail.
+    - **Title Styling**: Enclosed in a separate inner rectangle with a dark blue border (`border-[#052F4A]`) and light background (`bg-slate-100/90`). Text matches border color (`#052F4A`).
   
 - **Visual States**:
   - **Default**: Transparent background, no border

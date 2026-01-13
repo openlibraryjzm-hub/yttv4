@@ -38,6 +38,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
   const [stuckFolders, setStuckFolders] = useState(new Set()); // Track stuck folders: Set of "playlistId:folderColor" strings
   const { setPlaylistItems, currentPlaylistItems, setCurrentFolder, setPreviewPlaylist, setAllPlaylists } = usePlaylistStore();
   const { showColoredFolders, setShowColoredFolders } = useFolderStore();
+  const [imageLoadErrors, setImageLoadErrors] = useState(new Set());
   const { tabs, activeTabId, addPlaylistToTab, removePlaylistFromTab } = useTabStore();
   const { activePresetId, presets } = useTabPresetStore();
   const { setViewMode, viewMode, inspectMode } = useLayoutStore();
@@ -196,12 +197,21 @@ const PlaylistsPage = ({ onVideoSelect }) => {
             const items = await getPlaylistItems(playlist.id);
             if (Array.isArray(items)) {
               itemCountMap[playlist.id] = items.length;
-              if (items.length > 0) {
+
+              // Check for custom cover first
+              if (playlist.custom_thumbnail_url) {
+                thumbnailMap[playlist.id] = {
+                  max: playlist.custom_thumbnail_url,
+                  standard: playlist.custom_thumbnail_url // Fallback
+                };
+              } else if (items.length > 0) {
                 // Default thumbnail (first video)
                 const firstVideo = items[0];
-                const thumbUrl = getThumbnailUrl(firstVideo.video_id, 'medium');
-                thumbnailMap[playlist.id] = thumbUrl;
-                console.log(`Playlist ${playlist.id} (${playlist.name}): video_id=${firstVideo.video_id}, thumbnail=${thumbUrl}`);
+                thumbnailMap[playlist.id] = {
+                  max: getThumbnailUrl(firstVideo.video_id, 'max'),
+                  standard: getThumbnailUrl(firstVideo.video_id, 'standard')
+                };
+                console.log(`Playlist ${playlist.id} (${playlist.name}): video_id=${firstVideo.video_id}`);
 
                 // Find most recently watched video
                 let mostRecent = null;
@@ -592,7 +602,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-3 gap-4 px-8 pb-8">
+            <div className="grid grid-cols-2 gap-4 px-8 pb-8">
               {/* Colored Folders - Filtered by active tab (only show if showColoredFolders is true) */}
               {showColoredFolders && folders
                 .filter((folder) => {
@@ -606,9 +616,14 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                 })
                 .map((folder, index) => {
                   const folderColor = getFolderColorById(folder.folder_color);
-                  const thumbnailUrl = folder.first_video
-                    ? getThumbnailUrl(folder.first_video.video_id, 'medium')
-                    : null;
+                  const folderImageKey = `folder-${folder.playlist_id}-${folder.folder_color}`;
+                  const thumbUrls = folder.first_video ? {
+                    max: getThumbnailUrl(folder.first_video.video_id, 'max'),
+                    standard: getThumbnailUrl(folder.first_video.video_id, 'standard')
+                  } : null;
+
+                  const useFallback = imageLoadErrors.has(folderImageKey);
+                  const activeThumbnailUrl = thumbUrls ? (useFallback ? thumbUrls.standard : thumbUrls.max) : null;
 
                   return (
                     <div
@@ -636,11 +651,16 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                           className="absolute left-0 top-0 bottom-0 w-2 z-10"
                           style={{ backgroundColor: folderColor.hex }}
                         />
-                        {thumbnailUrl ? (
+                        {activeThumbnailUrl ? (
                           <img
-                            src={thumbnailUrl}
+                            src={activeThumbnailUrl}
                             alt={folder.first_video?.title || 'Folder thumbnail'}
                             className="w-full h-full object-cover pl-2"
+                            onError={() => {
+                              if (!useFallback) {
+                                setImageLoadErrors(prev => new Set(prev).add(folderImageKey));
+                              }
+                            }}
                             style={{
                               display: 'block',
                               width: '100%',
@@ -763,7 +783,11 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                 return items.map((item, index) => {
                   if (item.type === 'playlist') {
                     const playlist = item.data;
-                    const thumbnailUrl = playlistThumbnails[playlist.id];
+                    const thumbData = playlistThumbnails[playlist.id];
+                    const playlistImageKey = `playlist-${playlist.id}`;
+                    const useFallback = imageLoadErrors.has(playlistImageKey);
+                    const activeThumbnailUrl = thumbData ? (useFallback ? thumbData.standard : thumbData.max) : null;
+
                     const recentVideo = playlistRecentVideos[playlist.id];
                     const itemCount = playlistItemCounts[playlist.id] || 0;
                     const isExpanded = expandedPlaylists.has(playlist.id);
@@ -791,203 +815,208 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                         className="cursor-pointer group relative"
                         title={getInspectTitle(`Playlist: ${playlist.name}`)}
                       >
-                        {/* Thumbnail */}
-                        <div className="rounded-lg overflow-hidden relative group" style={{
-                          width: '100%',
-                          paddingBottom: '56.25%', // 16:9 aspect ratio
-                          backgroundColor: '#0f172a',
-                        }}>
-                          {thumbnailUrl ? (
-                            <img
-                              src={thumbnailUrl}
-                              alt={playlist.name}
-                              style={{
+                        <div className="border-2 border-slate-700/50 rounded-xl p-2 bg-slate-800/20 hover:border-sky-500/50 transition-colors h-full flex flex-col">
+                          {/* Playlist Info */}
+                          <div className="mb-2 text-center border-2 border-[#052F4A] rounded-md p-1 bg-slate-100/90 shadow-sm">
+                            <h3 className="font-bold text-lg truncate transition-colors"
+                              style={{ color: '#052F4A' }}
+                              onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
+                              onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}
+                              title={playlist.name}>
+                              {playlist.name}
+                            </h3>
+                          </div>
+
+                          {/* Thumbnail */}
+                          <div className="rounded-lg overflow-hidden relative group mt-auto" style={{
+                            width: '100%',
+                            paddingBottom: '56.25%', // 16:9 aspect ratio
+                            backgroundColor: '#0f172a',
+                          }}>
+                            {activeThumbnailUrl ? (
+                              <img
+                                src={activeThumbnailUrl}
+                                alt={playlist.name}
+                                onError={() => {
+                                  if (!useFallback) {
+                                    setImageLoadErrors(prev => new Set(prev).add(playlistImageKey));
+                                  }
+                                }}
+                                style={{
+                                  position: 'absolute',
+                                  top: 0,
+                                  left: 0,
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover',
+                                  display: 'block'
+                                }}
+                              />
+                            ) : (
+                              <div style={{
                                 position: 'absolute',
                                 top: 0,
                                 left: 0,
                                 width: '100%',
                                 height: '100%',
-                                objectFit: 'cover',
-                                display: 'block'
-                              }}
-                            />
-                          ) : (
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <svg
+                                  className="w-12 h-12 text-slate-500"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 6h16M4 12h16M4 18h16"
+                                  />
+                                </svg>
+                              </div>
+                            )}
+
+
+                            {/* Play overlay on hover */}
                             <div style={{
                               position: 'absolute',
                               top: 0,
                               left: 0,
                               width: '100%',
                               height: '100%',
+                              backgroundColor: 'rgba(0, 0, 0, 0)',
+                              transition: 'background-color 0.2s',
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center'
-                            }}>
-                              <svg
-                                className="w-12 h-12 text-slate-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M4 6h16M4 12h16M4 18h16"
-                                />
-                              </svg>
-                            </div>
-                          )}
-
-
-                          {/* Play overlay on hover */}
-                          <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            backgroundColor: 'rgba(0, 0, 0, 0)',
-                            transition: 'background-color 0.2s',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '12px',
-                            zIndex: 10
-                          }}
-                            className="group-hover:bg-black/40"
-                          >
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-3">
-                              <button
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  try {
-                                    const items = await getPlaylistItems(playlist.id);
-                                    setPreviewPlaylist(items, playlist.id, null);
-                                    // Navigate to videos page to show preview
-                                    setCurrentPage('videos');
-                                    if (viewMode === 'full') {
-                                      setViewMode('half');
+                              justifyContent: 'center',
+                              gap: '12px',
+                              zIndex: 10
+                            }}
+                              className="group-hover:bg-black/40"
+                            >
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-3">
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const items = await getPlaylistItems(playlist.id);
+                                      setPreviewPlaylist(items, playlist.id, null);
+                                      // Navigate to videos page to show preview
+                                      setCurrentPage('videos');
+                                      if (viewMode === 'full') {
+                                        setViewMode('half');
+                                      }
+                                    } catch (error) {
+                                      console.error('Failed to load playlist items for preview:', error);
                                     }
-                                  } catch (error) {
-                                    console.error('Failed to load playlist items for preview:', error);
+                                  }}
+                                  className="pointer-events-auto bg-sky-500 hover:bg-sky-600 rounded-full p-3 transition-all active:scale-90 shadow-lg"
+                                  style={{ color: '#052F4A' }}
+                                  title={getInspectTitle('Preview playlist') || 'Preview playlist'}
+                                >
+                                  <Eye size={20} strokeWidth={2.5} />
+                                </button>
+                                <svg
+                                  className="w-16 h-16 pointer-events-auto cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
+                                  style={{ color: '#052F4A' }}
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const items = await getPlaylistItems(playlist.id);
+                                      setPlaylistItems(items, playlist.id, null, playlist.name);
+                                      if (items.length > 0 && onVideoSelect) {
+                                        onVideoSelect(items[0].video_url);
+                                      }
+                                    } catch (error) {
+                                      console.error('Failed to load playlist items:', error);
+                                    }
+                                  }}
+                                >
+                                  <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                </svg>
+                              </div>
+                            </div>
+
+                            {/* 3-dot menu - moved to hover overlay (Top Right) */}
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30" onClick={e => e.stopPropagation()}>
+                              <CardMenu
+                                options={[
+                                  {
+                                    label: isExpanded ? 'Collapse Folders' : 'Expand Folders',
+                                    icon: (
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isExpanded ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
+                                      </svg>
+                                    ),
+                                    action: 'toggleFolders',
+                                  },
+                                  {
+                                    label: 'Export Playlist',
+                                    icon: (
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                      </svg>
+                                    ),
+                                    action: 'export',
+                                  },
+                                  {
+                                    label: 'Add to Tab',
+                                    submenu: 'tabs',
+                                    icon: (
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                      </svg>
+                                    ),
+                                  },
+                                  {
+                                    label: deletingPlaylistId === playlist.id ? 'Deleting...' : 'Delete',
+                                    danger: true,
+                                    icon: deletingPlaylistId === playlist.id ? (
+                                      <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                      </svg>
+                                    ) : (
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                      </svg>
+                                    ),
+                                    action: 'delete',
+                                    disabled: deletingPlaylistId === playlist.id,
+                                  },
+                                ]}
+                                submenuOptions={{
+                                  tabs: tabs
+                                    .filter(tab => tab.id !== 'all')
+                                    .map(tab => {
+                                      const isInTab = tab.playlistIds.includes(playlist.id);
+                                      return {
+                                        label: isInTab ? `✓ ${tab.name}` : tab.name,
+                                        action: isInTab ? 'removeFromTab' : 'addToTab',
+                                        tabId: tab.id,
+                                      };
+                                    }),
+                                }}
+                                onOptionClick={(option) => {
+                                  if (option.action === 'toggleFolders') {
+                                    togglePlaylistExpand(playlist.id);
+                                  } else if (option.action === 'export') {
+                                    handleExportPlaylist(playlist.id, playlist.name);
+                                  } else if (option.action === 'delete' && !option.disabled) {
+                                    handleDeletePlaylist(playlist.id, playlist.name, { stopPropagation: () => { } }); // CardMenu internal click handler already stops propagation usually, but we also wrapped in div
+                                  } else if (option.action === 'addToTab') {
+                                    addPlaylistToTab(option.tabId, playlist.id);
+                                  } else if (option.action === 'removeFromTab') {
+                                    removePlaylistFromTab(option.tabId, playlist.id);
                                   }
                                 }}
-                                className="pointer-events-auto bg-sky-500 hover:bg-sky-600 rounded-full p-3 transition-all active:scale-90 shadow-lg"
-                                style={{ color: '#052F4A' }}
-                                title={getInspectTitle('Preview playlist') || 'Preview playlist'}
-                              >
-                                <Eye size={20} strokeWidth={2.5} />
-                              </button>
-                              <svg
-                                className="w-16 h-16 pointer-events-auto cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
-                                style={{ color: '#052F4A' }}
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  try {
-                                    const items = await getPlaylistItems(playlist.id);
-                                    setPlaylistItems(items, playlist.id, null, playlist.name);
-                                    if (items.length > 0 && onVideoSelect) {
-                                      onVideoSelect(items[0].video_url);
-                                    }
-                                  } catch (error) {
-                                    console.error('Failed to load playlist items:', error);
-                                  }
-                                }}
-                              >
-                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                              </svg>
+                              />
                             </div>
-                          </div>
 
-                          {/* 3-dot menu - moved to hover overlay (Top Right) */}
-                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30" onClick={e => e.stopPropagation()}>
-                            <CardMenu
-                              options={[
-                                {
-                                  label: isExpanded ? 'Collapse Folders' : 'Expand Folders',
-                                  icon: (
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isExpanded ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
-                                    </svg>
-                                  ),
-                                  action: 'toggleFolders',
-                                },
-                                {
-                                  label: 'Export Playlist',
-                                  icon: (
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                  ),
-                                  action: 'export',
-                                },
-                                {
-                                  label: 'Add to Tab',
-                                  submenu: 'tabs',
-                                  icon: (
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                    </svg>
-                                  ),
-                                },
-                                {
-                                  label: deletingPlaylistId === playlist.id ? 'Deleting...' : 'Delete',
-                                  danger: true,
-                                  icon: deletingPlaylistId === playlist.id ? (
-                                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                  ) : (
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                  ),
-                                  action: 'delete',
-                                  disabled: deletingPlaylistId === playlist.id,
-                                },
-                              ]}
-                              submenuOptions={{
-                                tabs: tabs
-                                  .filter(tab => tab.id !== 'all')
-                                  .map(tab => {
-                                    const isInTab = tab.playlistIds.includes(playlist.id);
-                                    return {
-                                      label: isInTab ? `✓ ${tab.name}` : tab.name,
-                                      action: isInTab ? 'removeFromTab' : 'addToTab',
-                                      tabId: tab.id,
-                                    };
-                                  }),
-                              }}
-                              onOptionClick={(option) => {
-                                if (option.action === 'toggleFolders') {
-                                  togglePlaylistExpand(playlist.id);
-                                } else if (option.action === 'export') {
-                                  handleExportPlaylist(playlist.id, playlist.name);
-                                } else if (option.action === 'delete' && !option.disabled) {
-                                  handleDeletePlaylist(playlist.id, playlist.name, { stopPropagation: () => { } }); // CardMenu internal click handler already stops propagation usually, but we also wrapped in div
-                                } else if (option.action === 'addToTab') {
-                                  addPlaylistToTab(option.tabId, playlist.id);
-                                } else if (option.action === 'removeFromTab') {
-                                  removePlaylistFromTab(option.tabId, playlist.id);
-                                }
-                              }}
-                            />
-                          </div>
-
-                          {/* Playlist Title Overlay */}
-                          <div className="absolute bottom-0 left-0 right-0 p-3 z-20">
-                            <h3 className="font-black text-3xl italic tracking-wide truncate"
-                              style={{
-                                color: '#052F4A',
-                                WebkitTextStroke: '2px white',
-                                textShadow: '4px 4px 0 #38bdf8',
-                                paddingBottom: '4px' // Prevent shadow clipping
-                              }}
-                              title={playlist.name}>
-                              {playlist.name}
-                            </h3>
                           </div>
                         </div>
                       </div>
@@ -996,10 +1025,16 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                     // Render folder card - same size as playlist card
                     const folder = item.data;
                     const folderColor = getFolderColorById(folder.folder_color);
-                    const thumbnailUrl = folder.first_video
-                      ? getThumbnailUrl(folder.first_video.video_id, 'medium')
-                      : null;
+                    const folderImageKey = `folder-${folder.playlist_id}-${folder.folder_color}`;
+                    const thumbUrls = folder.first_video ? {
+                      max: getThumbnailUrl(folder.first_video.video_id, 'max'),
+                      standard: getThumbnailUrl(folder.first_video.video_id, 'standard')
+                    } : null;
+                    const useFallback = imageLoadErrors.has(folderImageKey);
+                    const activeThumbnailUrl = thumbUrls ? (useFallback ? thumbUrls.standard : thumbUrls.max) : null;
+
                     const folderKey = `${folder.playlist_id}:${folder.folder_color}`;
+
                     const isStuck = stuckFolders.has(folderKey);
 
                     return (
@@ -1025,147 +1060,153 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                         className="cursor-pointer group relative"
                         title={getInspectTitle(`${folderColor.name} folder`)}
                       >
-                        {/* Thumbnail - Same format as playlist card */}
-                        <div className="rounded-lg overflow-hidden" style={{
-                          position: 'relative',
-                          width: '100%',
-                          paddingBottom: '56.25%', // 16:9 aspect ratio
-                          backgroundColor: '#0f172a',
-                          overflow: 'hidden'
-                        }}>
-                          {/* Colored left border indicator */}
-                          <div
-                            className="absolute left-0 top-0 bottom-0 w-2 z-10"
-                            style={{ backgroundColor: folderColor.hex }}
-                          />
-                          {thumbnailUrl ? (
-                            <img
-                              src={thumbnailUrl}
-                              alt={folder.first_video?.title || 'Folder thumbnail'}
-                              style={{
+                        <div className="border-2 border-slate-700/50 rounded-xl p-2 bg-slate-800/20 hover:border-sky-500/50 transition-colors h-full flex flex-col">
+                          {/* Folder Info - Same format as playlist card */}
+                          <div className="mb-2 relative border-2 border-[#052F4A] rounded-md p-1 bg-slate-100/90 shadow-sm">
+                            <div className="flex items-center gap-2 justify-center">
+                              {/* Colored dot indicator */}
+                              <div
+                                className="w-3 h-3 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: folderColor.hex }}
+                              />
+                              <h3 className="font-medium text-sm truncate transition-colors pr-8"
+                                style={{ color: '#052F4A' }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
+                                {folderColor.name} Folder
+                              </h3>
+                            </div>
+
+                            {/* 3-dot menu - removed from bottom right */}
+                          </div>
+
+                          {/* Thumbnail - Same format as playlist card */}
+                          <div className="rounded-lg overflow-hidden relative group mt-auto" style={{
+                            width: '100%',
+                            paddingBottom: '56.25%', // 16:9 aspect ratio
+                            backgroundColor: '#0f172a',
+                            overflow: 'hidden'
+                          }}>
+                            {/* Colored left border indicator */}
+                            <div
+                              className="absolute left-0 top-0 bottom-0 w-2 z-10"
+                              style={{ backgroundColor: folderColor.hex }}
+                            />
+                            {activeThumbnailUrl ? (
+                              <img
+                                src={activeThumbnailUrl}
+                                alt={folder.first_video?.title || 'Folder thumbnail'}
+                                onError={() => {
+                                  if (!useFallback) {
+                                    setImageLoadErrors(prev => new Set(prev).add(folderImageKey));
+                                  }
+                                }}
+                                style={{
+                                  position: 'absolute',
+                                  top: 0,
+                                  left: 0,
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover',
+                                  display: 'block',
+                                  paddingLeft: '8px'
+                                }}
+                              />
+                            ) : (
+                              <div style={{
                                 position: 'absolute',
                                 top: 0,
                                 left: 0,
                                 width: '100%',
                                 height: '100%',
-                                objectFit: 'cover',
-                                display: 'block',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                                 paddingLeft: '8px'
-                              }}
-                            />
-                          ) : (
+                              }}>
+                                <svg
+                                  className="w-12 h-12 text-slate-500"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                                  />
+                                </svg>
+                              </div>
+                            )}
+                            {/* Play overlay on hover */}
                             <div style={{
                               position: 'absolute',
                               top: 0,
                               left: 0,
                               width: '100%',
                               height: '100%',
+                              backgroundColor: 'rgba(0, 0, 0, 0)',
+                              transition: 'background-color 0.2s',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              paddingLeft: '8px'
-                            }}>
-                              <svg
-                                className="w-12 h-12 text-slate-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                                />
-                              </svg>
+                              pointerEvents: 'none'
+                            }}
+                              className="group-hover:bg-black/40"
+                            >
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                <svg
+                                  className="w-16 h-16"
+                                  style={{ color: '#052F4A' }}
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                </svg>
+                              </div>
                             </div>
-                          )}
-                          {/* Play overlay on hover */}
-                          <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            backgroundColor: 'rgba(0, 0, 0, 0)',
-                            transition: 'background-color 0.2s',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            pointerEvents: 'none'
-                          }}
-                            className="group-hover:bg-black/40"
-                          >
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                              <svg
-                                className="w-16 h-16"
-                                style={{ color: '#052F4A' }}
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                              </svg>
-                            </div>
-                          </div>
-                          {/* 3-dot menu - moved to hover overlay (Top Right) */}
-                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
-                            <CardMenu
-                              options={[
-                                {
-                                  label: isStuck ? 'Unstick Folder' : 'Stick Folder',
-                                  icon: isStuck ? (
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  ) : (
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                                    </svg>
-                                  ),
-                                  action: 'toggleStick',
-                                },
-                              ]}
-                              onOptionClick={async (option) => {
-                                if (option.action === 'toggleStick') {
-                                  try {
-                                    const newStuckStatus = await toggleStuckFolder(folder.playlist_id, folder.folder_color);
-                                    // Update local state
-                                    const folderKey = `${folder.playlist_id}:${folder.folder_color}`;
-                                    setStuckFolders(prev => {
-                                      const next = new Set(prev);
-                                      if (newStuckStatus) {
-                                        next.add(folderKey);
-                                      } else {
-                                        next.delete(folderKey);
-                                      }
-                                      return next;
-                                    });
-                                  } catch (error) {
-                                    console.error('Failed to toggle stick folder:', error);
+                            {/* 3-dot menu - moved to hover overlay (Top Right) */}
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
+                              <CardMenu
+                                options={[
+                                  {
+                                    label: isStuck ? 'Unstick Folder' : 'Stick Folder',
+                                    icon: isStuck ? (
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    ) : (
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                      </svg>
+                                    ),
+                                    action: 'toggleStick',
+                                  },
+                                ]}
+                                onOptionClick={async (option) => {
+                                  if (option.action === 'toggleStick') {
+                                    try {
+                                      const newStuckStatus = await toggleStuckFolder(folder.playlist_id, folder.folder_color);
+                                      // Update local state
+                                      const folderKey = `${folder.playlist_id}:${folder.folder_color}`;
+                                      setStuckFolders(prev => {
+                                        const next = new Set(prev);
+                                        if (newStuckStatus) {
+                                          next.add(folderKey);
+                                        } else {
+                                          next.delete(folderKey);
+                                        }
+                                        return next;
+                                      });
+                                    } catch (error) {
+                                      console.error('Failed to toggle stick folder:', error);
+                                    }
                                   }
-                                }
-                              }}
-                            />
+                                }}
+                              />
+                            </div>
                           </div>
-                        </div>
-
-                        {/* Folder Info - Same format as playlist card */}
-                        <div className="mt-2 relative">
-                          <div className="flex items-center gap-2 mb-1">
-                            {/* Colored dot indicator */}
-                            <div
-                              className="w-3 h-3 rounded-full flex-shrink-0"
-                              style={{ backgroundColor: folderColor.hex }}
-                            />
-                            <h3 className="font-medium text-sm truncate transition-colors pr-8"
-                              style={{ color: '#052F4A' }}
-                              onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
-                              onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
-                              {folderColor.name} Folder
-                            </h3>
-                          </div>
-
-                          {/* 3-dot menu - removed from bottom right */}
                         </div>
                       </div>
                     );
@@ -1175,8 +1216,9 @@ const PlaylistsPage = ({ onVideoSelect }) => {
             </div>
           </div>
         </>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 

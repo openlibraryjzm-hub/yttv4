@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS playlists (
     description TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
-    custom_ascii TEXT
+    custom_ascii TEXT,
+    custom_thumbnail_url TEXT
 )
 ```
 
@@ -48,6 +49,7 @@ CREATE TABLE IF NOT EXISTS playlists (
 - `created_at` (TEXT NOT NULL) - ISO 8601 timestamp (RFC3339 format)
 - `updated_at` (TEXT NOT NULL) - ISO 8601 timestamp (RFC3339 format)
 - `custom_ascii` (TEXT) - Optional custom ASCII art banner for the playlist
+- `custom_thumbnail_url` (TEXT) - Optional URL for a custom playlist cover image. If present, this overrides the default behavior of using the first video's thumbnail.
 
 **Indexes**: None (primary key is automatically indexed)
 

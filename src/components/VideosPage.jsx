@@ -381,6 +381,23 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
           setShowPlaylistSelector(true);
           break;
 
+        case 'setPlaylistCover':
+          if (!activePlaylistId) return;
+          try {
+            // Use max resolution for cover
+            const coverUrl = `https://img.youtube.com/vi/${video.video_id}/maxresdefault.jpg`;
+            await updatePlaylist(activePlaylistId, null, null, null, coverUrl);
+            alert(`Playlist cover updated using thumbnail from "${video.title}"`);
+
+            // Refresh playlists to reflect change in UI immediately if possible
+            const playlists = await getAllPlaylists();
+            setAllPlaylists(playlists);
+          } catch (error) {
+            console.error('Failed to set playlist cover:', error);
+            alert('Failed to set playlist cover');
+          }
+          break;
+
         case 'copyToPlaylist':
           setSelectedVideoForAction(video);
           setActionType('copy');

@@ -6,6 +6,7 @@ pub struct Playlist {
     pub name: String,
     pub description: Option<String>,
     pub custom_ascii: Option<String>,
+    pub custom_thumbnail_url: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -37,6 +38,8 @@ pub struct UpdatePlaylistRequest {
     pub id: i64,
     pub name: Option<String>,
     pub description: Option<String>,
+    pub custom_ascii: Option<String>,
+    pub custom_thumbnail_url: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

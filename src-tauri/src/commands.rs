@@ -35,6 +35,7 @@ pub fn update_playlist(
     name: Option<String>,
     description: Option<String>,
     custom_ascii: Option<String>,
+    custom_thumbnail_url: Option<String>,
 ) -> Result<bool, String> {
     let db = db.lock().map_err(|e| e.to_string())?;
     db.update_playlist(
@@ -42,6 +43,7 @@ pub fn update_playlist(
         name.as_deref(),
         description.as_deref(),
         custom_ascii.as_deref(),
+        custom_thumbnail_url.as_deref(),
     )
     .map_err(|e| e.to_string())
 }

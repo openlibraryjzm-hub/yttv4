@@ -26,7 +26,9 @@ impl Database {
                 name TEXT NOT NULL,
                 description TEXT,
                 created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                custom_thumbnail_url TEXT
             )",
             [],
         )?;
@@ -239,6 +241,12 @@ impl Database {
             )?;
         }
 
+        // Migration: Add custom_thumbnail_url to playlists
+        if !pl_columns.contains(&"custom_thumbnail_url".to_string()) {
+            self.conn
+                .execute("ALTER TABLE playlists ADD COLUMN custom_thumbnail_url TEXT", [])?;
+        }
+
         Ok(())
     }
 
@@ -254,7 +262,7 @@ impl Database {
 
     pub fn get_all_playlists(&self) -> Result<Vec<Playlist>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, name, description, created_at, updated_at, custom_ascii FROM playlists ORDER BY created_at DESC"
+            "SELECT id, name, description, created_at, updated_at, custom_ascii, custom_thumbnail_url FROM playlists ORDER BY created_at DESC"
         )?;
 
         let playlists = stmt
@@ -266,6 +274,7 @@ impl Database {
                     created_at: row.get(3)?,
                     updated_at: row.get(4)?,
                     custom_ascii: row.get(5)?,
+                    custom_thumbnail_url: row.get(6)?,
                 })
             })?
             .collect::<Result<Vec<_>, _>>()?;
@@ -275,7 +284,7 @@ impl Database {
 
     pub fn get_playlist(&self, id: i64) -> Result<Option<Playlist>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, name, description, created_at, updated_at, custom_ascii FROM playlists WHERE id = ?1",
+            "SELECT id, name, description, created_at, updated_at, custom_ascii, custom_thumbnail_url FROM playlists WHERE id = ?1",
         )?;
 
         match stmt.query_row(params![id], |row| {
@@ -286,6 +295,7 @@ impl Database {
                 created_at: row.get(3)?,
                 updated_at: row.get(4)?,
                 custom_ascii: row.get(5)?,
+                custom_thumbnail_url: row.get(6)?,
             })
         }) {
             Ok(playlist) => Ok(Some(playlist)),
@@ -300,6 +310,7 @@ impl Database {
         name: Option<&str>,
         description: Option<&str>,
         custom_ascii: Option<&str>,
+        custom_thumbnail_url: Option<&str>,
     ) -> Result<bool> {
         let now = Utc::now().to_rfc3339();
 
@@ -321,6 +332,12 @@ impl Database {
                 idx += 1;
             }
 
+            if let Some(thumb) = custom_thumbnail_url {
+                query.push_str(&format!(", custom_thumbnail_url = ?{}", idx));
+                params.push(Box::new(thumb));
+                idx += 1;
+            }
+
             query.push_str(&format!(" WHERE id = ?{}", idx));
             params.push(Box::new(id));
 
@@ -330,7 +347,7 @@ impl Database {
             let rows = self.conn.execute(&query, params_refs.as_slice())?;
             return Ok(rows > 0);
         } else if let Some(desc) = description {
-            // Update only description (legacy support, though less likely used with new signature)
+            // Update only description
             let mut query = "UPDATE playlists SET description = ?1, updated_at = ?2".to_string();
             let mut params: Vec<Box<dyn rusqlite::ToSql>> =
                 vec![Box::new(desc), Box::new(now.clone())];
@@ -342,6 +359,12 @@ impl Database {
                 idx += 1;
             }
 
+            if let Some(thumb) = custom_thumbnail_url {
+                query.push_str(&format!(", custom_thumbnail_url = ?{}", idx));
+                params.push(Box::new(thumb));
+                idx += 1;
+            }
+
             query.push_str(&format!(" WHERE id = ?{}", idx));
             params.push(Box::new(id));
 
@@ -350,9 +373,29 @@ impl Database {
             let rows = self.conn.execute(&query, params_refs.as_slice())?;
             return Ok(rows > 0);
         } else if let Some(ascii) = custom_ascii {
-            let rows = self.conn.execute(
-                "UPDATE playlists SET custom_ascii = ?1, updated_at = ?2 WHERE id = ?3",
-                params![ascii, now, id],
+            // Update custom_ascii
+            let mut query = "UPDATE playlists SET custom_ascii = ?1, updated_at = ?2".to_string();
+            let mut params: Vec<Box<dyn rusqlite::ToSql>> =
+                vec![Box::new(ascii), Box::new(now.clone())];
+            let mut idx = 3;
+
+            if let Some(thumb) = custom_thumbnail_url {
+                query.push_str(&format!(", custom_thumbnail_url = ?{}", idx));
+                params.push(Box::new(thumb));
+                idx += 1;
+            }
+            
+            query.push_str(&format!(" WHERE id = ?{}", idx));
+            params.push(Box::new(id));
+
+            let params_refs: Vec<&dyn rusqlite::ToSql> =
+                params.iter().map(|p| p.as_ref()).collect();
+            let rows = self.conn.execute(&query, params_refs.as_slice())?;
+            return Ok(rows > 0);
+        } else if let Some(thumb) = custom_thumbnail_url {
+             let rows = self.conn.execute(
+                "UPDATE playlists SET custom_thumbnail_url = ?1, updated_at = ?2 WHERE id = ?3",
+                params![thumb, now, id],
             )?;
             return Ok(rows > 0);
         }
