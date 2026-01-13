@@ -117,10 +117,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                     <div className={`absolute inset-0 pointer-events-none z-0 pattern-${bannerPattern || 'diagonal'}`} />
                 )}
 
-                {/* Dark Overlay for Custom Images */}
-                {customPageBannerImage && (
-                    <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none" />
-                )}
+
 
                 {/* Abstract Background Shapes */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none transform group-hover:scale-110 transition-transform duration-1000 ease-in-out" />
@@ -153,16 +150,16 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                 {/* Avatar Section (Optional) */}
                 {avatar && (
                     <div className="shrink-0 hidden md:flex flex-col items-center gap-1 animate-in fade-in slide-in-from-left-4 duration-700">
-                        <span className="text-white/90 font-black tracking-widest uppercase opacity-60 mix-blend-overlay text-[10px]">
+                        <span className="text-white/90 font-black tracking-widest uppercase opacity-80 mix-blend-overlay text-[10px]" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8)' }}>
                             {author}
                         </span>
                         {avatar.includes('\n') ? (
-                            <pre className="font-mono text-[4px] leading-none whitespace-pre text-white/90 drop-shadow-md select-none opacity-70 mix-blend-overlay">
+                            <pre className="font-mono text-[4px] leading-none whitespace-pre text-white/90 drop-shadow-md select-none opacity-90 mix-blend-overlay" style={{ textShadow: '-0.5px -0.5px 0 #000, 0.5px -0.5px 0 #000, -0.5px 0.5px 0 #000, 0.5px 0.5px 0 #000, 0 1px 2px rgba(0,0,0,1)' }}>
                                 {avatar}
                             </pre>
                         ) : (
                             // Single line avatars (Lenny) are larger
-                            <div className="font-mono text-3xl font-bold text-white/90 drop-shadow-md whitespace-nowrap opacity-80 mix-blend-overlay">
+                            <div className="font-mono text-3xl font-bold text-white/90 drop-shadow-md whitespace-nowrap opacity-90 mix-blend-overlay" style={{ textShadow: '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 8px rgba(0,0,0,0.8)' }}>
                                 {avatar}
                             </div>
                         )}
@@ -170,23 +167,23 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                 )}
 
                 <div className="flex flex-col justify-center min-w-0">
-                    <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight drop-shadow-md truncate">
+                    <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight drop-shadow-md truncate" style={{ textShadow: '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 8px rgba(0,0,0,0.8)' }}>
                         {title}
                     </h1>
 
                     {/* Metadata Row */}
-                    <div className="flex items-center gap-3 text-white/80 font-medium text-sm md:text-base mb-4">
+                    <div className="flex items-center gap-3 text-white/80 font-medium text-sm md:text-base mb-4" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.9)' }}>
                         {videoCount !== undefined && (
                             <span>{videoCount} {videoCount === 1 ? 'Video' : 'Videos'}</span>
                         )}
                         {(videoCount !== undefined && (creationYear || author)) && (
-                            <span className="w-1 h-1 rounded-full bg-white/60" />
+                            <span className="w-1 h-1 rounded-full bg-white/60 shadow-sm" />
                         )}
                         {creationYear && (
                             <span>{creationYear}</span>
                         )}
                         {(creationYear && author) && (
-                            <span className="w-1 h-1 rounded-full bg-white/60" />
+                            <span className="w-1 h-1 rounded-full bg-white/60 shadow-sm" />
                         )}
                         {author && (
                             <span>{author}</span>
@@ -194,7 +191,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                     </div>
 
                     {description && (
-                        <p className="text-lg md:text-xl text-white/95 font-medium max-w-4xl leading-relaxed drop-shadow-sm opacity-90">
+                        <p className="text-lg md:text-xl text-white/95 font-medium max-w-4xl leading-relaxed drop-shadow-sm opacity-90" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8)' }}>
                             {description}
                         </p>
                     )}
@@ -224,7 +221,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                         if (onContinue) onContinue();
                     }}
                 >
-                    <span className="text-white/80 font-bold text-sm tracking-wider group-hover/continue:text-white transition-colors">
+                    <span className="text-white/80 font-bold text-sm tracking-wider group-hover/continue:text-white transition-colors" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8)' }}>
                         CONTINUE?
                     </span>
                     <div className="relative h-24 aspect-video rounded-lg overflow-hidden shadow-lg border-2 border-white/20 group-hover/continue:border-white transition-all transform group-hover/continue:scale-105">

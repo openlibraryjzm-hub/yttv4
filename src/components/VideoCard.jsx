@@ -426,7 +426,7 @@ const VideoCard = ({
           overlay={playOverlay}
           badges={bulkTagMode ? badges.filter(b => b.position !== 'top-right') : badges}
           progress={progress}
-          className={`rounded-lg overflow-hidden ${isCurrentlyPlaying ? 'ring-4 ring-red-500 ring-offset-2 ring-offset-black shadow-[0_0_40px_rgba(239,68,68,1),inset_0_0_40px_rgba(239,68,68,0.8)]' : ''}`} // Rounding thumbnail specifically
+          className={`rounded-lg overflow-hidden border-2 border-black ${isCurrentlyPlaying ? 'ring-4 ring-red-500 ring-offset-2 ring-offset-black shadow-[0_0_40px_rgba(239,68,68,1),inset_0_0_40px_rgba(239,68,68,0.8)]' : ''}`} // Rounding thumbnail specifically
         />
 
         {/* Star color picker overlay */}

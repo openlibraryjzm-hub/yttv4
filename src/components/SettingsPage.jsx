@@ -297,7 +297,7 @@ export default function SettingsPage({ currentThemeId, onThemeChange }) {
                                                     className="absolute inset-0 bg-cover bg-center"
                                                     style={{ backgroundImage: `url(${customPageBannerImage})` }}
                                                 />
-                                                <div className="absolute inset-0 bg-black/40"></div>
+
                                                 <span className="relative z-10 text-white font-black text-2xl tracking-widest drop-shadow-md uppercase opacity-90">
                                                     CUSTOM
                                                 </span>
