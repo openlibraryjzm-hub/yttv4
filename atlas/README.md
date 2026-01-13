@@ -402,3 +402,22 @@ For detailed information about the application's theme system and recent color c
 3.  **Action Button Layout**:
     *   **Equal Spacing**: Evenly distributed the Star, Shuffle, Pin, and Like buttons between the Play Button (Left Anchor) and Info Button (Right Anchor).
     *   **Far Right Menu**: Moved the 3-dot "More Menu" button to the far right edge (280px offset) to separate it from the primary action cluster.
+
+## Session Updates (Jan 13, 2026) -> Playlist Card Hover Actions
+
+### Key Features Implemented:
+
+1.  **Refined Playlist Card UI**:
+    -   **Action Repositioning**: Moved the **Play** and **Preview** hover buttons from the thumbnail overlay to the right side of the **Playlist Title Bar**.
+    -   **Visual Cleanup**: Removed the large, center-overlaid buttons to provide a clearer view of the thumbnail art.
+    -   **Title Bar Integration**: Converted the title bar into a flex container to house the new icon-only controls (Play, Shuffle, Preview) which appear on hover.
+
+2.  **New Interaction Capabilities**:
+    -   **Shuffle Button**: Added a dedicated **Shuffle** icon button to the immediate right of the Play button. It instantly shuffles the playlist/folder items and starts playback.
+    -   **Right-Click to Play Cover**:
+        -   **Behavior**: Right-clicking the Play button now scans the playlist to find the video matching the current card thumbnail (the "Cover Video").
+        -   **Use Case**: Allows users to instantly jump to the "Featured" video represented by the cover art, rather than starting from the top of the list.
+        -   **Fallback**: Standard left-click behavior (play from start) remains unchanged.
+
+3.  **Cross-Component Consistency**:
+    -   Applied all UI changes and new interaction logic (Shuffle, Smart Play) to **Folder Cards** as well, ensuring a unified experience across the entire playlist grid.

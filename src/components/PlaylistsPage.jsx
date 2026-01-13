@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPlaylist, getAllPlaylists, getPlaylistItems, deletePlaylist, deletePlaylistByName, getAllFoldersWithVideos, exportPlaylist, getFoldersForPlaylist, toggleStuckFolder, getAllStuckFolders, getVideosInFolder, getAllVideoProgress } from '../api/playlistApi';
 import { getThumbnailUrl } from '../utils/youtubeUtils';
 import { usePlaylistStore } from '../store/playlistStore';
-import { Eye } from 'lucide-react';
+import { Eye, Play, Shuffle } from 'lucide-react';
 import { useFolderStore } from '../store/folderStore';
 import { useTabStore } from '../store/tabStore';
 import { useTabPresetStore } from '../store/tabPresetStore';
@@ -817,14 +817,106 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                       >
                         <div className="border-2 border-slate-700/50 rounded-xl p-2 bg-slate-800/20 hover:border-sky-500/50 transition-colors h-full flex flex-col">
                           {/* Playlist Info */}
-                          <div className="mb-2 text-center border-2 border-[#052F4A] rounded-md p-1 bg-slate-100/90 shadow-sm">
-                            <h3 className="font-bold text-lg truncate transition-colors"
+                          <div className="mb-2 flex items-center justify-between border-2 border-[#052F4A] rounded-md p-1 bg-slate-100/90 shadow-sm relative overflow-hidden h-[38px]">
+                            <h3 className="font-bold text-lg truncate transition-colors pl-1 flex-1 text-left"
                               style={{ color: '#052F4A' }}
                               onMouseEnter={(e) => e.currentTarget.style.color = '#38bdf8'}
                               onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}
                               title={playlist.name}>
                               {playlist.name}
                             </h3>
+
+                            {/* Hover Controls - Moved to Title Bar */}
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-1 top-0 bottom-0 pr-1 pl-4 bg-gradient-to-l from-slate-100 via-slate-100 to-transparent">
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    const items = await getPlaylistItems(playlist.id);
+                                    setPreviewPlaylist(items, playlist.id, null);
+                                    setCurrentPage('videos');
+                                    if (viewMode === 'full') {
+                                      setViewMode('half');
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to load playlist items for preview:', error);
+                                  }
+                                }}
+                                className="p-1 hover:bg-slate-200 rounded text-[#052F4A] hover:text-sky-600 transition-colors"
+                                title="Preview playlist"
+                              >
+                                <Eye size={18} strokeWidth={2.5} />
+                              </button>
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    const items = await getPlaylistItems(playlist.id);
+                                    setPlaylistItems(items, playlist.id, null, playlist.name);
+                                    if (items.length > 0 && onVideoSelect) {
+                                      onVideoSelect(items[0].video_url);
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to load playlist items:', error);
+                                  }
+                                }}
+                                onContextMenu={async (e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  try {
+                                    const items = await getPlaylistItems(playlist.id);
+                                    setPlaylistItems(items, playlist.id, null, playlist.name);
+
+                                    if (items.length > 0 && onVideoSelect) {
+                                      // Find video that matches the current cover
+                                      // activeThumbnailUrl is available in scope
+                                      let targetVideo = items[0];
+
+                                      if (activeThumbnailUrl) {
+                                        const coverMatch = items.find(item => {
+                                          const maxThumb = getThumbnailUrl(item.video_id, 'max');
+                                          const stdThumb = getThumbnailUrl(item.video_id, 'standard');
+                                          return maxThumb === activeThumbnailUrl || stdThumb === activeThumbnailUrl;
+                                        });
+
+                                        if (coverMatch) {
+                                          targetVideo = coverMatch;
+                                          console.log('Playing cover video:', targetVideo.title);
+                                        }
+                                      }
+
+                                      onVideoSelect(targetVideo.video_url);
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to play cover video:', error);
+                                  }
+                                }}
+                                className="p-1 hover:bg-slate-200 rounded text-[#052F4A] hover:text-sky-600 transition-colors"
+                                title="Play playlist (Right-click for cover video)"
+                              >
+                                <Play size={18} fill="currentColor" />
+                              </button>
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    const items = await getPlaylistItems(playlist.id);
+                                    // Simple shuffle
+                                    const shuffled = [...items].sort(() => Math.random() - 0.5);
+                                    setPlaylistItems(shuffled, playlist.id, null, playlist.name);
+                                    if (shuffled.length > 0 && onVideoSelect) {
+                                      onVideoSelect(shuffled[0].video_url);
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to shuffle playlist:', error);
+                                  }
+                                }}
+                                className="p-1 hover:bg-slate-200 rounded text-[#052F4A] hover:text-sky-600 transition-colors"
+                                title="Shuffle playlist"
+                              >
+                                <Shuffle size={18} />
+                              </button>
+                            </div>
                           </div>
 
                           {/* Thumbnail */}
@@ -879,68 +971,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                               </div>
                             )}
 
-
-                            {/* Play overlay on hover */}
-                            <div style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '100%',
-                              height: '100%',
-                              backgroundColor: 'rgba(0, 0, 0, 0)',
-                              transition: 'background-color 0.2s',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '12px',
-                              zIndex: 10
-                            }}
-                              className="group-hover:bg-black/40"
-                            >
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-3">
-                                <button
-                                  onClick={async (e) => {
-                                    e.stopPropagation();
-                                    try {
-                                      const items = await getPlaylistItems(playlist.id);
-                                      setPreviewPlaylist(items, playlist.id, null);
-                                      // Navigate to videos page to show preview
-                                      setCurrentPage('videos');
-                                      if (viewMode === 'full') {
-                                        setViewMode('half');
-                                      }
-                                    } catch (error) {
-                                      console.error('Failed to load playlist items for preview:', error);
-                                    }
-                                  }}
-                                  className="pointer-events-auto bg-sky-500 hover:bg-sky-600 rounded-full p-3 transition-all active:scale-90 shadow-lg"
-                                  style={{ color: '#052F4A' }}
-                                  title={getInspectTitle('Preview playlist') || 'Preview playlist'}
-                                >
-                                  <Eye size={20} strokeWidth={2.5} />
-                                </button>
-                                <svg
-                                  className="w-16 h-16 pointer-events-auto cursor-pointer opacity-80 hover:opacity-100 transition-opacity"
-                                  style={{ color: '#052F4A' }}
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                  onClick={async (e) => {
-                                    e.stopPropagation();
-                                    try {
-                                      const items = await getPlaylistItems(playlist.id);
-                                      setPlaylistItems(items, playlist.id, null, playlist.name);
-                                      if (items.length > 0 && onVideoSelect) {
-                                        onVideoSelect(items[0].video_url);
-                                      }
-                                    } catch (error) {
-                                      console.error('Failed to load playlist items:', error);
-                                    }
-                                  }}
-                                >
-                                  <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                </svg>
-                              </div>
-                            </div>
+                            {/* Play overlay on hover - REMOVED per user request */}
 
                             {/* 3-dot menu - moved to hover overlay (Top Right) */}
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30" onClick={e => e.stopPropagation()}>
@@ -1062,8 +1093,8 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                       >
                         <div className="border-2 border-slate-700/50 rounded-xl p-2 bg-slate-800/20 hover:border-sky-500/50 transition-colors h-full flex flex-col">
                           {/* Folder Info - Same format as playlist card */}
-                          <div className="mb-2 relative border-2 border-[#052F4A] rounded-md p-1 bg-slate-100/90 shadow-sm">
-                            <div className="flex items-center gap-2 justify-center">
+                          <div className="mb-2 relative border-2 border-[#052F4A] rounded-md p-1 bg-slate-100/90 shadow-sm flex items-center justify-between h-[38px] overflow-hidden">
+                            <div className="flex items-center gap-2 justify-center pl-1">
                               {/* Colored dot indicator */}
                               <div
                                 className="w-3 h-3 rounded-full flex-shrink-0"
@@ -1075,6 +1106,78 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                                 onMouseLeave={(e) => e.currentTarget.style.color = '#052F4A'}>
                                 {folderColor.name} Folder
                               </h3>
+                            </div>
+
+                            {/* Hover Controls - Moved to Title Bar */}
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-1 top-0 bottom-0 pr-1 pl-4 bg-gradient-to-l from-slate-100 via-slate-100 to-transparent">
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    const items = await getVideosInFolder(folder.playlist_id, folder.folder_color);
+                                    // Use parentPlaylist name if available (it should be attach to item in the list builder)
+                                    const playlistTitle = item.parentPlaylist ? item.parentPlaylist.name : null;
+                                    setPlaylistItems(items, folder.playlist_id, { playlist_id: folder.playlist_id, folder_color: folder.folder_color }, playlistTitle);
+                                    if (items.length > 0 && onVideoSelect) {
+                                      onVideoSelect(items[0].video_url);
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to load folder playlist items:', error);
+                                  }
+                                }}
+                                onContextMenu={async (e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  try {
+                                    const items = await getVideosInFolder(folder.playlist_id, folder.folder_color);
+                                    const playlistTitle = item.parentPlaylist ? item.parentPlaylist.name : null;
+                                    setPlaylistItems(items, folder.playlist_id, { playlist_id: folder.playlist_id, folder_color: folder.folder_color }, playlistTitle);
+
+                                    if (items.length > 0 && onVideoSelect) {
+                                      let targetVideo = items[0];
+
+                                      if (activeThumbnailUrl) {
+                                        const coverMatch = items.find(v => {
+                                          const maxThumb = getThumbnailUrl(v.video_id, 'max');
+                                          const stdThumb = getThumbnailUrl(v.video_id, 'standard');
+                                          return maxThumb === activeThumbnailUrl || stdThumb === activeThumbnailUrl;
+                                        });
+                                        if (coverMatch) targetVideo = coverMatch;
+                                      }
+                                      onVideoSelect(targetVideo.video_url);
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to play folder cover:', error);
+                                  }
+                                }}
+                                className="p-1 hover:bg-slate-200 rounded text-[#052F4A] hover:text-sky-600 transition-colors"
+                                title="Play folder (Right-click for cover video)"
+                              >
+                                <Play size={18} fill="currentColor" />
+                              </button>
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    const items = await getVideosInFolder(folder.playlist_id, folder.folder_color);
+                                    const shuffled = [...items].sort(() => Math.random() - 0.5);
+
+                                    // Use parentPlaylist name if available
+                                    const playlistTitle = item.parentPlaylist ? item.parentPlaylist.name : null;
+                                    setPlaylistItems(shuffled, folder.playlist_id, { playlist_id: folder.playlist_id, folder_color: folder.folder_color }, playlistTitle);
+
+                                    if (shuffled.length > 0 && onVideoSelect) {
+                                      onVideoSelect(shuffled[0].video_url);
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to shuffle folder:', error);
+                                  }
+                                }}
+                                className="p-1 hover:bg-slate-200 rounded text-[#052F4A] hover:text-sky-600 transition-colors"
+                                title="Shuffle folder"
+                              >
+                                <Shuffle size={18} />
+                              </button>
                             </div>
 
                             {/* 3-dot menu - removed from bottom right */}
@@ -1139,33 +1242,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                                 </svg>
                               </div>
                             )}
-                            {/* Play overlay on hover */}
-                            <div style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '100%',
-                              height: '100%',
-                              backgroundColor: 'rgba(0, 0, 0, 0)',
-                              transition: 'background-color 0.2s',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              pointerEvents: 'none'
-                            }}
-                              className="group-hover:bg-black/40"
-                            >
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                <svg
-                                  className="w-16 h-16"
-                                  style={{ color: '#052F4A' }}
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                </svg>
-                              </div>
-                            </div>
+                            {/* Play overlay on hover - REMOVED */}
                             {/* 3-dot menu - moved to hover overlay (Top Right) */}
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
                               <CardMenu
