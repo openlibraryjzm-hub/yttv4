@@ -1,23 +1,11 @@
-# Session Updates: Sticky Toolbar & Video Aesthetics Refinement
-**Timestamp:** 14/01/2026 12:26am
+# Session Updates: Video Card Interaction Refinement
+**Timestamp:** 14/01/2026 12:48am
 
 ## Key Changes
-1. **Banner & Sticky Toolbar**:
-   - Refined `PageBanner.jsx` layout for cleaner vertical rhythm.
-   - **Sticky Toolbar Redesign**:
-     - Adjusted layout to be more compact.
-     - **Color Bar Prism**: Transformed the folder selection dots into a continuous, flexible "prism bar" of colored rectangles.
-     - **Video Counts**: Added video count numbers inside the colored rectangles (visible when count > 0).
-     - **Interaction**: Selecting a folder replaces the count with a subtle white ring indicator.
-   - Reordered toolbar elements for better UX (Sort -> Filter -> Colors).
-
-2. **Video Card Aesthetics**:
-   - **"Now Playing" Indicator**:
-     - Replaced text badge with **3 animated bouncing dots** (Warm Red).
-     - Added a **vibrant warm red glow** (`ring-red-500` + dual-layer shadow) around the active video thumbnail.
-     - Added "bleed" effect where the red glow extends both outwards and inwards into the thumbnail.
-   - **Watched Badge**: Simplified to a standalone green tick icon.
-   - **Cleanups**: Removed the "#index" badge from bottom-left for a cleaner thumbnail view.
+1. **Video Card Cleanup**:
+   - **Removed Hover Buttons**: Removed the Play button, Priority Pin button, and Pin/Bookmark button from the video thumbnail hover overlay to reduce visual clutter.
+   - **Cleaned Up State**: Removed unused state logic and event handlers associated with these buttons (`isPriority`, `handlePinClick`, etc.).
+   - **Updated Documentation**: Reflected these changes in `atlas/ui.md`.
 
 ---
 

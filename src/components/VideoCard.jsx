@@ -10,7 +10,7 @@ import { FOLDER_COLORS, getFolderColorById } from '../utils/folderColors';
 import { usePinStore } from '../store/pinStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { useFolderStore } from '../store/folderStore';
-import { Pin } from 'lucide-react';
+import { Pin } from 'lucide-react'; // Added Pin icon back
 
 /**
  * VideoCard - Example of how easy it is to build complex cards with the new system
@@ -52,14 +52,52 @@ const VideoCard = ({
   const thumbnailUrl = getThumbnailUrl(video.video_id, 'medium');
   const primaryFolder = videoFolders.length > 0 ? getFolderColorById(videoFolders[0]) : null;
   const quickAssignColor = getFolderColorById(quickAssignFolder);
-  const { togglePin, togglePriorityPin } = usePinStore();
 
+
+  // FIX: Split selectors to prevent "Maximum update depth exceeded" error
   // FIX: Split selectors to prevent "Maximum update depth exceeded" error
   const isPinnedVideo = usePinStore(state =>
     state.pinnedVideos.some(v => v.id === video.id) && !state.priorityPinIds.includes(video.id)
   );
 
   const isPriority = usePinStore(state => state.priorityPinIds.includes(video.id));
+  const { togglePin, togglePriorityPin } = usePinStore();
+  const pinLongPressTimerRef = useRef(null); // Timer for long press logic
+  const [activePin, setActivePin] = useState(null); // For visual feedback
+
+  // Handle pin interactions (dual action: click=normal, long=priority)
+  const handlePinMouseDown = (e) => {
+    e.stopPropagation();
+    setActivePin('pressing');
+    pinLongPressTimerRef.current = setTimeout(() => {
+      togglePriorityPin(video);
+      setActivePin('long-pressed'); // Visual feedback can be handled in render
+      pinLongPressTimerRef.current = null;
+    }, 600); // 600ms threshold
+  };
+
+  const handlePinMouseUp = (e) => {
+    e.stopPropagation();
+    setActivePin(null);
+    if (pinLongPressTimerRef.current) {
+      clearTimeout(pinLongPressTimerRef.current);
+      pinLongPressTimerRef.current = null;
+      // Short click -> Normal pin
+      togglePin(video);
+      if (onPinClick) onPinClick(video);
+    }
+  };
+
+  const handlePinMouseLeave = (e) => {
+    // Cancel if mouse leaves button
+    if (pinLongPressTimerRef.current) {
+      clearTimeout(pinLongPressTimerRef.current);
+      pinLongPressTimerRef.current = null;
+      setActivePin(null);
+    }
+  };
+
+
 
   const pinnedAt = usePinStore(state => {
     const pin = state.pinnedVideos.find(v => v.id === video.id);
@@ -205,50 +243,10 @@ const VideoCard = ({
     })),
   };
 
-  // Handle pin click
-  const handlePinClick = (e) => {
-    e.stopPropagation(); // Prevent card click
-    togglePin(video);
-    if (onPinClick) {
-      onPinClick(video);
-    }
-  };
 
-  // Handle priority pin click
-  const handlePriorityPinClick = (e) => {
-    e.stopPropagation(); // Prevent card click
-    togglePriorityPin(video);
-  };
 
   // Play overlay for hover (only show when not in bulk tag mode)
-  const playOverlay = !bulkTagMode ? (
-    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-3 pointer-events-none group-hover:pointer-events-auto">
-      {/* Play button for main player */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          if (onVideoClick) {
-            onVideoClick();
-          }
-        }}
-        className="bg-sky-500 hover:bg-sky-600 text-white rounded-full p-3 transition-all active:scale-90 shadow-lg pointer-events-auto"
-        title={getInspectTitle('Play video') || 'Play video'}
-      >
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-        </svg>
-      </button>
-      {/* Priority pin button */}
-      <button
-        onClick={handlePriorityPinClick}
-        className="rounded-full flex items-center justify-center border-2 border-amber-400 shadow-sm bg-white hover:bg-amber-50 transition-all active:scale-90 pointer-events-auto"
-        style={{ width: '48px', height: '48px', borderColor: '#fbbf24' }}
-        title={getInspectTitle(isPriority ? 'Remove priority' : 'Set as priority pin') || (isPriority ? 'Remove priority' : 'Set as priority pin')}
-      >
-        <Pin size={24} color="#fbbf24" fill={isPriority ? "#fbbf24" : "none"} strokeWidth={2} />
-      </button>
-    </div>
-  ) : null;
+  const playOverlay = null;
 
   // Badges for thumbnail (now can safely use quickActions, menuOptions, submenuOptions)
   const badges = [
@@ -265,73 +263,36 @@ const VideoCard = ({
       position: 'top-left',
     },
 
-    // Pin icon badge - bottom-right
+    // Top Right Controls (Pin + Star) - Combined to sit side-by-side
     !bulkTagMode && {
       component: (
-        <button
-          onClick={handlePinClick}
-          className={`p-1.5 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 ${isPinnedVideo
-            ? 'bg-amber-500 hover:bg-amber-600 text-white'
-            : 'bg-black/70 hover:bg-black/90 text-white/70 hover:text-white'
-            }`}
-          title={getInspectTitle(isPinnedVideo ? 'Unpin video' : 'Pin video') || (isPinnedVideo ? 'Unpin video' : 'Pin video')}
-        >
-          <svg
-            className="w-4 h-4"
-            fill={isPinnedVideo ? 'currentColor' : 'none'}
-            stroke="currentColor"
-            strokeWidth={isPinnedVideo ? 0 : 2}
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-            />
-          </svg>
-        </button>
-      ),
-      position: 'bottom-right',
-    },
-    // Quick Actions Badge (Star) - Top Right - Visible on Hover
-    !bulkTagMode && {
-      component: (
-        <div
-          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative"
-          onMouseEnter={() => {
-            // Clear any existing delay or hide timeout
-            if (starHoverDelayRef.current) {
-              clearTimeout(starHoverDelayRef.current);
-            }
-            if (starHoverTimeoutRef.current) {
-              clearTimeout(starHoverTimeoutRef.current);
-              starHoverTimeoutRef.current = null;
-            }
-            // Add 1.2 second delay before showing menu
-            starHoverDelayRef.current = setTimeout(() => {
-              setIsStarHovered(true);
-              starHoverDelayRef.current = null;
-            }, 1200);
-          }}
-          onMouseLeave={() => {
-            // Clear the delay if mouse leaves before menu appears
-            if (starHoverDelayRef.current) {
-              clearTimeout(starHoverDelayRef.current);
-              starHoverDelayRef.current = null;
-            }
-            // Use a small delay to allow mouse to move to picker
-            starHoverTimeoutRef.current = setTimeout(() => {
-              setIsStarHovered(false);
-            }, 150);
-          }}
-        >
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          {/* Dual-Action Pin Button */}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onStarClick) {
-                onStarClick(e);
-              }
+            onMouseDown={handlePinMouseDown}
+            onMouseUp={handlePinMouseUp}
+            onMouseLeave={handlePinMouseLeave}
+            className={`p-1.5 rounded-lg transition-all active:scale-95 duration-200 mr-1 ${isPriority
+              ? 'bg-amber-500/10 border-amber-500/50 text-amber-500 hover:bg-amber-500 hover:text-white'
+              : isPinnedVideo
+                ? 'bg-sky-500/10 border-sky-500/50 text-sky-500 hover:bg-sky-500 hover:text-white'
+                : 'bg-black/70 hover:bg-black/90 text-slate-400 hover:text-slate-200'
+              } ${activePin === 'pressing' ? 'scale-90' : ''}`}
+            style={{
+              borderWidth: (isPriority || isPinnedVideo) ? '1px' : '0px',
             }}
+            title={getInspectTitle(isPriority ? 'Remove priority pin' : isPinnedVideo ? 'Unpin video' : 'Pin (Click) / Priority (Hold)') || (isPriority ? 'Remove priority pin' : isPinnedVideo ? 'Unpin video' : 'Pin (Click) / Priority (Hold)')}
+          >
+            <Pin
+              size={20}
+              fill={isPriority || isPinnedVideo ? "currentColor" : "none"}
+              strokeWidth={2}
+            />
+          </button>
+
+          {/* Quick Actions Badge (Star) */}
+          <div
+            className="relative"
             onMouseEnter={() => {
               // Clear any existing delay or hide timeout
               if (starHoverDelayRef.current) {
@@ -353,38 +314,88 @@ const VideoCard = ({
                 clearTimeout(starHoverDelayRef.current);
                 starHoverDelayRef.current = null;
               }
+              // Use a small delay to allow mouse to move to picker
+              starHoverTimeoutRef.current = setTimeout(() => {
+                setIsStarHovered(false);
+              }, 150);
             }}
-            className="p-1.5 rounded-lg bg-black/70 hover:bg-black/90 transition-all"
-            title={getInspectTitle(
-              videoFolders.length > 0
-                ? `Assigned to: ${videoFolders.map(f => getFolderColorById(f).name).join(', ')}`
-                : 'Click to assign to folder'
-            ) || (
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onStarClick) {
+                  onStarClick(e);
+                }
+              }}
+              onMouseEnter={() => {
+                // Clear any existing delay or hide timeout
+                if (starHoverDelayRef.current) {
+                  clearTimeout(starHoverDelayRef.current);
+                }
+                if (starHoverTimeoutRef.current) {
+                  clearTimeout(starHoverTimeoutRef.current);
+                  starHoverTimeoutRef.current = null;
+                }
+                // Add 1.2 second delay before showing menu
+                starHoverDelayRef.current = setTimeout(() => {
+                  setIsStarHovered(true);
+                  starHoverDelayRef.current = null;
+                }, 1200);
+              }}
+              onMouseLeave={() => {
+                // Clear the delay if mouse leaves before menu appears
+                if (starHoverDelayRef.current) {
+                  clearTimeout(starHoverDelayRef.current);
+                  starHoverDelayRef.current = null;
+                }
+              }}
+              className="p-1.5 rounded-lg bg-black/70 hover:bg-black/90 transition-all block"
+              title={getInspectTitle(
                 videoFolders.length > 0
                   ? `Assigned to: ${videoFolders.map(f => getFolderColorById(f).name).join(', ')}`
                   : 'Click to assign to folder'
-              )}
-            style={{ color: primaryFolder ? primaryFolder.hex : quickAssignColor.hex }}
-            data-card-action="true"
-          >
-            <svg
-              className="w-5 h-5"
-              fill={videoFolders.length > 0 ? 'currentColor' : 'none'}
-              stroke="currentColor"
-              strokeWidth={videoFolders.length > 0 ? 0 : 2}
-              viewBox="0 0 24 24"
+              ) || (
+                  videoFolders.length > 0
+                    ? `Assigned to: ${videoFolders.map(f => getFolderColorById(f).name).join(', ')}`
+                    : 'Click to assign to folder'
+                )}
+              style={{ color: primaryFolder ? primaryFolder.hex : quickAssignColor.hex }}
+              data-card-action="true"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-              />
-            </svg>
-          </button>
+              <svg
+                className="w-5 h-5"
+                fill={videoFolders.length > 0 ? 'currentColor' : 'none'}
+                stroke="currentColor"
+                strokeWidth={videoFolders.length > 0 ? 0 : 2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       ),
       position: 'top-right',
     },
+
+    // 3-Dot Menu - Bottom Right
+    !bulkTagMode && {
+      component: (
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <CardActions
+            menuOptions={menuOptions}
+            onMenuOptionClick={onMenuOptionClick}
+            submenuOptions={submenuOptions}
+            className="flex-nowrap p-0 bg-black/70 rounded-lg hover:bg-black/90 text-white backdrop-blur-sm shadow-sm"
+          />
+        </div>
+      ),
+      position: 'bottom-right'
+    }
   ].filter(Boolean);
 
   return (
@@ -476,14 +487,7 @@ const VideoCard = ({
         subtitle={video.video_id}
         className="[&>p]:opacity-0 [&>p]:group-hover:opacity-100 [&>p]:transition-opacity [&>p]:duration-200"
         padding="p-0 pt-3"
-        headerActions={!bulkTagMode && (
-          <CardActions
-            menuOptions={menuOptions}
-            onMenuOptionClick={onMenuOptionClick}
-            submenuOptions={submenuOptions}
-            className="flex-nowrap"
-          />
-        )}
+        headerActions={null}
       />
     </Card>
   );

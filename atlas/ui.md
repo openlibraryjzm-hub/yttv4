@@ -529,37 +529,44 @@ Users see video cards built using the Card component system with video-specific 
     - **Badges**:
       - **Top-left**: "Now Playing" indicator (3 animated bouncing dots in Warm Red, only when playing)
       - **Top-left**: "Watched" indicator (Green tick icon, only when watched and not playing)
-      - **Bottom-right**: Pin icon button (amber when pinned, gray when not)
-      - **Top-right**: (Empty)
+
+      - **Top-right**: Combined controls:
+        - **Pin Button**: Dual-action (click for normal, hold for priority)
+        - **Quick Assign Star**: Hover/click interactions
     - **Progress Bar**: Red horizontal line at the bottom of the thumbnail indicating watch progress percentage.
-    - **Hover Overlay**: Play button (blue) and priority pin button (amber/yellow pin icon)
+    - **Hover Overlay**: 
+      - **Top Right**: Pin button and Star button appear
+      - **Bottom Right**: 3-dot menu appears
     - **Bulk Tag Overlay**: When in bulk tag mode, color grid appears on hover
     - **Star Color Picker Overlay**: When hovering over star icon for 1.2 seconds, a grid of 16 colored stars appears centered at the top of the thumbnail
 
 - **Content Area**:
   - **Title**: Video title, dark blue text (RGB(5, 47, 74) / #052F4A), truncates
+  - **Title**: Video title, dark blue text (RGB(5, 47, 74) / #052F4A), truncates
   - **Hidden by default (visible on hover)**:
     - **Subtitle**: Video ID, gray text
-    - **Actions** (bottom-right Star icon (for quick folder assign) and 3-dot menu
 
 - **Visual States**:
   - **Default**: Gray border, thumbnail and title visible
   - **Selected**: Blue border (when video is selected)
   - **Playing**: **Vibrant Red Glow** (thick `ring-red-500` border + dual-layer shadow bleeding into/out of thumbnail)
-  - **Hover**: Lighter background, play buttons, pin button (bottom-right), menu, star, and subtitle appear
+  - **Hover**: Lighter background, top-right controls (Pin/Star), bottom-right menu, and subtitle appear
 
 - **Interactive Elements**:
   - **Card Click**: Plays video in main player
-  - **Play Button** (hover): Same as card click
-  - **Priority Pin Button** (hover): Sets video as priority pin (amber/yellow pin icon, 48px × 48px). Shows filled icon if video is already priority pin, outline if not.
+
+  - **Pin Button** (top-right):
+    - **Short Click**: Pins/unpins video (session-only, normal pin). Icon outline/filled blue.
+    - **Long Click (>600ms)**: Sets video as priority pin. Icon outline/filled amber.
+
   - **Star Icon** (top-right): 
     - **Quick Click**: Assigns/unassigns video to quick assign folder (uses quick assign color preference)
     - **Hover (1.2s delay)**: Shows star color picker menu with 16 colored stars
       - **Left Click on Color Star**: Assigns/unassigns video to that folder color
       - **Right Click on Color Star**: Sets that color as the new quick assign default
     - Star outline color reflects the current quick assign folder color (when video has no folder assignments)
-  - **Pin Icon** (bottom-right): Pins/unpins video (session-only, normal pin)
-  - **3-Dot Menu** (top-right):
+
+  - **3-Dot Menu** (bottom-right on thumbnail):
     - **Move to Playlist**: Opens modal to move video to another playlist (removes from current)
     - **Copy to Playlist**: Opens modal to copy video to another playlist (keeps in current)
     - **Assign to Folder**: Opens submenu to assign video to color folder
