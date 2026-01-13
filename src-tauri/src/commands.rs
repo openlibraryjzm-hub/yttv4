@@ -169,6 +169,16 @@ pub fn get_videos_in_folder(
 }
 
 #[tauri::command]
+pub fn get_all_folder_assignments(
+    db: State<Mutex<Database>>,
+    playlist_id: i64,
+) -> Result<std::collections::HashMap<String, Vec<String>>, String> {
+    let db = db.lock().map_err(|e| e.to_string())?;
+    db.get_all_folder_assignments_for_playlist(playlist_id)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub fn get_video_folder_assignments(
     db: State<Mutex<Database>>,
     playlist_id: i64,

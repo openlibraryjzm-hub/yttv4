@@ -326,7 +326,7 @@ Users see a 3-column grid of video cards showing videos from the current playlis
 
 - **Page Banner**: 
   - **Location**: Displayed at the very top of the scrollable content area.
-  - **Unified Banner System**: Connects visually with the Sticky Toolbar below it. Both components display the same **Custom Banner Image** (if set) and use synchronized horizontal scrolling animation (`animate-page-banner-scroll`) to create the illusion of a single continuous surface.
+  - **Unified Banner System**: Connects visually with the Sticky Toolbar below it. Both components display the same **Custom Banner Image** (if set) and use synchronized, GPU-accelerated horizontal scrolling animations to create the illusion of a single continuous surface without performance stutter.
   - **Seamless Integration**: Connects seamlessly with the content area.
   - **Content**: Shows the title (Playlist Name, "{Color} Folder", custom folder name, or "Unsorted Videos") and description text.
   - **Metadata**: Displays video count, creation year (hardcoded 2026), and **Author Identity** (user avatar and name).

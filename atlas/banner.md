@@ -17,65 +17,57 @@ To ensure the image covers the entire combined height (Banner + Toolbar) without
 -   **Logic**: The system loads the image to get its natural dimensions. It then compares the image's aspect ratio to the container's aspect ratio (where "container height" = Banner Height + Toolbar Height Buffer).
 -   **Result**: It derives a `bannerBgSize` string (e.g., `100% auto` or `auto 450px`) that ensures the image creates a continuous surface.
 
-### 3. Synchronized Scrolling Animation
-Both components animate the background image horizontally to the right.
--   **Mechanism**: A CSS animation (`animate-page-banner-scroll`) modifies `background-position-x`.
--   **Synchronization**: By splitting the `background-position` logic, we can animate X (horizontal scroll) via CSS while controlling Y (vertical alignment) via inline styles.
+### 3. GPU-Accelerated Animation
+Both components animate the background image horizontally using hardware acceleration.
+-   **Mechanism**: A dedicated `UnifiedBannerBackground` component wraps the image.
+-   **Performance**: Uses `transform: translate3d()` to animate on the compositor thread, ensuring 60fps performance without main-thread jank.
+-   **Technique**: The component renders two copies of the image pattern side-by-side in a 200% width container and slides the container to create a seamless infinite loop.
 
 ## Implementation Details
 
 ### Components Involved
--   `src/components/PageBanner.jsx` (The calculator and top display)
--   `src/components/VideosPage.jsx` (Container for Videos tab)
--   `src/components/PlaylistsPage.jsx` (Container for Playlists tab)
+-   `src/components/UnifiedBannerBackground.jsx` (New re-usable GPU background component)
+-   `src/components/PageBanner.jsx` (Top display)
+-   `src/components/VideosPage.jsx` (Sticky Toolbar implementation)
+-   `src/components/PlaylistsPage.jsx` (Sticky Toolbar implementation)
 
 ### State Flow
 1.  **`PageBanner` calculates**:
-    -   It measures its own rendered height (`clientHeight`).
-    -   It loads the `customPageBannerImage` to get natural width/height.
-    -   It calculates the optimal `backgroundSize`.
-2.  **Data Passing**:
-    -   `PageBanner` calls `onHeightChange(height, bgSize)`.
-    -   The parent page (`VideosPage` or `PlaylistsPage`) stores these values in state: `bannerHeight` and `bannerBgSize`.
-3.  **Sticky Toolbar applies**:
-    -   The parent page applies these values to the sticky toolbar's inline styles.
+    -   Measures rendered height and calculates optimal `bannerBgSize` based on image aspect ratio.
+    -   Updates `bannerHeight` and `bannerBgSize` in `useConfigStore`.
+2.  **Global Store (Omnipresent)**:
+    -   Values are persisted in `useConfigStore`.
+    -   This eliminates "pop-in" on page load since dimensions are already known.
+3.  **Components Render**:
+    -   **Sticky Toolbar** reads directly from `useConfigStore`.
+    -   **Top Banner**: `<UnifiedBannerBackground yOffset="top" ... />`
+    -   **Sticky Toolbar**: `<UnifiedBannerBackground yOffset={-bannerHeight} ... />`
 
-### Style Logic
+### UnifiedBannerBackground Architecture
+The core component (`src/components/UnifiedBannerBackground.jsx`) uses a specific DOM structure to enable smooth looping:
 
-#### Top Banner (`PageBanner.jsx`)
 ```jsx
-style={{
-    backgroundImage: `url(${image})`,
-    backgroundSize: localBgSize,      // Calculated value
-    backgroundPositionY: 'top',       // Align to top
-    backgroundPositionX: '0px',       // Start for animation
-    backgroundRepeat: 'repeat-x'      // Allow seamless loop
-}}
-className="animate-page-banner-scroll"
+<div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    {/* Container: 200% width, slides -50% (one viewport width) over 120s */}
+    <div className="absolute top-0 left-0 h-full w-[200%] flex animate-gpu-scroll">
+        {/* Copy 1: Initial View */}
+        <div className="w-1/2 h-full" style={{ backgroundImage: ..., backgroundSize: ... }} />
+        {/* Copy 2: Seamless Loop Partner */}
+        <div className="w-1/2 h-full" style={{ backgroundImage: ..., backgroundSize: ... }} />
+    </div>
+</div>
 ```
 
-#### Sticky Toolbar (`VideosPage.jsx` / `PlaylistsPage.jsx`)
-```jsx
-style={{
-    backgroundImage: `url(${image})`,
-    backgroundSize: bannerBgSize,     // Same calculated value
-    backgroundPositionY: `-${bannerHeight}px`, // Negative offset matching top banner height
-    backgroundPositionX: '0px',
-    backgroundRepeat: 'repeat-x'
-}}
-className="animate-page-banner-scroll"
-```
-
-### Animation CSS
-Defined in `src/index.css` (or `App.css`):
+**Animation CSS (`App.css`):**
 ```css
-@keyframes page-banner-scroll {
-  from { background-position-x: 0px; }
-  to { background-position-x: 10000px; }
+@keyframes gpu-scroll {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 
-.animate-page-banner-scroll {
-  animation: page-banner-scroll 360s linear infinite;
+.animate-gpu-scroll {
+  animation: gpu-scroll 120s linear infinite;
+  will-change: transform;
 }
 ```
 
@@ -87,32 +79,14 @@ To enable this feature, a `customPageBannerImage` prop must be passed to the `Pa
 -   ** misalignment**: Ensure `bannerBgSize` is identical in both components.
 -   **No Animation**: Ensure `backgroundPositionX` is explicitly set to `0px` in inline styles, otherwise the shorthand `backgroundPosition` might override the animation.
 
-## Refactoring Plan: The "True Unified" Banner (Next Steps)
+## Future Plans: Global Layer Alignment
 
-The current implementation uses a "Stitched" approach (two separate divs syncing styles). This causes performance stutter (main thread animation) and a visual "pop-in" delay (React state lag).
+The current "Stitched" approach (two separate `UnifiedBannerBackground` instances) has solved the performance stutter. However, because they are separate React components, there may still be a slight "pop-in" delay on the Sticky Toolbar's background during initial page load or rapid state changes.
 
-**Next Objective**: Move to a **Master Parallax Layer** architecture.
-
-### Problem
-1.  **Performance**: Animating `background-position` on large divs causes high CSV/Paint costs.
-2.  **Alignment**: The bottom sticky banner "pops in" late because it waits for the top banner to measure/render first.
-
-### Implementation Plan (TL;DR)
-1.  **Create Global Layer**:
-    -   Create a new component `<GlobalBannerLayer />` that sits at `z-index: 0` (behind everything) in the main layout (e.g., `LayoutShell` or `App`).
-    -   This layer will contain the **single** source-of-truth `<img />` or `div` for the banner.
-
-2.  **GPU Animation**:
-    -   Instead of `background-position` animation, use `transform: translate3d(x, 0, 0)` on this global layer.
-    -   This offloads rendering to the GPU (compositor thread) for silky smooth 60fps scrolling.
-
-3.  **Transparent Windows**:
-    -   Update `PageBanner` (Top) and `Sticky Toolbar` (Bottom) to have **transparent backgrounds**.
-    -   They essentially become "glass windows" looking through to the `GlobalBannerLayer` behind them.
-    -   This eliminates the need for complex stitching math or offset calculations. The image is just "there" behind them.
-
-4.  **Context/Store**:
-    -   Move `customPageBannerImage` state up to a global store (e.g., `useLayoutStore`) so the `GlobalBannerLayer` can render immediately without waiting for child components to mount.
+**Optimization (Optional)**: Move to a **Master Parallax Layer** architecture.
+-   **Goal**: Solve alignment/pop-in completely.
+-   **Method**: Render a single global `<UnifiedBannerBackground />` behind the entire app shell, and simply make the `PageBanner` and `Sticky Toolbar` transparent windows.
+-   **Status**: Low priority. The current GPU-accelerated stitching provides an excellent 60fps experience.
 
 ### Benefit
 -   **Zero Pop-in**: Image loads with the app shell.

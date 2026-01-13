@@ -662,6 +662,37 @@ impl Database {
         Ok(colors)
     }
 
+    pub fn get_all_folder_assignments_for_playlist(
+        &self,
+        playlist_id: i64,
+    ) -> Result<HashMap<String, Vec<String>>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT pi.video_id, vfa.folder_color 
+             FROM video_folder_assignments vfa
+             INNER JOIN playlist_items pi ON vfa.item_id = pi.id
+             WHERE vfa.playlist_id = ?1"
+        )?;
+
+        let mut assignments: HashMap<String, Vec<String>> = HashMap::new();
+
+        let rows = stmt.query_map(params![playlist_id], |row| {
+            Ok((
+                row.get::<_, String>(0)?, // video_id
+                row.get::<_, String>(1)?, // folder_color
+            ))
+        })?;
+
+        for row_result in rows {
+            let (video_id, folder_color) = row_result?;
+            assignments
+                .entry(video_id)
+                .or_insert_with(Vec::new)
+                .push(folder_color);
+        }
+
+        Ok(assignments)
+    }
+
     pub fn get_all_folders_with_videos(&self) -> Result<Vec<crate::models::FolderWithVideos>> {
         // Query to get all folders that have at least one video, grouped by playlist and folder color
         // Returns playlist info, folder color, video count, and first video

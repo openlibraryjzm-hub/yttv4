@@ -19,6 +19,8 @@ import CardThumbnail from './CardThumbnail';
 import PageBanner from './PageBanner';
 import { useConfigStore } from '../store/configStore';
 import TabPresetsDropdown from './TabPresetsDropdown';
+import AddPlaylistToTabModal from './AddPlaylistToTabModal';
+import UnifiedBannerBackground from './UnifiedBannerBackground';
 
 const PlaylistsPage = ({ onVideoSelect }) => {
   const [playlists, setPlaylists] = useState([]);
@@ -43,12 +45,10 @@ const PlaylistsPage = ({ onVideoSelect }) => {
   const { tabs, activeTabId, addPlaylistToTab, removePlaylistFromTab } = useTabStore();
   const { activePresetId, presets } = useTabPresetStore();
   const { setViewMode, viewMode, inspectMode } = useLayoutStore();
-  const { customPageBannerImage } = useConfigStore();
+  const { customPageBannerImage, bannerHeight, bannerBgSize } = useConfigStore();
   const { setCurrentPage } = useNavigationStore();
 
-  // Unified Banner Height State
-  const [bannerHeight, setBannerHeight] = useState(0);
-  const [bannerBgSize, setBannerBgSize] = useState('100% auto');
+
 
   // Helper to get inspect label
   const getInspectTitle = (label) => inspectMode ? label : undefined;
@@ -553,10 +553,6 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                     color={null}
                     isEditable={false}
                     seamlessBottom={true}
-                    onHeightChange={(h, bgs) => {
-                      setBannerHeight(h);
-                      if (bgs) setBannerBgSize(bgs);
-                    }}
                   />
                 </div>
               );
@@ -567,26 +563,14 @@ const PlaylistsPage = ({ onVideoSelect }) => {
 
             {/* Sticky Toolbar */}
             <div
-              className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) border-white/5 overflow-hidden
+              className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden -mt-16
               ${isStuck
-                  ? 'backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2'
-                  : 'backdrop-blur-md border-b border-x shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-4 pb-4'
+                  ? 'backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2 bg-slate-900/95'
+                  : 'backdrop-blur-xl border-b border-x border-t border-white/10 shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-4 pb-4 bg-black/30'
                 }
-              ${!customPageBannerImage ? (isStuck ? 'bg-slate-900/95' : 'bg-slate-800/40') : ''}
-              ${customPageBannerImage ? 'animate-page-banner-scroll' : ''}
               `}
-              style={customPageBannerImage ? {
-                backgroundImage: `url(${customPageBannerImage})`,
-                backgroundSize: bannerBgSize,
-                backgroundPositionY: `-${bannerHeight}px`,
-                backgroundPositionX: '0px',
-                backgroundRepeat: 'repeat-x',
-              } : {}}
             >
-              {/* Dark Overlay for Custom Banner */}
-              {customPageBannerImage && (
-                <div className="absolute inset-0 bg-black/60 pointer-events-none z-0" />
-              )}
+
 
               <div className={`px-4 flex items-center justify-between transition-all duration-300 relative z-10 ${isStuck ? 'h-[52px]' : 'py-2'}`}>
 

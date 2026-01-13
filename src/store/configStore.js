@@ -177,6 +177,12 @@ export const useConfigStore = create(
             // Visualizer Gradient
             visualizerGradient: true,
             setVisualizerGradient: (val) => set({ visualizerGradient: val }),
+
+            // Unified Banner State (Calculated)
+            bannerHeight: 0,
+            setBannerHeight: (val) => set({ bannerHeight: val }),
+            bannerBgSize: '100% auto',
+            setBannerBgSize: (val) => set({ bannerBgSize: val }),
         }), {
         name: 'config-storage-v10', // name of the item in the storage (must be unique)
     }

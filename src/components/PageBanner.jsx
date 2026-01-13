@@ -4,10 +4,11 @@ import { Pen, Play } from 'lucide-react';
 import { getThumbnailUrl } from '../utils/youtubeUtils';
 
 
+import UnifiedBannerBackground from './UnifiedBannerBackground';
 import { useConfigStore } from '../store/configStore';
 
-const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue, children, childrenPosition = 'right', topRightContent, seamlessBottom = false, onHeightChange }) => {
-    const { bannerPattern, customPageBannerImage } = useConfigStore();
+const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue, children, childrenPosition = 'right', topRightContent, seamlessBottom = false }) => {
+    const { bannerPattern, customPageBannerImage, bannerBgSize, setBannerHeight, setBannerBgSize } = useConfigStore();
 
     // Find color config if folderColor is provided
     // If folderColor is 'unsorted', distinct gray style
@@ -23,11 +24,9 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
 
     // Measure height and calculate background size for Unified Banner
     const bannerRef = React.useRef(null);
-    // Use state for local styles to avoid flicker, parent will trigger updates via prop
-    const [localBgSize, setLocalBgSize] = React.useState('100% auto');
 
     React.useEffect(() => {
-        if (!bannerRef.current || !onHeightChange) return;
+        if (!bannerRef.current) return;
 
         const updateDimensions = () => {
             const banner = bannerRef.current;
@@ -38,31 +37,14 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
 
             // If no custom image, just report height
             if (!customPageBannerImage) {
-                onHeightChange(height, 'cover');
+                setBannerHeight(height);
                 return;
             }
 
-            // Load image to check aspect ratio
-            const img = new Image();
-            img.onload = () => {
-                const imgW = img.naturalWidth;
-                const imgH = img.naturalHeight;
-
-                const bannerRatio = width / (height + 80); // +80px for sticky toolbar safety buffer
-                const imageRatio = imgW / imgH;
-
-                let bgSize = '100% auto';
-                if (bannerRatio < imageRatio) {
-                    // Banner is taller relative to its width than the image
-                    // We need to scale by height to prevent grey gap
-                    bgSize = `auto ${height + 80}px`;
-                }
-
-                setLocalBgSize(bgSize);
-                onHeightChange(height, bgSize);
-            };
-            img.src = customPageBannerImage;
+            // Just report height for PageBanner spacing, we use cover/center now.
+            setBannerHeight(height);
         };
+
 
         const observer = new ResizeObserver(updateDimensions);
         observer.observe(bannerRef.current);
@@ -74,13 +56,13 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
             observer.disconnect();
             window.removeEventListener('resize', updateDimensions);
         };
-    }, [onHeightChange, customPageBannerImage]);
+    }, [customPageBannerImage, setBannerHeight, setBannerBgSize]);
 
     if (customPageBannerImage) {
         gradientStyle = {
             backgroundImage: `url(${customPageBannerImage})`,
-            backgroundSize: localBgSize,
-            backgroundPositionY: 'top',
+            backgroundSize: 'cover', // Standard cover
+            backgroundPositionY: 'center',
             backgroundPositionX: '0px', // Allow animation to take over X axis
             backgroundRepeat: 'repeat-x', // Repeat horizontally for scroll
             // backgroundAttachment: 'fixed', // Removed fixed to basic absolute stitching
@@ -105,15 +87,6 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
         shadowColor = '#3b82f6';
     }
 
-    // Define animation for custom banner if needed (e.g., slow pan)
-    // For now, we'll keep it static or rely on the pattern overlay if the user wants both.
-    // If custom image is set, we might want to hide the pattern overlay to avoid clutter,
-    // OR show it if the user explicitly wants texture. 
-    // Let's hide the pattern by default if custom image is there, unless we want to support both.
-    // Given the UI in Settings uses "Banner Pattern" buttons, maybe custom image is a separate mode?
-    // In Settings, we will probably have "Upload" and "Presets". 
-    // If "Upload" is active (customPageBannerImage != null), we use it.
-
     // Check if custom image is a GIF
     const isGif = customPageBannerImage?.startsWith('data:image/gif');
 
@@ -122,12 +95,23 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
 
             {/* Background Layer - Hides overflow for shapes/patterns/images */}
             <div
-                className={`absolute inset-0 overflow-hidden ${seamlessBottom ? 'rounded-t-2xl rounded-b-none shadow-none' : 'rounded-2xl shadow-lg'} ${(customPageBannerImage && !isGif) ? 'animate-page-banner-scroll' : ''}`}
+                className={`absolute inset-0 overflow-hidden ${seamlessBottom ? 'rounded-t-2xl rounded-b-none shadow-none' : 'rounded-2xl shadow-lg'}`}
                 style={{
-                    ...gradientStyle,
+                    // Gradient styles only when NO custom image (fallback)
+                    ...(!customPageBannerImage ? gradientStyle : {}),
                     boxShadow: seamlessBottom ? 'none' : `0 10px 25px -5px ${shadowColor}50`
                 }}
             >
+                {/* Unified GPU Banner */}
+                {customPageBannerImage && (
+                    <UnifiedBannerBackground
+                        image={customPageBannerImage}
+                        bgSize="cover"
+                        yOffset="center"
+                        isGif={isGif}
+                    />
+                )}
+
                 {/* Animated Pattern Overlay */}
                 {!customPageBannerImage && (
                     <div className={`absolute inset-0 pointer-events-none z-0 pattern-${bannerPattern || 'diagonal'}`} />

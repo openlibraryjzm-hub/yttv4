@@ -60,6 +60,7 @@ pub fn run() {
             commands::assign_video_to_folder,
             commands::unassign_video_from_folder,
             commands::get_videos_in_folder,
+            commands::get_all_folder_assignments,
             commands::get_video_folder_assignments,
             commands::get_all_folders_with_videos,
             commands::get_folders_for_playlist,

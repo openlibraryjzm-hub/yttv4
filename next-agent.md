@@ -1,31 +1,64 @@
-# Handover Brief: Unified Banners & Sticky Toolbar
+# Performance Diagnosis & roadmap: "Instant" Page Loads
 
-## Major Accomplishments
-1.  **Compact Sticky Toolbar**:
-    *   Consolidated the sticky header for both **VideosPage** and **PlaylistsPage** into a sleek **single-row layout**.
-    *   Merged folder/tab selectors with action controls to maximize vertical screen real estate.
+## 1. The Diagnosis: The "N+1" Bottleneck
+The current application suffers from perceptible lag when switching pages (particularly `VideosPage` and `PlaylistsPage`). The root cause is **inefficient data fetching**, specifically the "N+1 query problem" on the frontend side.
 
-2.  **Unified Banner Animation**:
-    *   Restored the "Unified" aesthetic where the top banner and sticky toolbar appear as a single continuous image.
-    *   **Horizontal Scroll**: Implemented a synchronized `animate-page-banner-scroll` that moves the background image horizontally on both components.
-    *   **Vertical Stitching**: Created a visual illusion of continuity using calculated `background-position-y` offsets (managed by `PageBanner` calculation logic).
+### The Problem Pattern
+In `VideosPage.jsx` (and similar components), the application iterates through lists of items and performs an asynchronous database call for *each individual item*.
 
-## Documentation
-*   **`atlas/banner.md`**: **READ THIS FIRST**. It contains the full architectural breakdown of the banner system, the stitching logic, and the future refactoring plan.
-*   **`atlas/ui.md`**: Updated to reflect the new sticky/compact layout.
+**Current Logic (Slow):**
+```javascript
+// Example from VideosPage.jsx
+for (const video of activePlaylistItems) {
+    // ⚠ CRITICAL: 50 videos = 50 separate IPC calls to Rust/SQLite
+    const folders = await getVideoFolderAssignments(activePlaylistId, video.id);
+}
+```
 
-## Current State / Known Issues
-1.  **Performance Stutter**:
-    *   The horizontal scroll animation uses `background-position`, which triggers paint operations on the main thread. This causes visible stuttering when the app is busy.
-    *   **Fix Plan**: Move to GPU-accelerated `transform: translate3d`. See `atlas/banner.md` for details.
+**Why this fails:**
+1.  **IPC Overhead**: Each call crosses the JS <-> Rust bridge, incurring serialization/deserialization costs.
+2.  **Sequential Blocking**: Often these run in sequence or choke the bridge, causing the main thread to stutter.
+3.  **UI Blocking**: The UI often waits for this data before settling into its final state, causing "pop-in" or "jank".
 
-2.  **"Pop-in" Alignment**:
-    *   The sticky toolbar background image loads/positions itself *after* the top banner finishes its calculation. This causes a brief visual "pop" or delay where they are out of sync.
-    *   **Fix Plan**: Move to a "Master Parallax Layer" architecture (described in `atlas/banner.md`) to decouple the background from the components entirely.
+## 2. The Solution: "Batch & Cache" Roadmap
 
-## Next Steps
-The immediate task is to decide whether to:
-A.  **Optimize Performance Only**: Refactor the current components to use a `transform` hack for smooth scrolling (low risk).
-B.  **Full Architecture Refactor**: Implement the "Global Banner Layer" plan to solve both performance and alignment permanently (higher effort/risk).
+### Phase 1: Batch Data Fetching (High Impact)
+**Goal:** Reduce 50+ database calls to **1** call per page load.
 
-Recommended: Start with **A** (Performance) to get smooth 60fps scrolling, then assess if **B** is needed.
+**Actions:**
+1.  **Backend (Rust)**:
+    -   Implement `get_all_folder_assignments_for_playlist(playlist_id)` that returns a `HashMap<VideoId, Vec<FolderColor>>`.
+    -   Implement `get_all_video_progress_batch(video_ids)` if not already optimized.
+2.  **Frontend (React)**:
+    -   Replace the `for...of` loop in `VideosPage.jsx` with a single `await getAllFolderAssignments(...)`.
+    -   Apply this pattern to `PlaylistsPage` for thumbnail/count fetching if applicable.
+
+### Phase 2: Optimistic UI & Transition (Perceived Speed)
+**Goal:** Make the UI feel instant even while data is loading.
+
+**Actions:**
+1.  **Skeleton Loading**: If data *is* pending, show a skeleton layout immediately instead of a blank screen.
+2.  **Stale-While-Revalidate**: Show the *previous* list (if available in a cache) while fetching the new one, rather than clearing the screen.
+
+### Phase 3: Global Data Stores (The "Omnipresent" Approach)
+**Goal:** Pre-fetch data so it's already there when the user clicks.
+
+**Actions:**
+1.  **Cache in Zustand**:
+    -   Expand `usePlaylistStore` or `useDataStore` to hold a map of `assignments`.
+    -   When entering a playlist, check the store first. If data exists, render *instantly*. Fetch updates in the background.
+
+## 3. Specific Targets
+
+| Page | Bottleneck | Recommended Fix |
+| :--- | :--- | :--- |
+| **Videos** | Folder Assignments (N+1) | Batch fetch assignments by Playlist ID. |
+| **Playlists** | Initial Playlist Load | Ensure `getAllPlaylists` is lean. Batch fetch meta-data (thumbnails/counts). |
+| **History/Likes** | Sequential API Calls | Batch fetch video metadata/progress for these lists. |
+| **Pins** | - | Likely fast, but ensure pin state isn't re-scanning all videos. |
+| **Settings** | - | Generally static; ensure config store writes are non-blocking. |
+
+## 4. Immediate Next Steps for Agent
+1.  **Modify Rust Backend**: Create the `get_video_folder_assignments_map` command.
+2.  **Refactor `VideosPage.jsx`**: Switch from the `for` loop to the single batch call.
+3.  **Verify**: Measure time-to-interactive on large playlists (100+ items).
