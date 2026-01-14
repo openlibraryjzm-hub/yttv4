@@ -113,20 +113,29 @@ The Central Orb is a circular element (154px diameter by default) positioned at 
 
 ---
 
-#### ### 1.2 Top Video Menu
+#### ### 1.2 Global Navigation Bar (TopNavigation)
+Located immediately below the Player Controller, the Global Navigation Bar allows switching between main application views (Playlists, Videos, History, etc.).
+
+**Visual Style:**
+It mirrors the design language of the Player Controller's Video Menu toolbar:
+- **Buttons**: Circular (icon-only for Support, Settings, History, Likes, Pins) or Pill-shaped (text+icon - for Playlists and Videos)
+- **Active State**: White background, Sky-500 border, Sky text/icon
+- **Inactive State**: White background, Slate-700 border (#334155), Slate icon
+
+#### ### 1.3 Top Video Menu
 
 The Top Video Menu is the right rectangle in the PlayerController, displaying video information (Title, Author, View Count) and controls for the currently playing video. Metadata is fetched from the database (populated via YouTube API during import).
 
 **Note:** The action buttons (Star, Shuffle, Pin, Like, Menu) have been shifted right to create a cohesive cluster with the navigation controls. The 3x3 Grid button has been integrated into the navigation cluster.
 
-##### ### 1.2.1 Pins
+##### ### 1.3.1 Pins
 
 **1: User-Perspective Description**
 
 Users see a centralized display of pinned videos, split between a dedicated Priority Pin and a flexible list of Normal Pins:
 
 - **Normal Pins Track**: Removed from the Video Menu (previously positioned underneath). Normal pins are now displayed exclusively on the Pins Page.
-- **Priority Pin**: The "Priority Pin" is no longer displayed in this track. It has been relocated to the **Top Playlist Menu** (see Section 1.3) to serve as a prominent visual anchor.
+- **Priority Pin**: The "Priority Pin" is no longer displayed in this track. It has been relocated to the **Top Playlist Menu** (see Section 1.4) to serve as a prominent visual anchor.
 - **Eye Toggle Button**: Removed.
 - **Active Pin Indicator**: The currently playing video's pin is highlighted with a ring and scale effect.
 - **Hover Preview**: On hover over a pin, after 2 seconds a preview image appears.
@@ -207,13 +216,7 @@ Users see a centralized display of pinned videos, split between a dedicated Prio
 
 ---
 
-##### ### 1.2.2 Navigation & Action Controls
-
-**1: User-Perspective Description**
-
-Users see a bottom toolbar in the video menu rectangle with distinct, grouped action buttons:
-
-##### ### 1.2.2 Navigation & Action Controls
+##### ### 1.3.2 Navigation & Action Controls
 
 **1: User-Perspective Description**
 
@@ -379,7 +382,7 @@ Users see a bottom toolbar in the video menu rectangle with distinct, grouped ac
 
 ---
 
-#### ### 1.3 Top Playlist Menu
+#### ### 1.4 Top Playlist Menu
 
 **1: User-Perspective Description**
 
@@ -508,7 +511,7 @@ Users see:
 
 ---
 
-#### ### 1.4 Previewer Menus
+#### ### 1.5 Previewer Menus
 
 **1: User-Perspective Description**
 
@@ -605,7 +608,7 @@ Users can preview playlists and videos without interrupting current playback thr
 
 ---
 
-#### ### 1.5 2-Player Support on Menus (Faulty)
+#### ### 1.6 2-Player Support on Menus (Faulty)
 
 **1: User-Perspective Description**
 
@@ -675,12 +678,12 @@ Users can preview playlists and videos without interrupting current playback thr
 - When `secondPlayerPlaylistItems` changes → Video lookup uses new array → Video info may update
 - **Known Issues**: State dependencies may not trigger correctly, causing incorrect video info display
 
-### 1.6 Video Card Actions
+### 1.7 Video Card Actions
 **Note**: This section describes the actions available on the Video Card component, specifically the 3-dot menu and quick-assign star.
 - **3-Dot Menu**: Located in the content area, aligned to the right of the video title. Always visible.
 - **Quick-Assign Star**: Located on the top-right of the video thumbnail. Visible only on hover. Toggles the "quick assign" folder color.
 
-### 1.7 Dev Toolbar
+### 1.8 Dev Toolbar
 The Dev Toolbar is a floating control bar (positioned absolute top-left or similar) that provides quick access to layout and debug tools. Its visibility is controlled via the "More Options" menu in the PlayerController.
 
 **Controls:**

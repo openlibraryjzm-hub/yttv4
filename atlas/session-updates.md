@@ -66,3 +66,26 @@
 ## Learnings
 *   **Batch vs. Sequential**: Moving iteration from Frontend (Sequential RPC) to Backend (Internal Loop) is the single biggest performance win for this architecture.
 *   **Perceived Speed**: Even with fast backends, skeleton screens are crucial for bridging the gap between "click" and "render", maintaining user immersion.
+# Session Updates: TopNavigation Refinement & Top Menu Alignment
+**Timestamp:** 14/01/2026 2:47pm
+
+## Key Changes
+1. **TopNavigation UI Refresh**:
+   - **Theme Integration**: Updated `TopNavigation.jsx` to use the centralized theme system (`utils/themes.js`) for background and border styles, replacing hardcoded Tailwind classes.
+   - **Tab Styling**:
+     - Converted tabs to circular (`w-9 h-9`) and pill-shaped buttons to match the aesthetic of the `PlayerController` action buttons.
+     - **Inactive State**: `bg-white` with `border-slate-700` (#334155) and slate icon.
+     - **Active State**: `bg-white` with `border-sky-500` and sky-colored icon/text.
+     - **Typography**: Matched the active tab text color (`text-sky-950`) to the video title style in the Player Controller menus.
+   - **Layout**:
+     - Retained "Playlists" and "Videos" as text+icon labels.
+     - Converted secondary tabs (History, Likes, Pins, Settings, Support) to **icon-only** buttons for a cleaner, toolbar-like appearance.
+
+2. **PlayerController Documentation**:
+   - Updated `atlas/advanced-player-controller.md` to reflect the removal of the 3x3 Grid button from the video menu (integrated into navigation cluster) and the updated layout of action buttons.
+
+## Learnings
+- **Visual Consistency**: Aligning the global navigation bar (`TopNavigation`) with the specific control aesthetics of the `PlayerController` creates a more unified application feel.
+
+---
+
