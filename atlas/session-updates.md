@@ -1,3 +1,27 @@
+# Session Updates: Card Menu Positioning & Fixes
+**Timestamp:** 14/01/2026 4:47pm
+
+## Key Changes
+1. **Card Menu Refactor**:
+   - **Problem**: The 3-dot context menu on playlist cards was being cut off by parent overflow containers, failing to stick to the card during scrolling, and had broken click event propagation (buttons completely unresponsive).
+   - **Solution**: 
+     - Replaced the existing `CardMenu` with a **new, robust implementation** (`NewCardMenu.jsx`) using `ReactDOM.createPortal`.
+     - **Fixed Positioning**: The menu now uses `position: fixed` relative to the viewport but listens to global `scroll` and `resize` events to "stick" visually to its trigger button.
+     - **Event Handling**: Implemented rigorous `e.stopPropagation()` and `e.preventDefault()` on all menu items to ensure clicks are processed by the menu system and not captured by the underlying card navigation logic.
+     - **Z-Index**: Tuned z-index to `30` to correctly layer above card content but below the Sticky Toolbar / Top Navigation.
+
+2. **"Remove from Tab" Feature**:
+   - **Feature**: Added a context-aware "Remove from Tab" option to the playlist card menu.
+   - **Logic**: This option only appears when viewing a specific tab (not "All"). Clicking it instantly removes the playlist from the current tab via `useTabStore`.
+   - **Type Safety**: Updated `tabStore.js` to strictly convert IDs to strings during comparisons, resolving "silent failure" bugs caused by number/string ID mismatches.
+
+## Learnings
+- **Portals & Scrolling**: When using Portals (`ReactDOM.createPortal`) for dropdowns inside scrollable containers, strictly calculating position on *every* scroll frame is necessary to keep the menu attached.
+- **Event Propagation**: In complex nested cards (where the card itself is a clickable link), it is critical that interactive children (like menus) aggressively stop event propagation to prevent triggering parent navigation.
+- **ID Mismatches**: Always normalize IDs (e.g., `String(id)`) in store logic when dealing with mixed-type sources (database integers vs. DOM/URL strings) to prevent logic failures.
+
+---
+
 # Session Updates: Video Card Interaction Refinement
 **Timestamp:** 14/01/2026 12:48am
 
@@ -66,6 +90,7 @@
 ## Learnings
 *   **Batch vs. Sequential**: Moving iteration from Frontend (Sequential RPC) to Backend (Internal Loop) is the single biggest performance win for this architecture.
 *   **Perceived Speed**: Even with fast backends, skeleton screens are crucial for bridging the gap between "click" and "render", maintaining user immersion.
+
 # Session Updates: TopNavigation Refinement & Top Menu Alignment
 **Timestamp:** 14/01/2026 2:47pm
 

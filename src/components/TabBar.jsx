@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useTabStore } from '../store/tabStore';
 import { useTabPresetStore } from '../store/tabPresetStore';
 import { useLayoutStore } from '../store/layoutStore';
@@ -7,11 +8,41 @@ import TabPresetsDropdown from './TabPresetsDropdown';
 
 const TabMenu = ({ onAdd, onRename, onDelete, inspectMode }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState(null);
   const menuRef = useRef(null);
+  const buttonRef = useRef(null);
+
+  useEffect(() => {
+    const updatePosition = () => {
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+
+        // Fixed positioning (viewport relative)
+        let top = rect.bottom + 5;
+        let left = rect.left;
+
+        setPosition({ top, left });
+      }
+    };
+
+    if (isOpen) {
+      updatePosition();
+      window.addEventListener('resize', updatePosition);
+      document.addEventListener('scroll', updatePosition, true);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      document.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      if (
+        menuRef.current && !menuRef.current.contains(event.target) &&
+        buttonRef.current && !buttonRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -26,13 +57,14 @@ const TabMenu = ({ onAdd, onRename, onDelete, inspectMode }) => {
   const getInspectTitle = (label) => inspectMode ? label : undefined;
 
   return (
-    <div className="relative ml-1" ref={menuRef}>
+    <>
       <button
+        ref={buttonRef}
         onClick={(e) => {
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        className={`p-0.5 rounded-md hover:bg-black/20 text-slate-300 hover:text-white transition-all ${isOpen ? 'opacity-100 bg-black/20' : 'opacity-0 group-hover:opacity-100'}`}
+        className={`p-0.5 rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-800 transition-all ${isOpen ? 'opacity-100 bg-slate-200 text-slate-800' : 'opacity-0 group-hover:opacity-100'}`}
         title={getInspectTitle('Tab options')}
         style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
@@ -41,9 +73,14 @@ const TabMenu = ({ onAdd, onRename, onDelete, inspectMode }) => {
         </svg>
       </button>
 
-      {isOpen && (
+      {isOpen && position && ReactDOM.createPortal(
         <div
-          className="absolute top-full right-0 mt-1 w-36 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden"
+          ref={menuRef}
+          className="fixed z-50 mt-1 w-36 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden"
+          style={{
+            top: position.top,
+            left: position.left,
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -68,9 +105,10 @@ const TabMenu = ({ onAdd, onRename, onDelete, inspectMode }) => {
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             Delete Tab
           </button>
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 };
 
@@ -174,18 +212,15 @@ const TabBar = ({ onAddPlaylistToTab, showPresets = true }) => {
                 />
               ) : (
                 <div
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors group relative cursor-pointer ${activeTabId === tab.id
-                    ? 'bg-sky-600 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  className={`rounded-full flex items-center justify-center border-2 shadow-sm transition-all duration-200 px-4 h-9 gap-1.5 cursor-pointer group relative ${activeTabId === tab.id
+                    ? 'bg-white border-sky-500 text-sky-600 transform scale-105'
+                    : 'bg-white border-[#334155] text-slate-600 hover:bg-slate-50 active:scale-95'
                     }`}
                   onClick={() => setActiveTab(tab.id)}
                   onDoubleClick={() => handleStartEdit(tab)}
                   title={getInspectTitle(`Tab: ${tab.name}`) || (tab.id !== 'all' ? 'Double-click to rename' : '')}
                 >
-                  <span>{tab.name}</span>
-                  {tab.id !== 'all' && (
-                    <span className="text-[10px] opacity-70">({tab.playlistIds.length})</span>
-                  )}
+                  <span className="font-bold text-xs uppercase tracking-wide">{tab.name}</span>
 
                   {tab.id !== 'all' && (
                     <TabMenu

@@ -13,7 +13,7 @@ import { useInspectLabel } from '../utils/inspectLabels';
 import PlaylistUploader from './PlaylistUploader';
 import BulkPlaylistImporter from './BulkPlaylistImporter';
 import LocalVideoUploader from './LocalVideoUploader';
-import CardMenu from './CardMenu';
+import CardMenu from './NewCardMenu'; // Using NewCardMenu as CardMenu
 import TabBar from './TabBar';
 import CardThumbnail from './CardThumbnail';
 import PageBanner from './PageBanner';
@@ -551,10 +551,13 @@ const PlaylistsPage = ({ onVideoSelect }) => {
             <div
               className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden -mt-16
               ${isStuck
-                  ? 'backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2 bg-slate-900/95'
-                  : 'backdrop-blur-xl border-b border-x border-t border-white/10 shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-1 pb-0 bg-black/30'
+                  ? 'backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2 bg-slate-900/70'
+                  : 'backdrop-blur-[2px] border-b border-x border-t border-white/10 shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-1 pb-0 bg-transparent'
                 }
               `}
+              style={{
+                backgroundColor: isStuck ? undefined : 'transparent' // Fully transparent resting state
+              }}
             >
 
 
@@ -997,10 +1000,20 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                                     submenu: 'tabs',
                                     icon: (
                                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                       </svg>
                                     ),
                                   },
+                                  ...(activeTabId !== 'all' ? [{
+                                    label: 'Remove from Tab',
+                                    icon: (
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                      </svg>
+                                    ),
+                                    action: 'removeFromTabCurrent',
+                                    danger: true
+                                  }] : []),
                                   {
                                     label: deletingPlaylistId === playlist.id ? 'Deleting...' : 'Delete',
                                     danger: true,
@@ -1034,8 +1047,11 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                                     togglePlaylistExpand(playlist.id);
                                   } else if (option.action === 'export') {
                                     handleExportPlaylist(playlist.id, playlist.name);
+                                  } else if (option.action === 'removeFromTabCurrent') {
+                                    console.log('Removing playlist', playlist.id, 'from active tab', activeTabId);
+                                    removePlaylistFromTab(activeTabId, playlist.id);
                                   } else if (option.action === 'delete' && !option.disabled) {
-                                    handleDeletePlaylist(playlist.id, playlist.name, { stopPropagation: () => { } }); // CardMenu internal click handler already stops propagation usually, but we also wrapped in div
+                                    handleDeletePlaylist(playlist.id, playlist.name, { stopPropagation: () => { } });
                                   } else if (option.action === 'addToTab') {
                                     addPlaylistToTab(option.tabId, playlist.id);
                                   } else if (option.action === 'removeFromTab') {

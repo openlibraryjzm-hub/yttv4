@@ -26,7 +26,7 @@ const saveTabs = (tabs) => {
 const useTabStore = create((set, get) => ({
   tabs: loadTabs(),
   activeTabId: 'all',
-  
+
   setActiveTab: (tabId) => {
     set({ activeTabId: tabId });
     try {
@@ -35,7 +35,7 @@ const useTabStore = create((set, get) => ({
       console.error('Failed to save active tab:', error);
     }
   },
-  
+
   createTab: (name) => {
     const state = get();
     const newTab = {
@@ -48,7 +48,7 @@ const useTabStore = create((set, get) => ({
     set({ tabs: updatedTabs, activeTabId: newTab.id });
     return newTab.id;
   },
-  
+
   deleteTab: (tabId) => {
     if (tabId === 'all') return; // Can't delete "All" tab
     const state = get();
@@ -62,12 +62,12 @@ const useTabStore = create((set, get) => ({
       console.error('Failed to save active tab:', error);
     }
   },
-  
+
   addPlaylistToTab: (tabId, playlistId) => {
     if (tabId === 'all') return; // Can't add to "All" tab
     const state = get();
     const updatedTabs = state.tabs.map(tab => {
-      if (tab.id === tabId && !tab.playlistIds.includes(playlistId)) {
+      if (tab.id === tabId && !tab.playlistIds.some(id => String(id) === String(playlistId))) {
         return { ...tab, playlistIds: [...tab.playlistIds, playlistId] };
       }
       return tab;
@@ -75,20 +75,20 @@ const useTabStore = create((set, get) => ({
     saveTabs(updatedTabs);
     set({ tabs: updatedTabs });
   },
-  
+
   removePlaylistFromTab: (tabId, playlistId) => {
     if (tabId === 'all') return; // Can't remove from "All" tab
     const state = get();
     const updatedTabs = state.tabs.map(tab => {
       if (tab.id === tabId) {
-        return { ...tab, playlistIds: tab.playlistIds.filter(id => id !== playlistId) };
+        return { ...tab, playlistIds: tab.playlistIds.filter(id => String(id) !== String(playlistId)) };
       }
       return tab;
     });
     saveTabs(updatedTabs);
     set({ tabs: updatedTabs });
   },
-  
+
   renameTab: (tabId, newName) => {
     if (tabId === 'all') return; // Can't rename "All" tab
     const state = get();

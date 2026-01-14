@@ -870,17 +870,20 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
     let color = null;
     let isEditable = true;
     let customAscii = null;
+    let hex = '#3b82f6'; // Default Blue
 
     if (selectedFolder) {
       if (selectedFolder === 'unsorted') {
         title = 'Unsorted Videos';
         description = `Videos from "${allPlaylists.find(p => p.id === activePlaylistId)?.name || 'Playlist'}" that haven't been assigned to any folder.`;
         color = 'unsorted';
+        hex = '#64748b'; // Slate-500
         isEditable = false;
       } else {
         // Folder View
         const colorInfo = FOLDER_COLORS.find(c => c.id === selectedFolder);
         color = selectedFolder;
+        if (colorInfo) hex = colorInfo.hex;
 
         if (activeObject) { // activeObject here refers to folderMetadataState
           title = activeObject.name || (colorInfo ? `${colorInfo.name} Folder` : 'Folder');
@@ -903,7 +906,7 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
       isEditable = true;
     }
 
-    return { title, description, color, isEditable, customAscii };
+    return { title, description, color, isEditable, customAscii, hex };
   }, [activeObject, selectedFolder, activePlaylistId, allPlaylists]);
 
   // Determine initial data for modal
@@ -1013,10 +1016,13 @@ const VideosPage = ({ onVideoSelect, onSecondPlayerSelect }) => {
           <div
             className={`sticky top-0 z-40 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden -mt-16
             ${isStuck
-                ? 'backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2 bg-slate-900/95'
-                : 'backdrop-blur-xl border-b border-x border-t border-white/10 shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-1 pb-0 bg-black/30'
+                ? 'backdrop-blur-xl border-y shadow-2xl mx-0 rounded-none mb-6 pt-2 pb-2 bg-slate-900/70'
+                : 'backdrop-blur-[2px] border-b border-x border-t border-white/10 shadow-xl mx-8 rounded-b-2xl mb-8 mt-0 pt-1 pb-0 bg-transparent'
               }
             `}
+            style={{
+              backgroundColor: isStuck ? undefined : 'transparent' // Fully transparent resting state
+            }}
           >
 
 
