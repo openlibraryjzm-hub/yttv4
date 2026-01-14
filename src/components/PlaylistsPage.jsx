@@ -527,9 +527,27 @@ const PlaylistsPage = ({ onVideoSelect }) => {
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto bg-transparent relative">
             {(() => {
               const activePreset = presets.find(p => p.id === activePresetId);
-              const bannerTitle = activePresetId === 'all' || !activePreset
-                ? "Playlists"
-                : `Playlists - ${activePreset.name}`;
+              let bannerTitle = activePresetId === 'all' || !activePreset
+                ? "All"
+                : activePreset.name;
+
+              if (activeTabId && activeTabId !== 'all') {
+                const activeTab = tabs.find(t => t.id === activeTabId);
+                if (activeTab) {
+                  bannerTitle += ` - ${activeTab.name}`;
+                }
+              }
+
+              // Calculate visible playlists and total videos
+              // Filter logic must match the rendering logic below
+              const filteredPlaylists = playlists.filter((playlist) => {
+                if (activeTabId === 'all') return true;
+                const activeTab = tabs.find(t => t.id === activeTabId);
+                return activeTab && activeTab.playlistIds.includes(playlist.id);
+              });
+
+              const playlistCount = filteredPlaylists.length;
+              const totalVideos = filteredPlaylists.reduce((sum, p) => sum + (playlistItemCounts[p.id] || 0), 0);
 
               return (
                 <div className="px-8 pt-8">
@@ -539,6 +557,9 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                     color={null}
                     isEditable={false}
                     seamlessBottom={true}
+                    videoCount={playlistCount}
+                    countLabel="Playlist"
+                    author={`${totalVideos} Videos`}
                   />
                 </div>
               );
@@ -565,12 +586,11 @@ const PlaylistsPage = ({ onVideoSelect }) => {
 
                 {/* Left: Tab Bar */}
                 <div className="flex-1 overflow-x-auto no-scrollbar mask-gradient-right min-w-0">
-                  <TabBar onAddPlaylistToTab={addPlaylistToTab} showPresets={false} />
+                  <TabBar onAddPlaylistToTab={addPlaylistToTab} showPresets={true} />
                 </div>
 
                 {/* Right: Controls */}
                 <div className="flex items-center gap-2 ml-4 shrink-0 pl-3 border-l border-white/10">
-                  <TabPresetsDropdown align="right" />
 
                   {/* Folder Toggle - Icon Only */}
                   <button

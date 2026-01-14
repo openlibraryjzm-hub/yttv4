@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useTabPresetStore } from '../store/tabPresetStore';
 import { useTabStore } from '../store/tabStore';
 
@@ -10,22 +11,63 @@ const TabPresetsDropdown = ({ align = 'left' }) => {
   const [newPresetName, setNewPresetName] = useState('');
   const [selectedTabIds, setSelectedTabIds] = useState(new Set());
   const [editingPresetId, setEditingPresetId] = useState(null);
-  const dropdownRef = useRef(null);
 
+  const buttonRef = useRef(null);
+  const [dropdownPosition, setDropdownPosition] = useState(null);
+
+  // Calculate position when opening
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
+    const updatePosition = () => {
+      if (buttonRef.current && isOpen) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        // Position below the button with a small usage of fixed positioning
+        setDropdownPosition({
+          top: rect.bottom + 8,
+          left: rect.left,
+        });
       }
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      updatePosition();
+      // Update position on scroll/resize to keep it attached
+      window.addEventListener('resize', updatePosition);
+      window.addEventListener('scroll', updatePosition, true);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
     };
+  }, [isOpen]);
+
+  // Handle click outside to close
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!isOpen) return;
+
+      // Check if click is on the button
+      if (buttonRef.current && buttonRef.current.contains(event.target)) {
+        return;
+      }
+
+      // Check if click is inside the portal (we'll look for the portal element by ID)
+      const portalContent = document.getElementById('tab-presets-dropdown-portal');
+      if (portalContent && portalContent.contains(event.target)) {
+        return;
+      }
+
+      // Don't close if clicking inside the modal (which is also a portal)
+      const modalContent = document.getElementById('tab-presets-modal');
+      if (modalContent && modalContent.contains(event.target)) {
+        return;
+      }
+
+      setIsOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
   const activePreset = presets.find(p => p.id === activePresetId) || presets[0];
@@ -85,100 +127,115 @@ const TabPresetsDropdown = ({ align = 'left' }) => {
 
   return (
     <>
-      <div ref={dropdownRef} className="relative flex-shrink-0">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${activePresetId === 'all'
-            ? 'bg-sky-600 text-white'
-            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-            }`}
-          title="Tab Presets"
+      <button
+        ref={buttonRef}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        className={`h-9 px-4 rounded-full text-xs font-bold uppercase tracking-wide transition-colors flex items-center justify-center gap-2 border-2 shadow-sm ${activePresetId === 'all'
+          ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700'
+          : 'bg-white text-slate-600 border-[#334155] hover:bg-slate-50'
+          }`}
+        title="Tab Presets"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <span>{activePreset.name}</span>
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && dropdownPosition && ReactDOM.createPortal(
+        <div
+          id="tab-presets-dropdown-portal"
+          className="fixed z-[9999] w-64 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden"
+          style={{
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+          }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          <span>{activePreset.name}</span>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-
-        {isOpen && (
-          <div className={`absolute top-full mt-2 w-64 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden ${align === 'right' ? 'right-0' : 'left-0'}`}>
-            {/* Preset List */}
-            <div className="max-h-64 overflow-y-auto">
-              {presets.map((preset) => (
-                <div
-                  key={preset.id}
-                  className={`flex items-center justify-between px-3 py-2 hover:bg-slate-700 cursor-pointer group ${activePresetId === preset.id ? 'bg-sky-600/20' : ''
-                    }`}
-                  onClick={() => {
-                    setActivePreset(preset.id);
-                    setIsOpen(false);
-                  }}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="text-white text-sm truncate">{preset.name}</span>
-                    {preset.id === 'all' ? (
-                      <span className="text-xs text-slate-400">({tabs.length} tabs)</span>
-                    ) : (
-                      <span className="text-xs text-slate-400">({preset.tabIds.length} tabs)</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {preset.id !== 'all' && (
-                      <>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditPreset(preset);
-                          }}
-                          className="p-1 rounded hover:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-white"
-                          title="Edit preset"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={(e) => handleDeletePreset(preset.id, e)}
-                          className="p-1 rounded hover:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-400"
-                          title="Delete preset"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Create Preset Button */}
-            <div className="border-t border-slate-700">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleStartCreate();
+          {/* Preset List */}
+          <div className="max-h-64 overflow-y-auto">
+            {presets.map((preset) => (
+              <div
+                key={preset.id}
+                className={`flex items-center justify-between px-3 py-2 hover:bg-slate-700 cursor-pointer group ${activePresetId === preset.id ? 'bg-sky-600/20' : ''
+                  }`}
+                onClick={() => {
+                  setActivePreset(preset.id);
                   setIsOpen(false);
                 }}
-                className="w-full text-left px-3 py-2 text-sm text-sky-400 hover:bg-slate-700 flex items-center gap-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Create Preset</span>
-              </button>
-            </div>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-white text-sm truncate">{preset.name}</span>
+                  {preset.id === 'all' ? (
+                    <span className="text-xs text-slate-400">({tabs.length} tabs)</span>
+                  ) : (
+                    <span className="text-xs text-slate-400">({preset.tabIds.length} tabs)</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  {preset.id !== 'all' && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPreset(preset);
+                        }}
+                        className="p-1 rounded hover:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-white"
+                        title="Edit preset"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={(e) => handleDeletePreset(preset.id, e)}
+                        className="p-1 rounded hover:bg-slate-600 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-400"
+                        title="Delete preset"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+
+          {/* Create Preset Button */}
+          <div className="border-t border-slate-700">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStartCreate();
+                setIsOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 text-sm text-sky-400 hover:bg-slate-700 flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Create Preset</span>
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Create/Edit Preset Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowCreateModal(false)}>
+        <div
+          id="tab-presets-modal"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000]"
+          onClick={() => setShowCreateModal(false)}
+        >
           <div
             className="bg-slate-800 rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
@@ -258,4 +315,3 @@ const TabPresetsDropdown = ({ align = 'left' }) => {
 };
 
 export default TabPresetsDropdown;
-

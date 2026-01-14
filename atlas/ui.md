@@ -42,12 +42,19 @@ The application employs a high-contrast, structured design with distinct borders
   - **Separator**: Features a "Solid" separator line (12px) with the Light Blue Pattern, separating the banner from the app content.
 
 - **Page Banner ("Videos Banner")**:
-  - Located on the Videos Page and Colored Folders views.
-  - **Dynamic Patterns**: Features selectable animated background patterns (Diagonal, Dots, Mesh, Solid) configurable in Settings.
+  - Located on the Videos, Playlists, and Colored Folders views.
+  - **Height**: Fixed height of 220px ensures consistent layout and prevents resizing jitter.
+  - **Dynamic Title**:
+    - **Playlists Page**: Displays "All", preset name (e.g., "Gaming"), or appended tab name (e.g., "All - Favorites").
+    - **Videos Page**: Displays Playlist Name or Folder Name.
+  - **Top-Aligned Layout**: Content (Title, Metadata, Description) is aligned to the top-left (`items-start`) for a cleaner presentation.
+  - **Visual Elements**:
+    - **ASCII Avatar**: Vertically centered within the banner.
+    - **Metadata Trio**: Displays Video Count (dynamic label), Year, and Author Pseudonym below the title.
+    - **Description**: Truncated to 2 lines (`line-clamp-2`) with generous right padding to avoid overlap.
+    - **Continue Watching**: Thumbnail positioned at the top-right (`top-12`) to align horizontally with the centered ASCII art.
+  - **Dynamic Patterns**: Features selectable animated background patterns (Diagonal, Dots, Mesh, Solid).
   - **Custom Uploads**: Supports changing the background to a custom uploaded image.
-    - **Static Images**: Scroll slowly to the right (infinite loop).
-    - **GIFs**: Play natively without scrolling.
-  - **Customizable Identity**: Displays user avatar (ASCII art) and name.
     - **Sticky Toolbar**:
     - A translucent, glassmorphic toolbar (`backdrop-blur-xl`) that sits below the banner and sticks to the top of the viewport on scroll.
     - **Unified Design**: Shares the banner's background image and scroll animation for a seamless look.
@@ -186,9 +193,8 @@ Users see a 2-column grid of playlist cards. For detailed description of playlis
 - **Header Actions**: Top of page shows:
 - **Sticky Toolbar**: A dynamic toolbar that sits below the Page Banner and sticks to the top of the viewport when scrolling.
   - **Unified Compact Design**: Shares the same single-row architecture and unified banner background as the Videos Page toolbar.
-  - **Tab Bar**: Integrated into the left side of the row, taking up the majority of the width (`flex-1`).
+  - **Tab Bar**: Integrated into the left side of the row (`flex-1`). Contains the **Tab Presets Dropdown** (which acts as the "All" / Master switch) and the scrollable list of tabs.
   - **Controls Cluster**: A compact group on the right side containing:
-    - **Tab Presets Dropdown**: Manage tab sets.
     - **Folder Toggle (Icon)**: Toggles inline folder display.
     - **Add Playlist (Icon)**: Opens playlist import/create modal.
 

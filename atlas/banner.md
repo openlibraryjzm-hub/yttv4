@@ -9,7 +9,7 @@ Instead of treating them as separate images, the system "stitches" them together
 
 ### 1. Visual Stitching
 The goal is for the sticky toolbar to look like it is revealing the bottom portion of the same image used in the top banner.
--   **Top Component (`PageBanner`)**: Displays the top portion of the image.
+-   **Top Component (`PageBanner`)**: Displays the top portion of the image (Fixed height: `220px`).
 -   **Bottom Component (`Sticky Toolbar`)**: Displays the bottom portion of the image, with a vertical offset equal to the height of the `PageBanner`.
 
 ### 2. Intelligent Scaling

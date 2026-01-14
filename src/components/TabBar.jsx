@@ -172,9 +172,11 @@ const TabBar = ({ onAddPlaylistToTab, showPresets = true }) => {
   const { activePresetId, presets } = useTabPresetStore();
   const activePreset = presets.find(p => p.id === activePresetId) || presets[0];
 
-  const visibleTabs = activePresetId === 'all' || !activePreset || activePreset.tabIds.length === 0
+  const visibleTabsRaw = activePresetId === 'all' || !activePreset || activePreset.tabIds.length === 0
     ? tabs
     : tabs.filter(tab => tab.id === 'all' || activePreset.tabIds.includes(tab.id));
+
+  const visibleTabs = visibleTabsRaw.filter(tab => tab.id !== 'all');
 
   return (
     <>
@@ -216,9 +218,8 @@ const TabBar = ({ onAddPlaylistToTab, showPresets = true }) => {
                     ? 'bg-white border-sky-500 text-sky-600 transform scale-105'
                     : 'bg-white border-[#334155] text-slate-600 hover:bg-slate-50 active:scale-95'
                     }`}
-                  onClick={() => setActiveTab(tab.id)}
-                  onDoubleClick={() => handleStartEdit(tab)}
-                  title={getInspectTitle(`Tab: ${tab.name}`) || (tab.id !== 'all' ? 'Double-click to rename' : '')}
+                  onClick={() => setActiveTab(activeTabId === tab.id ? 'all' : tab.id)}
+                  title={getInspectTitle(`Tab: ${tab.name}`)}
                 >
                   <span className="font-bold text-xs uppercase tracking-wide">{tab.name}</span>
 

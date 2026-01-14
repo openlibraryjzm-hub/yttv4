@@ -1,3 +1,15 @@
+# Session Updates: Playlist Banner Tabs Refinement
+**Timestamp:** 14/01/2026 5:55pm
+
+## Key Changes
+1. **Playlist Page Banner Tabs**:
+   - **Refactor**: Integrated **Tab Presets Dropdown** directly into the `TabBar` layout on the left side, physically replacing the removed "All" tab position.
+   - **Logic Change**: Removed the explicit "All" tab button. The "All" state is now represented by having no specific tab selected.
+   - **Toggle Behavior**: Clicking the currently active tab now toggles it off, returning to the "All" (default) state.
+   - **UI Polish**: Styled the `TabPresetsDropdown` trigger button to match the circular aesthetic (`h-9`, `rounded-full`) of the sibling tabs for visual consistency.
+
+---
+
 # Session Updates: Scroll Controls & Playlist Refinement
 **Timestamp:** 14/01/2026 5:43pm
 
@@ -152,3 +164,30 @@
 
 ---
 
+# Session Updates: Banner Layout & Content Alignment
+**Timestamp:** 14/01/2026 8:35pm
+
+## Key Changes
+1. **Banner Height & Layout**:
+   - **Height**: Reduced `PageBanner` container height to a fixed `220px` to minimize empty vertical space and bring the content closer to the sticky toolbar.
+   - **Vertical Alignment**: Moved banner content higher by reducing top padding from `pt-12` to `pt-4`.
+   - **Centering**: Added `mt-8` to the ASCII avatar container and adjusted `continueVideo` position to `top-12`. This effectively centers the visual elements (Avatar, Text Block, Thumbnail) within the new 220px vertical space.
+
+2. **Content Presentation**:
+   - **Author Identity**: Removed the duplicate author pseudonym that was previously floating above the ASCII avatar. The author name remains in the metadata text row.
+   - **Continue Video**: Moved the "Continue Visual" thumbnail to the top-right (`top-12`, `right-6`) to align horizontally with the main title block and ASCII art.
+   - **Overlap Prevention**: Added dynamic right padding (`pr-64`) to the text container only when a continue video is present, ensuring long titles/descriptions don't underlap the thumbnail.
+
+3. **Playlists Page Banner**:
+   - **Data Integration**: Updated the banner on the Playlists Page to display meaningful metadata:
+     - **Count**: Shows the number of visible playlists (e.g., "5 Playlists").
+     - **Dynamic Label**: Implemented logical pluralization ("Playlist" vs "Playlists") in `PageBanner.jsx`.
+     - **Secondary Data**: Repaired the "Author" slot to display the **Total Video Count** (sum of videos in visible playlists) as "X Videos".
+   - **Title Logic**:
+     - Renamed default view from "Playlists" to **"All"**.
+     - Custom presets now show just the preset name (e.g., "Gaming").
+     - **Tab Awareness**: Appends the active tab name if selected (e.g., "**All - Favorites**") to clearly indicate the current view context.
+
+## Learnings
+- **Visual Balance**: When reducing container height, strictly centering elements (like the ASCII art and floating thumbnails) relative to the container *height* is crucial for a balanced look, even if the text block is top-aligned.
+- **Contextual Metadata**: Re-purposing generic banner slots (like 'author') to show relevant context-specific data (like 'Total Videos' on a playlist overview) significantly improves the utility of the UI without requiring new component props.

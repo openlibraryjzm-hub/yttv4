@@ -7,7 +7,7 @@ import { getThumbnailUrl } from '../utils/youtubeUtils';
 import UnifiedBannerBackground from './UnifiedBannerBackground';
 import { useConfigStore } from '../store/configStore';
 
-const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creationYear, author, avatar, continueVideo, onContinue, children, childrenPosition = 'right', topRightContent, seamlessBottom = false }) => {
+const PageBanner = ({ title, description, folderColor, onEdit, videoCount, countLabel = 'Video', creationYear, author, avatar, continueVideo, onContinue, children, childrenPosition = 'right', topRightContent, seamlessBottom = false }) => {
     const { bannerPattern, customPageBannerImage, bannerBgSize, setBannerHeight, setBannerBgSize } = useConfigStore();
 
     // Find color config if folderColor is provided
@@ -91,7 +91,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
     const isGif = customPageBannerImage?.startsWith('data:image/gif');
 
     return (
-        <div ref={bannerRef} className={`w-full relative animate-fade-in group mx-auto ${seamlessBottom ? 'mb-0' : 'mb-8'}`}>
+        <div ref={bannerRef} className={`w-full relative animate-fade-in group mx-auto h-[220px] ${seamlessBottom ? 'mb-0' : 'mb-8'}`}>
 
             {/* Background Layer - Hides overflow for shapes/patterns/images */}
             <div
@@ -146,13 +146,10 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
             )}
 
             {/* Content Container - Allow overflow for dropdowns */}
-            <div className="relative z-10 flex items-end h-full gap-8 w-full px-8 pt-4 pb-16">
+            <div className="relative z-10 flex items-start h-full gap-8 w-full px-8 pt-4">
                 {/* Avatar Section (Optional) */}
                 {avatar && (
-                    <div className="shrink-0 hidden md:flex flex-col items-center gap-1 animate-in fade-in slide-in-from-left-4 duration-700">
-                        <span className="text-white/90 font-black tracking-widest uppercase opacity-80 mix-blend-overlay text-[10px]" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8)' }}>
-                            {author}
-                        </span>
+                    <div className="shrink-0 hidden md:flex flex-col items-center gap-1 animate-in fade-in slide-in-from-left-4 duration-700 mt-8">
                         {avatar.includes('\n') ? (
                             <pre className="font-mono text-[4px] leading-none whitespace-pre text-white/90 drop-shadow-md select-none opacity-90 mix-blend-overlay" style={{ textShadow: '-0.5px -0.5px 0 #000, 0.5px -0.5px 0 #000, -0.5px 0.5px 0 #000, 0.5px 0.5px 0 #000, 0 1px 2px rgba(0,0,0,1)' }}>
                                 {avatar}
@@ -166,7 +163,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                     </div>
                 )}
 
-                <div className="flex flex-col justify-center min-w-0">
+                <div className={`flex flex-col justify-start min-w-0 ${continueVideo ? 'pr-64' : ''}`}>
                     <h1 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight drop-shadow-md truncate" style={{ textShadow: '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 8px rgba(0,0,0,0.8)' }}>
                         {title}
                     </h1>
@@ -174,7 +171,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                     {/* Metadata Row */}
                     <div className="flex items-center gap-3 text-white/80 font-medium text-sm md:text-base mb-4" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.9)' }}>
                         {videoCount !== undefined && (
-                            <span>{videoCount} {videoCount === 1 ? 'Video' : 'Videos'}</span>
+                            <span>{videoCount} {videoCount === 1 ? countLabel : `${countLabel}s`}</span>
                         )}
                         {(videoCount !== undefined && (creationYear || author)) && (
                             <span className="w-1 h-1 rounded-full bg-white/60 shadow-sm" />
@@ -191,7 +188,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
                     </div>
 
                     {description && (
-                        <p className="text-lg md:text-xl text-white/95 font-medium max-w-4xl leading-relaxed drop-shadow-sm opacity-90" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8)' }}>
+                        <p className="text-sm md:text-base text-white/90 font-medium max-w-4xl leading-relaxed drop-shadow-sm opacity-90 line-clamp-2" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px rgba(0,0,0,0.8)' }}>
                             {description}
                         </p>
                     )}
@@ -215,7 +212,7 @@ const PageBanner = ({ title, description, folderColor, onEdit, videoCount, creat
             {/* Continue Section - Bottom Right */}
             {continueVideo && (
                 <div
-                    className="absolute bottom-6 right-6 flex flex-col items-end gap-2 group/continue cursor-pointer z-20"
+                    className="absolute top-12 right-6 flex flex-col items-end gap-2 group/continue cursor-pointer z-20"
                     onClick={(e) => {
                         e.stopPropagation();
                         if (onContinue) onContinue();
