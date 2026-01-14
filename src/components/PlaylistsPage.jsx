@@ -40,7 +40,7 @@ const PlaylistsPage = ({ onVideoSelect }) => {
   const [expandedPlaylists, setExpandedPlaylists] = useState(new Set()); // Track which playlists are expanded
   const [playlistFolders, setPlaylistFolders] = useState({}); // Store folders for each playlist: { playlistId: [folders] }
   const [stuckFolders, setStuckFolders] = useState(new Set()); // Track stuck folders: Set of "playlistId:folderColor" strings
-  const { setPlaylistItems, currentPlaylistItems, setCurrentFolder, setPreviewPlaylist, setAllPlaylists } = usePlaylistStore();
+  const { setPlaylistItems, currentPlaylistItems, setCurrentFolder, setPreviewPlaylist, setAllPlaylists, activePlaylistId } = usePlaylistStore();
   const { showColoredFolders, setShowColoredFolders } = useFolderStore();
   const [imageLoadErrors, setImageLoadErrors] = useState(new Set());
   const { tabs, activeTabId, addPlaylistToTab, removePlaylistFromTab } = useTabStore();
@@ -815,7 +815,10 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                         className="cursor-pointer group relative"
                         title={getInspectTitle(`Playlist: ${playlist.name}`)}
                       >
-                        <div className="border-2 border-slate-700/50 rounded-xl p-2 bg-slate-800/20 hover:border-sky-500/50 transition-colors h-full flex flex-col">
+                        <div
+                          className={`border-2 border-slate-700/50 rounded-xl p-2 bg-slate-800/20 hover:border-sky-500/50 transition-colors h-full flex flex-col ${String(playlist.id) === String(activePlaylistId) ? 'active-playlist-marker' : ''}`}
+                          data-active-playlist={String(playlist.id) === String(activePlaylistId) ? "true" : "false"}
+                        >
                           {/* Playlist Info */}
                           <div className="mb-2 flex items-center justify-between border-2 border-[#052F4A] rounded-md p-1 bg-slate-100/90 shadow-sm relative overflow-hidden h-[38px]">
                             <h3 className="font-bold text-lg truncate transition-colors pl-1 flex-1 text-left"
@@ -1104,7 +1107,10 @@ const PlaylistsPage = ({ onVideoSelect }) => {
                         className="cursor-pointer group relative"
                         title={getInspectTitle(`${folderColor.name} folder`)}
                       >
-                        <div className="border-2 border-slate-700/50 rounded-xl p-2 bg-slate-800/20 hover:border-sky-500/50 transition-colors h-full flex flex-col">
+                        <div
+                          className={`border-2 border-slate-700/50 rounded-xl p-2 bg-slate-800/20 hover:border-sky-500/50 transition-colors h-full flex flex-col ${String(playlist.id) === String(activePlaylistId) ? 'active-playlist-marker' : ''}`}
+                          data-active-playlist={String(playlist.id) === String(activePlaylistId) ? "true" : "false"}
+                        >
                           {/* Folder Info - Same format as playlist card */}
                           <div className="mb-2 relative border-2 border-[#052F4A] rounded-md p-1 bg-slate-100/90 shadow-sm flex items-center justify-between h-[38px] overflow-hidden">
                             <div className="flex items-center gap-2 justify-center pl-1">

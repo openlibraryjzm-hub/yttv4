@@ -81,6 +81,10 @@ Users see a side menu panel that appears on the right side of the screen when in
   - **Tabs**: 
     - Text-based tabs: "Playlists", "Videos".
     - Icon-only tabs: "History" (Clock), "Likes" (Heart), "Pins" (Pin), "Settings" (Gear), "Support" (Cat).
+   - **Side Menu Scroll Controls**: 
+     - **Location**: Integrated into the Top Navigation header, to the left of the Back button.
+     - **Components**: Up Chevron, Central Dot Button (scroll-to-active), Down Chevron.
+     - **Functionality**: Smoothly scrolls the active side menu page content. The central dot attempts to center the currently active item (playing video or playlist).
   - **Close Side Menu Button**: "Close Side Menu" button (X) aligned to the right. Clicking it returns to full-screen mode (hides side menu).
 
 - **Folder Selector** (Videos page only): Below the tabs, a row of 17 colored dots:

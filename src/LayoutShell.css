@@ -230,6 +230,8 @@
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
+  position: relative;
+  /* Anchor for absolute scroll controls */
 
   /* Full Border Styling REMOVED based on user preference */
   /* background-color: #052F4A; */
@@ -470,4 +472,65 @@
   to {
     background-position-x: 100vw;
   }
+}
+
+/* Side Menu Scroll Controls */
+.side-menu-scroll-controls {
+  display: flex;
+  flex-direction: row;
+  /* Horizontal alignment */
+  align-items: center;
+  gap: 8px;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  pointer-events: auto;
+  margin-right: 8px;
+  /* Space between controls and back button */
+}
+
+.side-menu-scroll-controls:hover {
+  opacity: 1;
+}
+
+.scroll-control-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #052F4A;
+  /* Theme dark blue */
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.scroll-control-btn:hover {
+  background-color: rgba(5, 47, 74, 0.1);
+  transform: scale(1.1);
+}
+
+.scroll-control-dot {
+  width: 4px;
+  height: 4px;
+  background-color: #334155;
+  /* Slate-700 to match TopNav borders */
+  border-radius: 50%;
+  opacity: 0.8;
+  pointer-events: none;
+  /* Let clicks pass to the button wrapper */
+}
+
+/* Button wrapper for the dot to make it easier to click */
+.scroll-control-dot-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  /* Larger hit area */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
 }

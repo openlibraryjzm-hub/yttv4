@@ -1,3 +1,41 @@
+# Session Updates: Scroll Controls & Playlist Refinement
+**Timestamp:** 14/01/2026 5:43pm
+
+## Key Changes
+1. **Side Menu Scroll Controls (Top Nav Integration)**:
+   - **Refactor**: Moved the scroll controls from the left margin into the **Top Navigation Bar** itself (Left of the Back Arrow).
+   - **Layout**: Horizontal row (`Up` - `Dot` - `Down`).
+   - **UI Polish**:
+     - Increased the hit area of the central "Dot" button (8px padding) for easier interaction.
+     - Dot button now attempts to scroll to the "Active" item (Playing Video or Active Playlist) when clicked.
+
+2. **Active Playlist Visual State**:
+   - **Experiment**: Attempted to add a "Warm Red Glow" to the currently playing playlist card (matching the video card aesthetic).
+   - **Outcome**: The visual implementation on the inner thumbnail clashed with the outer card structure. Reverted visual changes but kept the underlying DOM markers (`active-playlist-marker`, `data-active-playlist`) to facilitate future scroll-to-active functionality.
+   - **Current Status**: 
+     - "Scroll to Active" works perfectly on **Videos Page** (Red Ring detection).
+     - "Scroll to Active" currently **does not work** on **Playlists Page** (Pending visual/class confirmation).
+     - Red Aura on active playlist card is currently **disabled/not working**.
+
+---
+
+# Session Updates: Side Menu Scroll Controls
+**Timestamp:** 14/01/2026 5:05pm
+
+## Key Changes
+1. **Side Menu Scroll Controls**:
+   - **Feature**: Added a "Side Menu Scroll Menu" component in the left margin of the side panel.
+   - **Visuals**: Simple two-chevron design (Up/Down) with a central dot separator, fixed vertically in the center.
+   - **Functionality**:
+     - **Up Chevron**: Smoothly scrolls the active side menu page (Playlists, Videos, History, etc.) to the top.
+     - **Down Chevron**: Smoothly scrolls to the bottom.
+   - **Implementation**:
+     - Created `SideMenuScrollControls.jsx` which dynamically locates the active scrollable container (`.overflow-y-auto`) within the side menu content.
+     - Integrated into `LayoutShell.jsx` to ensure it appears on all side menu pages.
+     - Positioned absolutely (`left: 6px`) to float within the page margins without overlapping content.
+
+---
+
 # Session Updates: Card Menu Positioning & Fixes
 **Timestamp:** 14/01/2026 4:47pm
 
