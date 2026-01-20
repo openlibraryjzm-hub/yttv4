@@ -1,0 +1,8 @@
+2026/01/20-22:33:56.656 8374 Creating DB C:\Projects\yttv2\src-csharp\Yttv2.Host\bin\Debug\net8.0-windows\Yttv2.Host.exe.WebView2\EBWebView\Default\Local Storage\leveldb since it was missing.
+2026/01/20-22:33:56.790 8374 Reusing MANIFEST C:\Projects\yttv2\src-csharp\Yttv2.Host\bin\Debug\net8.0-windows\Yttv2.Host.exe.WebView2\EBWebView\Default\Local Storage\leveldb/MANIFEST-000001
+2026/01/20-22:35:57.173 1e3c Level-0 table #5: started
+2026/01/20-22:35:57.182 1e3c Level-0 table #5: 268310 bytes OK
+2026/01/20-22:35:57.190 1e3c Delete type=0 #3
+2026/01/20-22:37:02.347 1e3c Level-0 table #7: started
+2026/01/20-22:37:02.356 1e3c Level-0 table #7: 149097 bytes OK
+2026/01/20-22:37:02.365 1e3c Delete type=0 #4

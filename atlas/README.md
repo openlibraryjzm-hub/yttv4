@@ -441,11 +441,3 @@ For detailed information about the application's theme system and recent color c
 3.  **Result**:
     -   Eliminated UI stutter during page transitions.
     -   Grid layouts load progressively and smoothly.
-
-## Session Updates (Jan 14, 2026) -> Video Card Interaction Refinement
-
-### Key Changes:
-1.  **Video Card Cleanup**:
-    -   **Removed Hover Buttons**: Removed the Play button, Priority Pin button, and Pin/Bookmark button from the video thumbnail hover overlay to reduce visual clutter.
-    -   **Cleaned Up State**: Removed unused state logic and event handlers associated with these buttons (`isPriority`, `handlePinClick`, etc.).
-    -   **Updated Documentation**: Reflected these changes in `atlas/ui.md`.
