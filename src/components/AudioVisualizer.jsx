@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
+import { invokeCommand } from '../utils/bridge';
 import { mapFrequencyToBars, smoothBarValues } from '../utils/audioProcessor';
 import { fft, util } from 'fft-js';
 import { useConfigStore } from '../store/configStore';
@@ -71,7 +72,7 @@ const AudioVisualizer = ({
         if (isCapturingRef.current) {
           console.log('[AudioVisualizer] Stopping audio capture...');
           try {
-            await invoke('stop_audio_capture');
+            await invokeCommand('stop_audio_capture');
             if (mounted) {
               isCapturingRef.current = false;
               setIsCapturing(false);
@@ -87,7 +88,7 @@ const AudioVisualizer = ({
       if (isCapturingRef.current) {
         console.log('[AudioVisualizer] Stopping existing capture before restart...');
         try {
-          await invoke('stop_audio_capture');
+          await invokeCommand('stop_audio_capture');
         } catch (error) {
           // Ignore errors if not running
           console.log('[AudioVisualizer] Stop error (may be expected):', error);
@@ -106,13 +107,13 @@ const AudioVisualizer = ({
 
         // Test command invocation first
         try {
-          const testResult = await invoke('test_audio_command');
+          const testResult = await invokeCommand('test_audio_command');
           console.log('[AudioVisualizer] Test command result:', testResult);
         } catch (testError) {
           console.error('[AudioVisualizer] Test command failed:', testError);
         }
 
-        await invoke('start_audio_capture');
+        await invokeCommand('start_audio_capture');
         if (mounted) {
           isCapturingRef.current = true;
           setIsCapturing(true);
@@ -133,7 +134,7 @@ const AudioVisualizer = ({
       mounted = false;
       if (isCapturingRef.current) {
         console.log('[AudioVisualizer] Stopping audio capture (cleanup)...');
-        invoke('stop_audio_capture').catch(console.error);
+        invokeCommand('stop_audio_capture').catch(console.error);
         isCapturingRef.current = false;
         setIsCapturing(false);
       }
@@ -150,28 +151,25 @@ const AudioVisualizer = ({
     const setupListener = async () => {
       try {
         console.log('[AudioVisualizer] Setting up audio data listener...');
-        unlisten = await listen('audio-data', (event) => {
+
+        const handleAudioSamples = (samples) => {
+          if (!samples || !Array.isArray(samples) || samples.length === 0) {
+            // console.warn('[AudioVisualizer] Invalid samples:', samples);
+            return;
+          }
+
           // Log first event to confirm listener is working
           if (eventCount === 0) {
             console.log('[AudioVisualizer] ✅ FIRST AUDIO EVENT RECEIVED!', {
-              payloadType: typeof event.payload,
-              isArray: Array.isArray(event.payload),
-              length: event.payload?.length,
-              payload: event.payload?.slice ? event.payload.slice(0, 5) : event.payload
+              length: samples.length,
+              payload: samples.slice(0, 5)
             });
-          }
-
-          const samples = event.payload; // Array of f32 samples
-
-          if (!samples || !Array.isArray(samples) || samples.length === 0) {
-            console.warn('[AudioVisualizer] Invalid samples:', samples);
-            return;
           }
 
           eventCount++;
           if (eventCount === 1 || eventCount % 100 === 0) {
             const maxSample = Math.max(...samples.map(s => Math.abs(s)));
-            console.log('[AudioVisualizer] Received', eventCount, 'audio events,', samples.length, 'samples, max:', maxSample.toFixed(4), 'queue size:', audioDataQueueRef.current.length);
+            // console.log('[AudioVisualizer] Received', eventCount, 'audio events,', samples.length, 'samples, max:', maxSample.toFixed(4));
           }
 
           // Add samples to queue
@@ -182,13 +180,35 @@ const AudioVisualizer = ({
           if (audioDataQueueRef.current.length > maxQueueSize) {
             audioDataQueueRef.current = audioDataQueueRef.current.slice(-maxQueueSize);
           }
-        });
+        };
+
+        const isCSharp = window.chrome?.webview?.hostObjects?.bridge;
+
+        if (isCSharp) {
+          console.log('[AudioVisualizer] Using C# Bridge audio listener');
+          const messageHandler = (e) => {
+            // Check if it's our event
+            if (e.data && e.data.event_name === 'audio-data') {
+              handleAudioSamples(e.data.payload);
+            }
+          };
+
+          window.chrome.webview.addEventListener('message', messageHandler);
+          // Assign cleanup function
+          unlisten = () => window.chrome.webview.removeEventListener('message', messageHandler);
+        } else {
+          console.log('[AudioVisualizer] Using Tauri audio listener');
+          unlisten = await listen('audio-data', (event) => {
+            handleAudioSamples(event.payload);
+          });
+        }
+
         console.log('[AudioVisualizer] Audio listener set up successfully, waiting for events...');
 
         // Set a timeout to warn if no events are received
         setTimeout(() => {
           if (eventCount === 0) {
-            console.warn('[AudioVisualizer] ⚠️ No audio events received after 2 seconds. Check Rust console for audio capture logs.');
+            console.warn('[AudioVisualizer] ⚠️ No audio events received after 2 seconds.');
           }
         }, 2000);
       } catch (error) {

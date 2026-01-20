@@ -12,27 +12,26 @@ This document provides a comprehensive guide to the frontend-backend communicati
   - Video Progress → `videoplayer.md`
 
 ## Overview
+ 
+The application uses a **Hybrid Bridge** architecture to communicate with the backend. It supports both **Tauri** (Rust) and **WebView2** (C#) backends via a unified `invokeCommand` utility.
 
-The application uses **Tauri** for frontend-backend communication. The frontend (React) communicates with the backend (Rust) through Tauri commands invoked via `invoke()` from `@tauri-apps/api/core`. All database operations and backend logic are encapsulated in Rust commands.
-
-## Architecture
-
-### Communication Flow
+### Communication Flow (Hybrid)
 
 ```
 React Component
     ↓
 playlistApi.js (API layer)
     ↓
-invoke('command_name', { params })
+invokeCommand('command_name', { params })  <-- Routes based on Environment
     ↓
-Tauri Bridge (auto-converts snake_case ↔ camelCase)
-    ↓
-Rust Command Handler (commands.rs)
-    ↓
-Database Operations (database.rs)
-    ↓
-SQLite Database
+[IF TAURI]                              [IF C#]
+Tauri Invoke                            window.chrome.webview.hostObjects.bridge
+    ↓                                       ↓
+Rust Command Handler (commands.rs)      AppBridge.cs (C#)
+    ↓                                       ↓
+Database Operations (database.rs)       DatabaseService.cs (C#)
+    ↓                                       ↓
+SQLite Database                         SQLite Database
 ```
 
 ### API Layer Structure

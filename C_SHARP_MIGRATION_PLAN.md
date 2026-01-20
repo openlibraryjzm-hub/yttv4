@@ -54,9 +54,15 @@ export async function invokeCommand(command, args = {}) {
 - [ ] `GetAllFoldersWithVideos`
 
 **Priority 3: Metadata & Progress**
-- [ ] `UpdateVideoProgress`
-- [ ] `GetVideoProgress`
-- [ ] `SetFolderMetadata`
+- [x] `UpdateVideoProgress`
+- [x] `GetVideoProgress`
+- [ ] `SetFolderMetadata` (Low priority)
+
+**Status Update (Jan 21, 2026):**
+Watch History and Video Progress are fully implemented in C# and exposed via the Bridge.
+The Audio Visualizer native backend (Phase 5) is also complete ahead of schedule!
+Videos display, Playlists work, History works, and the Visualizer animates.
+We are now entering Phase 6 (MPV/Native Player).
 
 ## Phase 4: The Bridge Implementation (`AppBridge.cs`)
 *Goal: Expose C# methods to Javascript.*
@@ -68,20 +74,23 @@ Every method in `commands.rs` needs a match in `AppBridge.cs`.
 | Rust Command | C# Method | Status |
 | :--- | :--- | :--- |
 | `get_all_playlists` | `GetAllPlaylists()` | ✅ |
-| `create_playlist` | `CreatePlaylist(string jsonArgs)` | ⏳ |
-| `add_video_to_playlist` | `AddVideoToPlaylist(string jsonArgs)` | ⏳ |
-| `...` | `...` | ⏳ |
+| `create_playlist` | `CreatePlaylist(string jsonArgs)` | ✅ |
+| `add_video_to_playlist` | `AddVideoToPlaylist(string jsonArgs)` | ✅ |
+| `get_watch_history` | `GetWatchHistory(string jsonArgs)` | ✅ |
+| `update_video_progress` | `UpdateVideoProgress(string jsonArgs)` | ✅ |
+| `start_audio_capture` | `StartAudioCapture(string jsonArgs)` | ✅ |
 
 ## Phase 5: Audio Visualizer (The Native Swap) 🎵
 *Goal: Replace `audio_capture.rs` with `NAudio` implementation.*
 
-1.  **Install NAudio:** `dotnet add package NAudio`
-2.  **Create `AudioCaptureService.cs`:**
-    *   Initialize `WasapiLoopbackCapture`.
-    *   Perform FFT (Fast Fourier Transform) in C#.
-    *   Send Frequency Data to WebView via `PostWebMessageAsJson`.
-3.  **Frontend Update:**
-    *   Update `AudioVisualizer.jsx` to listen for WebView messages instead of Tauri events.
+**Status: COMPLETED (Jan 21, 2026)**
+- [x] **Install NAudio:** `dotnet add package NAudio`
+- [x] **Create `AudioCaptureService.cs`:**
+    - [x] Initialize `WasapiLoopbackCapture`.
+    - [x] Send raw samples (Float32) to WebView via `PostWebMessageAsJson`.
+- [x] **Frontend Update:**
+    - [x] Update `AudioVisualizer.jsx` to listen for `window.chrome.webview` messages in C# mode.
+    - [x] Use `invokeCommand` for Start/Stop signals.
 
 ## Phase 6: MPV Integration (The "Sandwich" Filling) 🎥
 *Goal: Native Video Playback.*

@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { invokeCommand } from '../utils/bridge';
 
 /**
  * Playlist API - All database operations for playlists
@@ -6,12 +6,12 @@ import { invoke } from '@tauri-apps/api/core';
 
 // Playlist operations
 export const createPlaylist = async (name, description = null) => {
-  return await invoke('create_playlist', { name, description });
+  return await invokeCommand('create_playlist', { name, description });
 };
 
 export const getAllPlaylists = async () => {
   try {
-    const result = await invoke('get_all_playlists');
+    const result = await invokeCommand('get_all_playlists');
     console.log('getAllPlaylists API result:', result);
     return result || [];
   } catch (error) {
@@ -22,7 +22,7 @@ export const getAllPlaylists = async () => {
 
 export const getAllPlaylistMetadata = async () => {
   try {
-    const result = await invoke('get_all_playlist_metadata');
+    const result = await invokeCommand('get_all_playlist_metadata');
     return result || [];
   } catch (error) {
     console.error('Error in getAllPlaylistMetadata API:', error);
@@ -31,25 +31,25 @@ export const getAllPlaylistMetadata = async () => {
 };
 
 export const getPlaylist = async (id) => {
-  return await invoke('get_playlist', { id });
+  return await invokeCommand('get_playlist', { id });
 };
 
 export const updatePlaylist = async (id, name = null, description = null, customAscii = null, customThumbnailUrl = null) => {
-  return await invoke('update_playlist', { id, name, description, customAscii, customThumbnailUrl });
+  return await invokeCommand('update_playlist', { id, name, description, customAscii, customThumbnailUrl });
 };
 
 export const deletePlaylist = async (id) => {
-  return await invoke('delete_playlist', { id });
+  return await invokeCommand('delete_playlist', { id });
 };
 
 export const deletePlaylistByName = async (name) => {
-  return await invoke('delete_playlist_by_name', { name });
+  return await invokeCommand('delete_playlist_by_name', { name });
 };
 
 // Playlist item operations
 export const addVideoToPlaylist = async (playlistId, videoUrl, videoId, title, thumbnailUrl, author, viewCount, publishedAt, isLocal = false) => {
   try {
-    const id = await invoke('add_video_to_playlist', {
+    const id = await invokeCommand('add_video_to_playlist', {
       playlistId,
       videoUrl,
       videoId,
@@ -69,7 +69,7 @@ export const addVideoToPlaylist = async (playlistId, videoUrl, videoId, title, t
 
 export const getPlaylistItems = async (playlistId) => {
   try {
-    const result = await invoke('get_playlist_items', { playlistId });
+    const result = await invokeCommand('get_playlist_items', { playlistId });
     console.log('getPlaylistItems API result:', result);
     return result || [];
   } catch (error) {
@@ -80,7 +80,7 @@ export const getPlaylistItems = async (playlistId) => {
 
 export const getPlaylistsForVideoIds = async (videoIds) => {
   try {
-    const result = await invoke('get_playlists_for_video_ids', { videoIds });
+    const result = await invokeCommand('get_playlists_for_video_ids', { videoIds });
     console.log('getPlaylistsForVideoIds API result:', result);
     return result || {};
   } catch (error) {
@@ -90,14 +90,14 @@ export const getPlaylistsForVideoIds = async (videoIds) => {
 };
 
 export const removeVideoFromPlaylist = async (playlistId, itemId) => {
-  return await invoke('remove_video_from_playlist', {
+  return await invokeCommand('remove_video_from_playlist', {
     playlistId,
     itemId,
   });
 };
 
 export const reorderPlaylistItem = async (playlistId, itemId, newPosition) => {
-  return await invoke('reorder_playlist_item', {
+  return await invokeCommand('reorder_playlist_item', {
     playlistId,
     itemId,
     newPosition,
@@ -106,7 +106,7 @@ export const reorderPlaylistItem = async (playlistId, itemId, newPosition) => {
 
 // Folder assignment operations
 export const assignVideoToFolder = async (playlistId, itemId, folderColor) => {
-  return await invoke('assign_video_to_folder', {
+  return await invokeCommand('assign_video_to_folder', {
     playlistId,
     itemId,
     folderColor,
@@ -114,7 +114,7 @@ export const assignVideoToFolder = async (playlistId, itemId, folderColor) => {
 };
 
 export const unassignVideoFromFolder = async (playlistId, itemId, folderColor) => {
-  return await invoke('unassign_video_from_folder', {
+  return await invokeCommand('unassign_video_from_folder', {
     playlistId,
     itemId,
     folderColor,
@@ -122,14 +122,14 @@ export const unassignVideoFromFolder = async (playlistId, itemId, folderColor) =
 };
 
 export const getVideosInFolder = async (playlistId, folderColor) => {
-  return await invoke('get_videos_in_folder', {
+  return await invokeCommand('get_videos_in_folder', {
     playlistId,
     folderColor,
   });
 };
 
 export const getVideoFolderAssignments = async (playlistId, itemId) => {
-  return await invoke('get_video_folder_assignments', {
+  return await invokeCommand('get_video_folder_assignments', {
     playlistId,
     itemId,
   });
@@ -137,7 +137,7 @@ export const getVideoFolderAssignments = async (playlistId, itemId) => {
 
 export const getAllFolderAssignments = async (playlistId) => {
   try {
-    const result = await invoke('get_all_folder_assignments', { playlistId });
+    const result = await invokeCommand('get_all_folder_assignments', { playlistId });
     // Result is HashMap<String, Vec<String>> where String is item_id
     // We want the frontend to see it as Object/Map where key is item_id (int or string)
     // Javascript object keys are strings.
@@ -149,12 +149,12 @@ export const getAllFolderAssignments = async (playlistId) => {
 };
 
 export const getAllFoldersWithVideos = async () => {
-  return await invoke('get_all_folders_with_videos');
+  return await invokeCommand('get_all_folders_with_videos');
 };
 
 export const getFoldersForPlaylist = async (playlistId) => {
   try {
-    const result = await invoke('get_folders_for_playlist', { playlistId });
+    const result = await invokeCommand('get_folders_for_playlist', { playlistId });
     return result || [];
   } catch (error) {
     console.error('Error in getFoldersForPlaylist API:', error);
@@ -164,16 +164,16 @@ export const getFoldersForPlaylist = async (playlistId) => {
 
 // Stuck folders operations
 export const toggleStuckFolder = async (playlistId, folderColor) => {
-  return await invoke('toggle_stuck_folder', { playlistId, folderColor });
+  return await invokeCommand('toggle_stuck_folder', { playlistId, folderColor });
 };
 
 export const isFolderStuck = async (playlistId, folderColor) => {
-  return await invoke('is_folder_stuck', { playlistId, folderColor });
+  return await invokeCommand('is_folder_stuck', { playlistId, folderColor });
 };
 
 export const getAllStuckFolders = async () => {
   try {
-    const result = await invoke('get_all_stuck_folders');
+    const result = await invokeCommand('get_all_stuck_folders');
     return result || [];
   } catch (error) {
     console.error('Error in getAllStuckFolders API:', error);
@@ -184,7 +184,7 @@ export const getAllStuckFolders = async () => {
 // Folder Metadata operations
 export const getFolderMetadata = async (playlistId, folderColor) => {
   try {
-    const result = await invoke('get_folder_metadata', { playlistId, folderColor });
+    const result = await invokeCommand('get_folder_metadata', { playlistId, folderColor });
     return result || null; // Returns [name, description] or null
   } catch (error) {
     console.error('Error in getFolderMetadata API:', error);
@@ -194,7 +194,7 @@ export const getFolderMetadata = async (playlistId, folderColor) => {
 
 export const setFolderMetadata = async (playlistId, folderColor, name, description, customAscii) => {
   try {
-    return await invoke('set_folder_metadata', { playlistId, folderColor, name, description, customAscii });
+    return await invokeCommand('set_folder_metadata', { playlistId, folderColor, name, description, customAscii });
   } catch (error) {
     console.error('Error in setFolderMetadata API:', error);
     throw error;
@@ -317,7 +317,7 @@ export const importPlaylistFromJson = async (jsonData) => {
 
 // Watch history operations
 export const addToWatchHistory = async (videoUrl, videoId, title = null, thumbnailUrl = null) => {
-  return await invoke('add_to_watch_history', {
+  return await invokeCommand('add_to_watch_history', {
     videoUrl,
     videoId,
     title,
@@ -327,7 +327,7 @@ export const addToWatchHistory = async (videoUrl, videoId, title = null, thumbna
 
 export const getWatchHistory = async (limit = 100) => {
   try {
-    const result = await invoke('get_watch_history', { limit });
+    const result = await invokeCommand('get_watch_history', { limit });
     return result || [];
   } catch (error) {
     console.error('Error in getWatchHistory API:', error);
@@ -336,12 +336,12 @@ export const getWatchHistory = async (limit = 100) => {
 };
 
 export const clearWatchHistory = async () => {
-  return await invoke('clear_watch_history');
+  return await invokeCommand('clear_watch_history');
 };
 
 export const getWatchedVideoIds = async () => {
   try {
-    const result = await invoke('get_watched_video_ids');
+    const result = await invokeCommand('get_watched_video_ids');
     return result || [];
   } catch (error) {
     console.error('Error in getWatchedVideoIds API:', error);
@@ -351,7 +351,7 @@ export const getWatchedVideoIds = async () => {
 
 // Video progress operations
 export const updateVideoProgress = async (videoId, videoUrl, duration = null, currentTime) => {
-  return await invoke('update_video_progress', {
+  return await invokeCommand('update_video_progress', {
     videoId,
     videoUrl,
     duration,
@@ -361,7 +361,7 @@ export const updateVideoProgress = async (videoId, videoUrl, duration = null, cu
 
 export const getVideoProgress = async (videoId) => {
   try {
-    const result = await invoke('get_video_progress', { videoId });
+    const result = await invokeCommand('get_video_progress', { videoId });
     return result;
   } catch (error) {
     console.error('Error in getVideoProgress API:', error);
@@ -371,7 +371,7 @@ export const getVideoProgress = async (videoId) => {
 
 export const getAllVideoProgress = async () => {
   try {
-    const result = await invoke('get_all_video_progress');
+    const result = await invokeCommand('get_all_video_progress');
     return result || [];
   } catch (error) {
     console.error('Error in getAllVideoProgress API:', error);

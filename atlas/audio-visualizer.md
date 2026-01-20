@@ -45,6 +45,15 @@ The system uses a "push" architecture where the Rust backend captures audio and 
     5.  **Smoothing**: Applies temporal smoothing to prevent jitter.
     6.  **Drawing**: Clears and redraws the canvas 60 times per second (16ms).
 
+### 2.3 C# Host Architecture (.NET 8)
+*   **Library**: `NAudio` (WasapiLoopbackCapture).
+*   **Integration**: `AudioCaptureService.cs` in `Yttv2.Host`.
+*   **Data Flow**:
+    1.  `WasapiLoopbackCapture` fires `DataAvailable` event.
+    2.  `MainWindow.xaml.cs` marshals the raw float samples to the UI thread.
+    3.  Data is pushed to WebView2 using `PostWebMessageAsJson` with payload: `{ event_name: "audio-data", payload: [...] }`.
+*   **Hybrid Logic**: The frontend detects the host (`window.chrome.webview`) and switches its listener from `tauri.listen` to `window.chrome.webview.addEventListener('message')`.
+
 ---
 
 ## 3. Usage & Controls

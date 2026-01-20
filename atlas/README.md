@@ -441,3 +441,27 @@ For detailed information about the application's theme system and recent color c
 3.  **Result**:
     -   Eliminated UI stutter during page transitions.
     -   Grid layouts load progressively and smoothly.
+
+## Session Updates (Jan 21, 2026) -> C# Migration: Core Features & Visualizer
+
+### Major Milestone: C# Host Migration (Phases 1-5)
+
+We have successfully migrated the core backend functionality from Rust to a pure C# (.NET 8 WPF) host with `WebView2`.
+
+### Key Achievements:
+1.  **Hybrid Bridge**:
+    *   Created `src/utils/bridge.js` to dynamically route API calls to either Rust (Tauri) or C# (WebView2) based on the environment.
+    *   Refactored `playlistApi.js` to use this bridge, enabling the frontend to run in both contexts seamlessly.
+
+2.  **Database Migration**:
+    *   Ported `playlist_items`, `folders`, `history`, and `progress` tables logic to C# `DatabaseService`.
+    *   Fixed a critical JSON serialization casing issue (`PascalCase` vs `snake_case`) using `Newtonsoft.Json`'s `SnakeCaseNamingStrategy`.
+
+3.  **Watch History & Progress**:
+    *   Implemented full read/write support for watch history and video progress in C#.
+    *   The "Red Progress Bar" and History page are now functional in the C# app.
+
+4.  **Native Audio Visualizer**:
+    *   **Architecture**: Implemented `AudioCaptureService.cs` using `NAudio`'s `WasapiLoopbackCapture`.
+    *   **Performance**: The C# backend pushes raw audio samples directly to the WebView via `PostWebMessageAsJson` on the UI thread.
+    *   **Frontend**: Updated `AudioVisualizer.jsx` to listen for these web messages in C# mode, maintaining the same smooth 60FPS visualizations as the Rust version.

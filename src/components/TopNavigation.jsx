@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigationStore } from '../store/navigationStore';
 import { useLayoutStore } from '../store/layoutStore';
 import { usePlaylistStore } from '../store/playlistStore';
-import { ChevronLeft, Heart, Pin, Settings, Clock, Cat } from 'lucide-react';
+import { ChevronLeft, Heart, Pin, Settings, Clock, Cat, Globe } from 'lucide-react';
 import { THEMES } from '../utils/themes';
 
 import SideMenuScrollControls from './SideMenuScrollControls';
@@ -24,6 +24,7 @@ const TopNavigation = () => {
         { id: 'history', label: 'History', icon: <Clock size={16} /> },
         { id: 'likes', label: 'Likes', icon: <Heart size={16} /> },
         { id: 'pins', label: 'Pins', icon: <Pin size={16} /> },
+        { id: 'browser', label: 'Browser', icon: <Globe size={16} /> },
         { id: 'settings', label: 'Settings', icon: <Settings size={16} /> },
         { id: 'support', label: 'Support', icon: <Cat size={16} /> },
     ];
@@ -43,7 +44,7 @@ const TopNavigation = () => {
             <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
                     {tabs.map((tab) => {
-                        const isIconOnly = ['history', 'likes', 'pins', 'settings', 'support'].includes(tab.id);
+                        const isIconOnly = ['history', 'likes', 'pins', 'settings', 'support', 'browser'].includes(tab.id);
                         const isActive = currentPage === tab.id;
 
                         return (

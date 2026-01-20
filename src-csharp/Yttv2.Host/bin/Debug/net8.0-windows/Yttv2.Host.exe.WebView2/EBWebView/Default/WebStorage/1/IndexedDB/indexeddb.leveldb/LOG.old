@@ -1,7 +1,0 @@
-2026/01/20-22:42:27.343 64e0 Reusing MANIFEST C:\Projects\yttv2\src-csharp\Yttv2.Host\bin\Debug\net8.0-windows\Yttv2.Host.exe.WebView2\EBWebView\Default\WebStorage\1\IndexedDB\indexeddb.leveldb/MANIFEST-000001
-2026/01/20-22:42:27.343 64e0 Recovering log #3
-2026/01/20-22:42:27.345 64e0 Reusing old log C:\Projects\yttv2\src-csharp\Yttv2.Host\bin\Debug\net8.0-windows\Yttv2.Host.exe.WebView2\EBWebView\Default\WebStorage\1\IndexedDB\indexeddb.leveldb/000003.log 
-2026/01/20-22:42:27.374 6494 Level-0 table #5: started
-2026/01/20-22:42:27.386 6494 Level-0 table #5: 40500 bytes OK
-2026/01/20-22:42:27.393 6494 Delete type=0 #3
-2026/01/20-22:42:27.394 6494 Manual compaction at level-0 from '\x00\x02\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x03\x00\x00\x00' @ 0 : 0; will stop at (end)
